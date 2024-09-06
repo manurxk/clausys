@@ -16,14 +16,27 @@
         <!-- Links -->
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a class="nav-link" href="#">Ciudades</a>
+            <a class="nav-link" href="#">Módulo 1</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Paises</a>
+            <a class="nav-link" href="#">Módulo 2</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Personas</a>
+            <a class="nav-link" href="#">Módulo 3</a>
           </li>
+
+          <!-- Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+              Referenciales
+            </a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="{{ url_for('ciudad.ciudadIndex') }}">Ciudad</a>
+              <a class="dropdown-item" href="#">Link 2</a>
+              <a class="dropdown-item" href="#">Link 3</a>
+            </div>
+          </li>
+
         </ul>
 
     </nav>
