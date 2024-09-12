@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, jsonify
 from app.dao.referenciales.ciudad.CiudadDao import CiudadDao
 
 ciumod = Blueprint('ciudad', __name__, template_folder='templates')
@@ -11,3 +11,9 @@ def ciudadIndex():
 @ciumod.route('/ciudad-agregar')
 def ciudadAgregar():
     return render_template('ciudad-agregar.html')
+
+# REST
+@ciumod.route('/get-ciudades')
+def getCiudades():
+    ciudao = CiudadDao()
+    return jsonify(ciudao.getCiudades())
