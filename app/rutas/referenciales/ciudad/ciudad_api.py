@@ -102,7 +102,7 @@ def updateCiudad(ciudad_id):
                             }), 400
     descripcion = data['descripcion']
     try:
-        if ciudao.updateCiudad(ciudad_id, descripcion):
+        if ciudao.updateCiudad(ciudad_id, descripcion.upper()):
             return jsonify({
                 'success': True,
                 'data': {'id': ciudad_id, 'descripcion': descripcion},
