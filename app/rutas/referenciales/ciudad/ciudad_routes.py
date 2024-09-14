@@ -7,13 +7,3 @@ ciumod = Blueprint('ciudad', __name__, template_folder='templates')
 def ciudadIndex():
     ciudao = CiudadDao()
     return render_template('ciudad-index.html', lista_ciudades=ciudao.getCiudades())
-
-@ciumod.route('/ciudad-agregar')
-def ciudadAgregar():
-    return render_template('ciudad-agregar.html')
-
-# REST
-@ciumod.route('/get-ciudades')
-def getCiudades():
-    ciudao = CiudadDao()
-    return jsonify({ 'data':ciudao.getCiudades() })
