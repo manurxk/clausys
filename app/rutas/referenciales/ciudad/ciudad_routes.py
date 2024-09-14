@@ -16,4 +16,4 @@ def ciudadAgregar():
 @ciumod.route('/get-ciudades')
 def getCiudades():
     ciudao = CiudadDao()
-    return jsonify(ciudao.getCiudades())
+    return jsonify({ 'data':ciudao.getCiudades() })

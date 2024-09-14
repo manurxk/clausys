@@ -21,30 +21,14 @@ Ciudades
         <!-- columna de la mascota -->
         <div class="col col-md-12">
 
-            <table class="table table-striped">
+            <table class="table table-striped" id="tbl">
                 <thead>
                   <tr>
                     <th>Descripción</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {% for item in lista_ciudades %}
-                  <tr>
-                    <td>{{ item['descripcion'] }}</td>
-                    <td>
-                      <div class="row">
-                        <div class="col col-md-2">
-                          <a href="" class="btn btn-primary">Editar</a>
-                        </div>
-                        <div class="col col-md-2">
-                          <a href="" class="btn btn-danger">Eliminar</a>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                  {% endfor %}
-                </tbody>
+                <tbody></tbody>
             </table>
 
         </div>
@@ -65,24 +49,26 @@ Ciudades
 
 {% block js %}
 <script>
-  $(function() {
-    // Promise
-    // r => r.json()
-    debugger;
-    fetch('/referenciales/ciudad/get-ciudades')
-      .then(function(r) {
-        //debugger;
-        return r.json();
-      })
-      .then(function(data) {
-        //debugger;
-        console.log(data);
-      })
-      .catch(function(err) {
-        //debugger;
-        console.error(err);
-      })
 
+  const initDatatable = () => {
+    $('#tbl').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax:'/referenciales/ciudad/get-ciudades',
+      columns: [
+        { data: 'descripcion' },
+        { data: function(row) {
+            return `<button type="button" name="btn_editar" class="btn btn-primary">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger">Eliminar</button>`
+          }
+        }
+      ]
+    });
+  }
+
+  $(function() {
+    initDatatable();
   });
 </script>
 {% endblock %}
