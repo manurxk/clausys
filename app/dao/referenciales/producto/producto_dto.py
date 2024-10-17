@@ -15,7 +15,7 @@ class ProductoDto:
     @id_producto.setter
     def id_producto(self, valor):
         if not valor:
-            raise("El atributo id_producto no puede estar vacio")
+            raise ValueError("El atributo id_producto no puede estar vacio")
         self.__id_producto = valor
 
     #getters y setters de nombre
@@ -26,7 +26,7 @@ class ProductoDto:
     @nombre.setter
     def nombre(self, valor):
         if not valor:
-            raise("El atributo nombre no puede estar vacio")
+            raise ValueError("El atributo nombre no puede estar vacio")
         self.__nombre = valor.upper()
 
     #getters y setters de cantidad
@@ -37,7 +37,7 @@ class ProductoDto:
     @cantidad.setter
     def cantidad(self, valor):
         if not valor:
-            raise("El atributo cantidad no puede estar vacio")
+            raise ValueError("El atributo cantidad no puede estar vacio")
         self.__cantidad = valor
 
     #getters y setters de precio_unitario
@@ -48,5 +48,5 @@ class ProductoDto:
     @precio_unitario.setter
     def precio_unitario(self, valor):
         if not valor:
-            raise("El atributo precio_unitario no puede estar vacio")
+            raise ValueError("El atributo precio_unitario no puede estar vacio")
         self.__precio_unitario = valor
