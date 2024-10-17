@@ -8,13 +8,16 @@ class PedidoDeComprasDao:
         query_pedidos = """
         SELECT
             pdc.id_pedido_compra
-            , pdc.id_empleado, p.nombres, p.apellidos,
+            , pdc.id_empleado
+            , p.nombres
+            , p.apellidos
             , pdc.id_sucursal
-            , pdc.id_epc, edpc.descripcion,
+            , pdc.id_epc
+            , edpc.descripcion estado
             , pdc.fecha_pedido
             , pdc.id_deposito
         FROM
-            public.pedido_de_compra AS pdc
+            public.pedido_de_compra pdc
         LEFT JOIN empleados e
             ON e.id_empleado = pdc.id_empleado
         LEFT JOIN personas p
@@ -22,6 +25,31 @@ class PedidoDeComprasDao:
         LEFT JOIN estado_de_pedido_compras edpc
         ON pdc.id_epc = edpc.id_epc
         """
+
+        # objeto conexion
+        conexion = Conexion()
+        con = conexion.getConexion()
+        cur = con.cursor()
+        try:
+            cur.execute(query_pedidos)
+            pedidos = cur.fetchall()
+            return [{
+                    'id_pedido_compra': pedido[0]
+                    , 'id_empleado': pedido[1]
+                    , 'empleado': f'{pedido[2]} {pedido[3]}'
+                    , 'id_sucursal': pedido[4]
+                    , 'id_epc': pedido[5]
+                    , 'estado': pedido[6]
+                    , 'fecha_pedido': pedido[7]
+                    , 'id_deposito': pedido[8]
+                } for pedido in pedidos]
+
+        except Exception as e:
+            app.logger.error(f"Error a obtener los pedidos: {str(e)}")
+        finally:
+            cur.close()
+            con.close()
+        return []
 
     # agregar
     def agregar(self, pedido_dto: PedidoDeComprasDto):
