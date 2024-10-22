@@ -40,7 +40,7 @@ class PedidoDeComprasDao:
                     , 'id_sucursal': pedido[4]
                     , 'id_epc': pedido[5]
                     , 'estado': pedido[6]
-                    , 'fecha_pedido': pedido[7]
+                    , 'fecha_pedido': pedido[7].strftime("%Y-%m-%d") if pedido[7] else None
                     , 'id_deposito': pedido[8]
                 } for pedido in pedidos]
 
