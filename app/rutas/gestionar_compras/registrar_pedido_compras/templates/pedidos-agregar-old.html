@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Formulario Pedido de Compras
+{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>Formulario Pedido de Compras</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col col-md-6">
+                    <div class="form-group">
+                      <label for="email">Email address:</label>
+                      <input type="email" class="form-control" placeholder="Enter email" id="email">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email address:</label>
+                      <input type="email" class="form-control" placeholder="Enter email" id="email">
+                    </div>
+                    <div class="form-group">
+                      <label for="email">Email address:</label>
+                      <input type="email" class="form-control" placeholder="Enter email" id="email">
+                    </div>
+                </div>
+                <div class="col col-md-6">
+                    <div class="form-group">
+                      <label for="email">Email address:</label>
+                      <input type="email" class="form-control" placeholder="Enter email" id="email">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-md-12">
+                    <div class="form-row">
+                      <div class="col">
+                        <input type="text" class="form-control" id="email" placeholder="Enter email" name="email">
+                      </div>
+                      <div class="col">
+                        <input type="password" class="form-control" placeholder="Enter password" name="pswd">
+                      </div>
+                      <div class="col">
+                        <input type="password" class="form-control" placeholder="Enter password" name="pswd">
+                      </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-md-4">
+                    <div class="form-group">
+                      <label for="email">Email address:</label>
+                      <input type="email" class="form-control" placeholder="Enter email" id="email">
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col col-md-12">
+                    <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>id</th>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Acciones</th>
+                          </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="button" class="btn btn-primary">Registrar</button>
+            <button type="button" class="btn btn-primary">Cancelar</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

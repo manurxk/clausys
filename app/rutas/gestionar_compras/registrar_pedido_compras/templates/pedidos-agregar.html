@@ -12,54 +12,84 @@ Formulario Pedido de Compras
         </div>
         <div class="card-body">
             <div class="row">
+
+                <div class="col col-md-6">
+
+                  <!-- Combo empleados -->
+                  <div class="form-group">
+                    <label for="cbo_empleado">Empleados:</label>
+                    <select id="cbo_empleado" class="custom-select">
+                      <option selected>Empleados</option>
+                      <option value="1">Item 1</option>
+                      <option value="2">Item 2</option>
+                      <option value="3">Item 3</option>
+                    </select>
+                  </div>
+                  <!--  -->
+
+                  <!-- Combo sucursales -->
+                  <div class="form-group">
+                    <label for="cbo_sucursal">Sucursales:</label>
+                    <select id="cbo_sucursal" class="custom-select">
+                      <option selected>Sucursales</option>
+                      <option value="1">Item 1</option>
+                      <option value="2">Item 2</option>
+                      <option value="3">Item 3</option>
+                    </select>
+                  </div>
+
+                  <!--  -->
+                  <div class="form-group">
+                    <label for="txt_fecha_de_pedido">Fecha de Pedido:</label>
+                    <input type="date" class="form-control" id="txt_fecha_de_pedido" />
+                  </div>
+                </div>
+
+                <!-- Combo deposito -->
                 <div class="col col-md-6">
                     <div class="form-group">
-                      <label for="email">Email address:</label>
-                      <input type="email" class="form-control" placeholder="Enter email" id="email">
-                    </div>
-                    <div class="form-group">
-                      <label for="email">Email address:</label>
-                      <input type="email" class="form-control" placeholder="Enter email" id="email">
-                    </div>
-                    <div class="form-group">
-                      <label for="email">Email address:</label>
-                      <input type="email" class="form-control" placeholder="Enter email" id="email">
+                      <label for="cbo_deposito">Depósitos:</label>
+                      <select id="cbo_deposito" class="custom-select">
+                        <option selected>Depósitos</option>
+                        <option value="1">Item 1</option>
+                        <option value="2">Item 2</option>
+                        <option value="3">Item 3</option>
+                      </select>
                     </div>
                 </div>
-                <div class="col col-md-6">
-                    <div class="form-group">
-                      <label for="email">Email address:</label>
-                      <input type="email" class="form-control" placeholder="Enter email" id="email">
-                    </div>
-                </div>
+                <!--  -->
             </div>
-            <div class="row">
-                <div class="col col-md-12">
-                    <div class="form-row">
-                      <div class="col">
-                        <input type="text" class="form-control" id="email" placeholder="Enter email" name="email">
-                      </div>
-                      <div class="col">
-                        <input type="password" class="form-control" placeholder="Enter password" name="pswd">
-                      </div>
-                      <div class="col">
-                        <input type="password" class="form-control" placeholder="Enter password" name="pswd">
-                      </div>
-                    </div>
-                </div>
+
+            <!-- Combo producto -->
+            <div class="form-group row mt-3">
+              <label for="cbo_producto" class="col-md-2 col-form-label">Producto:</label>
+              <div class="col-md-6">
+                  <select id="cbo_producto" class="custom-select">
+                    <option selected>Productos</option>
+                    <option value="1">Item 1</option>
+                    <option value="2">Item 2</option>
+                    <option value="3">Item 3</option>
+                  </select>
+              </div>
+              <div class="col col-md-4">
+                <button type="button" class="btn btn-primary" id="btn_agregar_producto">Agregar</button>
+              </div>
             </div>
-            <div class="row">
-                <div class="col col-md-4">
-                    <div class="form-group">
-                      <label for="email">Email address:</label>
-                      <input type="email" class="form-control" placeholder="Enter email" id="email">
-                    </div>
-                </div>
+            <!-- -->
+
+            <!-- Cantidad de producto -->
+            <div class="form-group row mt-3">
+              <label for="txt_cantidad" class="col-md-2 col-form-label">Cantidad:</label>
+              <div class="col-md-2">
+                <input type="number" class="form-control mb-2 mr-md-2" placeholder="Cantidad" id="txt_cantidad" min="0">
+              </div>
             </div>
+            <!--  -->
+
             <hr>
             <div class="row">
                 <div class="col col-md-12">
-                    <table class="table table-hover">
+                    <table class="table table-hover" id="tbl_productos">
                         <thead>
                           <tr>
                             <th>id</th>
@@ -75,8 +105,8 @@ Formulario Pedido de Compras
             </div>
         </div>
         <div class="card-footer">
-            <button type="button" class="btn btn-primary">Registrar</button>
-            <button type="button" class="btn btn-primary">Cancelar</button>
+            <button type="button" class="btn btn-primary" id="btn_registrar_pedido">Registrar pedido</button>
+            <button type="button" class="btn btn-warning" id="btn_salir_operacion">Salir de la operación</button>
         </div>
     </div>
 </div>
