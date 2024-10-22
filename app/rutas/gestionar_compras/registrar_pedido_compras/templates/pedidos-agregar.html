@@ -20,9 +20,11 @@ Formulario Pedido de Compras
                     <label for="cbo_empleado">Empleados:</label>
                     <select id="cbo_empleado" class="custom-select">
                       <option selected>Empleados</option>
-                      <option value="1">Item 1</option>
-                      <option value="2">Item 2</option>
-                      <option value="3">Item 3</option>
+                      {% for item in empleados %}
+                        <option value="{{ item['id_empleado'] }}">
+                          {{ item['empleado'] }} - CEDULA: {{ item['ci'] }}
+                        </option>
+                      {% endfor %}
                     </select>
                   </div>
                   <!--  -->
@@ -31,10 +33,12 @@ Formulario Pedido de Compras
                   <div class="form-group">
                     <label for="cbo_sucursal">Sucursales:</label>
                     <select id="cbo_sucursal" class="custom-select">
-                      <option selected>Sucursales</option>
-                      <option value="1">Item 1</option>
-                      <option value="2">Item 2</option>
-                      <option value="3">Item 3</option>
+                      <option>Sucursales</option>
+                      {% for item in sucursales %}
+                        <option value="{{ item['id'] }}">
+                          {{ item['descripcion'] }}
+                        </option>
+                      {% endfor %}
                     </select>
                   </div>
 
