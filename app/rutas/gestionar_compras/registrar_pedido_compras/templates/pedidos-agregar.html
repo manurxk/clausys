@@ -67,9 +67,11 @@ Formulario Pedido de Compras
               <div class="col-md-6">
                   <select id="cbo_producto" class="custom-select">
                     <option selected>Productos</option>
-                    <option value="1">Item 1</option>
-                    <option value="2">Item 2</option>
-                    <option value="3">Item 3</option>
+                      {% for item in productos %}
+                        <option value="{{ item['id_producto'] }}">
+                          {{ item['nombre'] }}
+                        </option>
+                      {% endfor %}
                   </select>
               </div>
               <div class="col col-md-4">
