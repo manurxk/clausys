@@ -7,8 +7,17 @@ class SucursalDao:
     def get_sucursales(self):
 
         sucursal_sql = """
-        SELECT id_sucursal, descripcion
-        FROM sucursales
+        SELECT
+            s.id_sucursal,
+            s.descripcion AS nombre_sucursal
+        FROM
+            sucursales s
+        WHERE
+            EXISTS (
+                SELECT 1
+                FROM sucursal_depositos sd
+                WHERE sd.id_sucursal = s.id_sucursal
+            )
         """
         # objeto conexion
         conexion = Conexion()
