@@ -33,7 +33,7 @@ Formulario Pedido de Compras
                   <div class="form-group">
                     <label for="cbo_sucursal">Sucursales:</label>
                     <select id="cbo_sucursal" class="custom-select">
-                      <option>Sucursales</option>
+                      <option value="">Sucursales</option>
                       {% for item in sucursales %}
                         <option value="{{ item['id'] }}">
                           {{ item['descripcion'] }}
@@ -54,10 +54,7 @@ Formulario Pedido de Compras
                     <div class="form-group">
                       <label for="cbo_deposito">Depósitos:</label>
                       <select id="cbo_deposito" class="custom-select">
-                        <option selected>Depósitos</option>
-                        <option value="1">Item 1</option>
-                        <option value="2">Item 2</option>
-                        <option value="3">Item 3</option>
+                        <option value="">Depósitos</option>
                       </select>
                     </div>
                 </div>
@@ -118,22 +115,45 @@ Formulario Pedido de Compras
 
 {% block js %}
 <script>
+  // Crea los nodos en el combo deposito
+  function actualizarDepositos(depositos) {
+    let options = "<option value=''>Depósitos</option>";
+    for(const item of depositos) {
+      options += `<option value="${item.id_deposito}">${item.nombre_deposito}</option>`;
+    }
+    $('#cbo_deposito').empty().append(options);
+  }
   function addEvents() {
     $('#cbo_sucursal').on('change', function() {
-      console.log($(this).val())
+      const id_sucursal = $(this).val();
+      if(id_sucursal) {
+        fetch(`/api/v1/sucursal-depositos/${Number(id_sucursal)}`, {
+          method: 'GET',
+          headers: {'Content-Type': 'application/json'}
+        })
+        .then(resp => {
+          if(!resp.ok) {
+            throw new Error(`HTTP error! status: ${resp.status}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          if(data && data.data.length > 0) {
+            // Si hay depósitos, los agregamos al select
+            actualizarDepositos(data.data);
+          } else {
+            // Si no hay depósitos, mostramos una opción por defecto
+            $('#cbo_deposito').empty().append("<option value=''>No hay depósitos disponibles</option>");
+          }
+        })
+        .catch(err => {
+          console.error('Fetch error:', err);
+        })
+      }
     });
   }
   $(function() {
     addEvents();
-    // PROMESA
-    fetch('/api/v1/sucursal-depositos/1', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(resp => resp.json())
-    .then(data => console.log(data));
   });
 </script>
 {% endblock %}
