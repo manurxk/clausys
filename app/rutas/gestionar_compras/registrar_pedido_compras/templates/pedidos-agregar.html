@@ -137,6 +137,17 @@ Formulario Pedido de Compras
     `;
   }
 
+  function obtieneDetalleProductos() {
+    const productos = [];
+    $('#tbl_productos tbody tr').each(function(k, v) {
+      productos.push({
+        id_producto: Number($(v).children().eq(0).text())
+        , cantidad: Number($(v).children().eq(3).text())
+      });
+    });
+    return productos;
+  }
+
   // Crea los nodos en el combo deposito
   function actualizarDepositos(depositos) {
     let options = "<option value=''>Depósitos</option>";
@@ -179,6 +190,7 @@ Formulario Pedido de Compras
         })
       }
     });
+
     $('#btn_agregar_producto').on('click', function() {
       // Obtener el id_producto seleccionado
       const id_producto = $('#cbo_producto').val() ? Number($('#cbo_producto').val()) : null;
@@ -222,6 +234,36 @@ Formulario Pedido de Compras
       // eliminar el tr
       $(this).closest('tr').remove();
     });
+
+    $('#btn_registrar_pedido').on('click', function() {
+      // Previamente validado, se debe construir el payload
+      const payload = {
+        id_empleado: Number($('#cbo_empleado').val())
+        , id_sucursal: Number($('#cbo_sucursal').val())
+        , fecha_pedido: $('#txt_fecha_de_pedido').val()
+        , id_deposito: Number($('#cbo_deposito').val())
+        , detalle_pedido: obtieneDetalleProductos()
+      }
+      console.log(payload);
+      fetch(`/api/v1/gestionar-compras/registrar-pedido-compras/pedidos`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }, body: JSON.stringify(payload)
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        if(data && !data.error && data.success) {
+          Swal.fire("Bien", "Pedido Creado.", "success");
+        } else {
+          Swal.fire(data.error);
+        }
+      }).catch(err => {
+        console.error(err);
+        Swal.fire("Error", "Error al crear el pedido.", "error");
+      });
+    });
+
     // Regresa al index de pedidos
     $('#btn_salir_operacion').on('click', function() {
       location.replace("{{ url_for('pdcmod.pedidos_index') }}");

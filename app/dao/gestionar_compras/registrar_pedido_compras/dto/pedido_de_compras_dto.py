@@ -23,8 +23,6 @@ class PedidoDeComprasDto:
 
     @id_pedido_compra.setter
     def id_pedido_compra(self, valor: int):
-        if not valor:
-            raise ValueError("El atributo id_pedido_compra no puede estar vacio")
         self.__id_pedido_compra = valor
 
     @property

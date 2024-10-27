@@ -12,8 +12,8 @@ class PedidoDeCompraDetalleDto:
 
     @id_pedido_compra.setter
     def id_pedido_compra(self, valor: int):
-        if not isinstance(valor, int) or valor <= 0:
-            raise ValueError("El atributo id_pedido_compra debe ser un entero positivo")
+        #if not isinstance(valor, int) or valor <= 0:
+        #    raise ValueError("El atributo id_pedido_compra debe ser un entero positivo")
         self.__id_pedido_compra = valor
 
     #getters y setters de id_producto

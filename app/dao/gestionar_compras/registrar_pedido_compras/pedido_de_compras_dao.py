@@ -1,6 +1,7 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 from app.dao.gestionar_compras.registrar_pedido_compras.dto.pedido_de_compras_dto import PedidoDeComprasDto
+from app.dao.gestionar_compras.registrar_pedido_compras.dto.pedido_de_compras_dto import PedidoDeComprasDto
 
 class PedidoDeComprasDao:
     
@@ -52,7 +53,7 @@ class PedidoDeComprasDao:
         return []
 
     # agregar
-    def agregar(self, pedido_dto: PedidoDeComprasDto):
+    def agregar(self, pedido_dto: PedidoDeComprasDto)->bool:
         insertPedidoCompraCabecera = """
         INSERT INTO public.pedido_de_compra
         (id_empleado, id_sucursal, id_epc, fecha_pedido, id_deposito)
@@ -75,20 +76,19 @@ class PedidoDeComprasDao:
             ## Insertando la cabecera
             # (id_empleado, id_sucursal, id_epc, fecha_pedido, id_deposito)
             parametros = (pedido_dto.id_empleado, pedido_dto.id_sucursal, \
-                pedido_dto.id_epc, pedido_dto.fecha_pedido, pedido_dto.id_deposito,)
+                pedido_dto.estado.id, pedido_dto.fecha_pedido, pedido_dto.id_deposito,)
             cur.execute(insertPedidoCompraCabecera, parametros)
             id_pedido_compra = cur.fetchone()[0]
 
             ## Insertando el detalle del pedido
-            if len(pedido_dto.detallePedido) > 0:
-                for pedido in pedido_dto.detallePedido:
+            if len(pedido_dto.detalle_pedido) > 0:
+                for pedido in pedido_dto.detalle_pedido:
                     # (id_pedido_compra, id_producto, cantidad)
                     parametrosdetalle = (id_pedido_compra, pedido.id_producto, pedido.cantidad,)
                     cur.execute(insertDetalleCompra, parametrosdetalle)
 
             # Confirma la transacción
             con.commit()
-
         except Exception as e:
             app.logger.error(f"Error a agregar un nuevo pedido: {str(e)}")
             con.rollback()
@@ -97,6 +97,7 @@ class PedidoDeComprasDao:
             con.autocommit = True
             cur.close()
             con.close()
+        return True
 
     # modificar
     def modificar(self):
