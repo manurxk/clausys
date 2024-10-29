@@ -13,11 +13,19 @@ CREATE TABLE sucursales(
 
 CREATE TABLE depositos(
     id_deposito SERIAL PRIMARY KEY,
-    descripcion VARCHAR(60) UNIQUE NOT NULL,
-	id_sucursal INTEGER NOT NULL,
-	FOREIGN KEY(id_sucursal) REFERENCES
-	sucursales(id_sucursal)
-	ON DELETE RESTRICT ON UPDATE CASCADE
+    descripcion VARCHAR(60) UNIQUE NOT NULL
+);
+
+CREATE TABLE sucursal_depositos(
+    id_sucursal INTEGER NOT NULL,
+    id_deposito INTEGER NOT NULL,
+    observaciones VARCHAR(60),
+    estado BOOLEAN NOT NULL,
+    PRIMARY KEY(id_sucursal, id_deposito),
+    FOREIGN KEY(id_sucursal) REFERENCES sucursales(id_sucursal)
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY(id_deposito) REFERENCES depositos(id_deposito)
+    ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE productos(
@@ -26,7 +34,6 @@ CREATE TABLE productos(
     cantidad INTEGER,
     precio_unitario INTEGER
 );
-
 
 CREATE TABLE personas(
     id_persona SERIAL PRIMARY KEY,
@@ -39,13 +46,7 @@ CREATE TABLE personas(
     creacion_usuario INTEGER NOT NULL,
     modificacion_fecha DATE,
     modificacion_hora TIME,
-    modificacion_usuario INTEGER--,
-    /*FOREIGN KEY(creacion_usuario) REFERENCES
-    usuarios(id_usuario)
-    ON DELETE RESTRICT ON UPDATE CASCADE
-    FOREIGN KEY(modificacion_usuario) REFERENCES
-    usuarios(id_usuario)
-    ON DELETE RESTRICT ON UPDATE CASCADE*/
+    modificacion_usuario INTEGER
 );
 
 CREATE TABLE empleados(
