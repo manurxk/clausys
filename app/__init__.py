@@ -2,6 +2,13 @@ from flask import Flask
 
 app = Flask(__name__)
 
+# inicializar el secret key
+app.secret_key = b'_5#y2L"F6Q7z\n\xec]/'
+
+# importar modulo de seguridad
+from app.rutas.seguridad.login_routes import logmod
+app.register_blueprint(logmod)
+
 # importar referenciales
 from app.rutas.referenciales.ciudad.ciudad_routes import ciumod
 
