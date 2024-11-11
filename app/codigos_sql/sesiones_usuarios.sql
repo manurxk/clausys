@@ -13,6 +13,20 @@ CREATE TABLE cargos(
     , car_des VARCHAR(60) UNIQUE NOT NULL
 );
 
+CREATE TABLE funcionarios(
+    fun_id SERIAL PRIMARY KEY
+    , car_id INTEGER NOT NULL
+    , fun_estado BOOLEAN NOT NULL DEFAULT TRUE
+    , creacion_fecha DATE NOT NULL DEFAULT CURRENT_DATE
+    , creacion_hora TIME NOT NULL DEFAULT CURRENT_TIME(0)
+    , creacion_usuario INTEGER NOT NULL DEFAULT 1
+    , modificacion_fecha DATE
+    , modificacion_hora TIME
+    , modificacion_usuario INTEGER
+    , FOREIGN KEY(car_id) REFERENCES cargos(car_id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
 CREATE TABLE usuarios(
     usu_id SERIAL PRIMARY KEY
     , usu_nick VARCHAR(10) UNIQUE NOT NULL
@@ -20,10 +34,10 @@ CREATE TABLE usuarios(
     , usu_nro_intentos INTEGER NOT NULL
     , fun_id INTEGER NOT NULL
     , gru_id INTEGER NOT NULL
-    /*
-    hola soy yo de nuevo, ayer escribi esto,
-    me encanta, pero seguis vos ahora.
-    */
+    , FOREIGN KEY(fun_id) REFERENCES funcionarios(fun_id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
+    , FOREIGN KEY(gru_id) REFERENCES grupos(gru_id)
+    ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 
