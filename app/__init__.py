@@ -1,9 +1,18 @@
+from datetime import timedelta
 from flask import Flask
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
 
+# creamos el token
+csrf = CSRFProtect()
+csrf.init_app(app)
+
 # inicializar el secret key
 app.secret_key = b'_5#y2L"F6Q7z\n\xec]/'
+
+# Establecer duración de la sesión, 15 minutos
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=15)
 
 # importar modulo de seguridad
 from app.rutas.seguridad.login_routes import logmod

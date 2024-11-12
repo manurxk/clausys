@@ -17,3 +17,6 @@ fecha_pedido=date(2024, 10, 16)
 
 ```
 
+### Paquetes a instalar
+`pip install flask-wtf`
+

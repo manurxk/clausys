@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, session, \
-    request, redirect, url_for, flash
+    request, redirect, url_for, flash, current_app as app
 
 logmod = Blueprint('login', __name__, template_folder='templates')
 
@@ -10,6 +10,9 @@ def login():
         usuario_nombre = request.form['usuario_nombre']
         usuario_clave = request.form['usuario_clave']
         if usuario_nombre == 'pepito' and usuario_clave == '123':
+            # crear la sesión
+            session.clear() # limpiar cualquier sesión previa
+            session.permanent = True
             session['usuario_nombre'] = request.form['usuario_nombre']
             session['rol'] = 'contabilidad'
             return redirect(url_for('login.inicio'))
@@ -21,9 +24,8 @@ def login():
 
 @logmod.route('/logout')
 def logout():
-    if 'usuario_nombre' in session:
-        session.pop('usuario_nombre', None)
-        flash('Sesion cerrada', 'warning')
+    session.clear() # limpiar cualquier sesión previa
+    flash('Sesion cerrada', 'warning')
     return redirect(url_for('login.login'))
 
 @logmod.route('/')
