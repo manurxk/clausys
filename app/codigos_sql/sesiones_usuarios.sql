@@ -34,6 +34,7 @@ CREATE TABLE usuarios(
     , usu_nro_intentos INTEGER NOT NULL
     , fun_id INTEGER NOT NULL
     , gru_id INTEGER NOT NULL
+    , usu_estado BOOLEAN NOT NULL DEFAULT TRUE
     , FOREIGN KEY(fun_id) REFERENCES funcionarios(fun_id)
     ON DELETE RESTRICT ON UPDATE CASCADE
     , FOREIGN KEY(gru_id) REFERENCES grupos(gru_id)
