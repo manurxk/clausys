@@ -1,0 +1,1422 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Pacientes
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <h3><i class="fas fa-user-injured"></i> Gestión de Pacientes</h3>
+    
+    <!-- Tarjeta principal -->
+    <div class="card shadow">
+        <!-- Header simplificado -->
+        <div class="card-header bg-primary text-white">
+            <button type="button" class="btn btn-light" id="btnAgregar">
+                <i class="fas fa-plus-circle"></i> Agregar Nuevo Paciente
+            </button>
+        </div>
+
+        <!-- Cuerpo de la tarjeta con tabla -->
+        <div class="card-body">
+            <!-- Tabla de pacientes -->
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered w-100" id="tbl">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Historia Clínica</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Cédula</th>
+                            <th>Edad</th>
+                            <th>Teléfono</th>
+                            <th>Género</th>
+                            <th>Ciudad</th>
+                            <th>Fecha Registro</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar al paciente <strong id="nombrePacienteEliminar"></strong>?</p>
+                <p class="text-danger"><small><i class="fas fa-exclamation-circle"></i> Esta acción no se puede deshacer.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">
+                    <i class="fas fa-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Vista Previa Completa del Paciente -->
+<div class="modal fade" id="modalVistaPaciente" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title"><i class="fas fa-user-circle"></i> Ficha Completa del Paciente</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="contenidoVistaPaciente">
+                <!-- Se carga dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="btnImprimirFicha">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- /tarjeta -->
+<!-- Modal con Wizard -->
+<div class="modal fade" id="modalFormulario" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Registro de Paciente</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Indicadores de pasos -->
+        <div class="stepwizard mb-4">
+          <div class="stepwizard-row">
+            <div class="stepwizard-step">
+              <button type="button" class="btn btn-primary btn-circle" data-step="1">1</button>
+              <p><small>Datos Personales</small></p>
+            </div>
+            <div class="stepwizard-step">
+              <button type="button" class="btn btn-default btn-circle" data-step="2">2</button>
+              <p><small>Contacto</small></p>
+            </div>
+            <div class="stepwizard-step">
+              <button type="button" class="btn btn-default btn-circle" data-step="3">3</button>
+              <p><small>Académico</small></p>
+            </div>
+            <div class="stepwizard-step">
+              <button type="button" class="btn btn-default btn-circle" data-step="4">4</button>
+              <p><small>Clínico</small></p>
+            </div>
+            <div class="stepwizard-step" id="step5Indicator" style="display:none;">
+              <button type="button" class="btn btn-default btn-circle" data-step="5">5</button>
+              <p><small>Tutor</small></p>
+            </div>
+          </div>
+        </div>
+
+        <form id="formPaciente">
+          <input type="hidden" id="txtIdPersona">
+          <input type="hidden" id="txtIdPaciente">
+          
+          <!-- PASO 1: Datos Personales -->
+          <div class="wizard-step" data-step="1">
+            <h5 class="text-primary mb-3">Datos Personales</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtNombre">Nombre: <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtApellido">Apellido: <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido" required>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtCedula">Cédula: <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" placeholder="Ingrese la cédula" id="txtCedula" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtFecha_nacimiento">Fecha de nacimiento: <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="txtFecha_nacimiento" required>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="hidden" id="id_genero">
+                  <label for="txtGenero">Sexo:</label>
+                  <input type="text" class="form-control" placeholder="Seleccione el sexo" id="txtGenero">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="hidden" id="id_estado_civil">
+                  <label for="txtEstado_civil">Estado civil:</label>
+                  <input type="text" class="form-control" placeholder="Seleccione el estado civil" id="txtEstado_civil">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 2: Contacto -->
+          <div class="wizard-step" data-step="2" style="display:none;">
+            <h5 class="text-primary mb-3">Datos de Contacto</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtTelefono">Teléfono: <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" placeholder="Ingrese el teléfono" id="txtTelefono" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtCorreo">Correo electrónico:</label>
+                  <input type="email" class="form-control" placeholder="Ingrese el correo" id="txtCorreo">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="txtDomicilio">Domicilio:</label>
+                  <input type="text" class="form-control" placeholder="Ingrese el domicilio" id="txtDomicilio">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="hidden" id="id_ciudad">
+                  <label for="txtCiudad">Ciudad de residencia:</label>
+                  <input type="text" class="form-control" placeholder="Seleccione la ciudad" id="txtCiudad">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="hidden" id="id_ciudad_nacimiento">
+                  <label for="txtCiudad_nacimiento">Ciudad de nacimiento:</label>
+                  <input type="text" class="form-control" placeholder="Seleccione la ciudad de nacimiento" id="txtCiudad_nacimiento">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 3: Académico -->
+          <div class="wizard-step" data-step="3" style="display:none;">
+            <h5 class="text-primary mb-3">Datos Académicos y Profesionales</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="hidden" id="id_nivel_instruccion">
+                  <label for="txtNivel_instruccion">Nivel de instrucción:</label>
+                  <input type="text" class="form-control" placeholder="Seleccione nivel de instrucción" id="txtNivel_instruccion">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <input type="hidden" id="id_profesion">
+                  <label for="txtProfesion">Profesión/Ocupación:</label>
+                  <input type="text" class="form-control" placeholder="Seleccione profesión" id="txtProfesion">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 4: Clínico -->
+          <div class="wizard-step" data-step="4" style="display:none;">
+            <h5 class="text-primary mb-3">Datos Clínicos</h5>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtHistoria_clinica">Historia clínica:</label>
+                  <input type="text" class="form-control" placeholder="Se genera automáticamente" id="txtHistoria_clinica" readonly>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtObservaciones">Observaciones:</label>
+                  <textarea class="form-control" rows="3" placeholder="Observaciones generales" id="txtObservaciones"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="chkEsMenor">
+                  <label class="custom-control-label" for="chkEsMenor">
+                    <strong>¿Es menor de edad?</strong>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PASO 5: Datos del Tutor (solo si es menor) -->
+          <div class="wizard-step" data-step="5" style="display:none;">
+            <h5 class="text-warning mb-3">Datos del Tutor/Responsable</h5>
+            <h6 class="text-primary">Datos de la Madre</h6>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtNomMadre">Nombre de la madre:</label>
+                  <input type="text" class="form-control" placeholder="Nombre completo de la madre" id="txtNomMadre">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtTelMadre">Teléfono de la madre:</label>
+                  <input type="text" class="form-control" placeholder="Teléfono" id="txtTelMadre">
+                </div>
+              </div>
+            </div>
+            <hr>
+            <h6 class="text-primary">Datos del Padre</h6>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtNomPadre">Nombre del padre:</label>
+                  <input type="text" class="form-control" placeholder="Nombre completo del padre" id="txtNomPadre">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtTelPadre">Teléfono del padre:</label>
+                  <input type="text" class="form-control" placeholder="Teléfono" id="txtTelPadre">
+                </div>
+              </div>
+            </div>
+            <hr>
+            <h6 class="text-primary">Datos Educativos</h6>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label for="txtEducacion">Nivel educativo actual:</label>
+                  <input type="text" class="form-control" placeholder="Ej: 5to grado primaria" id="txtEducacion">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtColegio">Colegio/Institución:</label>
+                  <input type="text" class="form-control" placeholder="Nombre del colegio" id="txtColegio">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtTelColegio">Teléfono del colegio:</label>
+                  <input type="text" class="form-control" placeholder="Teléfono" id="txtTelColegio">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnAnterior">
+          <i class="fas fa-arrow-left"></i> Anterior
+        </button>
+        <button type="button" class="btn btn-primary" id="btnSiguiente">
+          Siguiente <i class="fas fa-arrow-right"></i>
+        </button>
+        <button type="button" class="btn btn-success" id="btnGuardar" style="display:none;">
+          <i class="fas fa-save"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.stepwizard-row {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+}
+
+.stepwizard-row:before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background-color: #ddd;
+  z-index: 0;
+}
+
+.stepwizard-step {
+  text-align: center;
+  flex: 1;
+  position: relative;
+}
+
+.stepwizard-step p {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.btn-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+  background-color: white;
+}
+
+.btn-circle.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-circle.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+</style>
+
+
+
+<!-- Modal Buscar Género -->
+<div class="modal" id="modalBuscarGenero">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Sexo</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblGenero">
+            <thead>
+              <tr>
+                <th>Sexo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Estado Civil -->
+<div class="modal" id="modalBuscarEstadoCivil">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Estado Civil</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblEstadoCivil">
+            <thead>
+              <tr>
+                <th>Estado Civil</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Ciudad -->
+<div class="modal" id="modalBuscarCiudad">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Ciudad de Residencia</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblCiudad">
+            <thead>
+              <tr>
+                <th>Ciudad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Ciudad de Nacimiento -->
+<div class="modal" id="modalBuscarCiudadNacimiento">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Ciudad de Nacimiento</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblCiudadNacimiento">
+            <thead>
+              <tr>
+                <th>Ciudad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Nivel de Instrucción -->
+<div class="modal" id="modalBuscarNivelInstruccion">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Nivel de Instrucción</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblNivelInstruccion">
+            <thead>
+              <tr>
+                <th>Nivel de Instrucción</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Profesión -->
+<div class="modal" id="modalBuscarProfesion">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Profesión</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblProfesion">
+            <thead>
+              <tr>
+                <th>Profesión/Ocupación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    <div class="row mt-4 d-none" id="rowAlerta">
+      <div class="col col-md-12">
+        <div class="alert alert-success">
+          <strong>Registro Exitoso!</strong>
+          <div class="row" id="mostrarAlerta"></div>
+        </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% block js %}
+
+
+<!-- JavaScript para manejar el switch -->
+<script>
+let currentStep = 1;
+const totalSteps = 4; // o 5 si es menor
+
+const initWizard = () => {
+  // Navegación entre pasos
+  $('#btnSiguiente').click(function() {
+    if (validateCurrentStep()) {
+      nextStep();
+    }
+  });
+
+  $('#btnAnterior').click(function() {
+    previousStep();
+  });
+
+  // Mostrar paso 5 si es menor
+  $('#chkEsMenor').change(function() {
+    if (this.checked) {
+      $('#step5Indicator').show();
+      // Si estamos en el paso 4, mostrar botón siguiente en lugar de guardar
+      if (currentStep === 4) {
+        $('#btnGuardar').hide();
+        $('#btnSiguiente').show();
+      }
+    } else {
+      $('#step5Indicator').hide();
+      // Ocultar paso 5 si está visible
+      $(`.wizard-step[data-step="5"]`).hide();
+      // Si estamos en paso 4, mostrar guardar
+      if (currentStep === 4) {
+        $('#btnSiguiente').hide();
+        $('#btnGuardar').show();
+      }
+    }
+  });
+}
+
+const showStep = (step) => {
+  $('.wizard-step').hide();
+  $(`.wizard-step[data-step="${step}"]`).fadeIn();
+  
+  // Actualizar indicadores
+  $('.stepwizard-step button').removeClass('btn-primary btn-success').addClass('btn-default');
+  $(`.stepwizard-step button[data-step="${step}"]`).removeClass('btn-default').addClass('btn-primary');
+  
+  // Marcar anteriores como completados
+  for (let i = 1; i < step; i++) {
+    $(`.stepwizard-step button[data-step="${i}"]`).removeClass('btn-default btn-primary').addClass('btn-success');
+  }
+  
+  // Controlar botones
+  $('#btnAnterior').toggle(step > 1);
+  
+  const esMenor = $('#chkEsMenor').is(':checked');
+  const lastStep = esMenor ? 5 : 4;
+  
+  if (step === lastStep) {
+    $('#btnSiguiente').hide();
+    $('#btnGuardar').show();
+  } else {
+    $('#btnSiguiente').show();
+    $('#btnGuardar').hide();
+  }
+}
+
+const nextStep = () => {
+  const esMenor = $('#chkEsMenor').is(':checked');
+  const maxStep = esMenor ? 5 : 4;
+  
+  if (currentStep < maxStep) {
+    currentStep++;
+    showStep(currentStep);
+  }
+}
+
+const previousStep = () => {
+  if (currentStep > 1) {
+    currentStep--;
+    showStep(currentStep);
+  }
+}
+
+const validateCurrentStep = () => {
+  let valid = true;
+  $(`.wizard-step[data-step="${currentStep}"] input[required]`).each(function() {
+    if (!$(this).val()) {
+      $(this).addClass('is-invalid');
+      valid = false;
+    } else {
+      $(this).removeClass('is-invalid');
+    }
+  });
+  
+  if (!valid) {
+    Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
+  }
+  
+  return valid;
+}
+
+  
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+  const CSRFToken = "{{ csrf_token() }}" || null;
+
+const initDatatable = () => {
+    $('#tbl').DataTable({
+        language: {
+            url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+        },
+        ajax: {
+            url: '/api/v1/pacientes',
+            dataSrc: function(json) {
+                // Manejo de errores
+                if (!json.success) {
+                    console.error('Error del servidor:', json.error);
+                    return [];
+                }
+                return json.data;  // Devuelve el array de pacientes
+            },
+            error: function(xhr, error, thrown) {
+                console.error('Error en AJAX:', xhr.responseText);
+                alert('Error al cargar los pacientes. Revise la consola.');
+            }
+        },
+        columns: [
+            { data: 'historia_clinica' },
+            { data: 'nombre' },
+            { data: 'apellido' },
+            { data: 'cedula' },
+            { data: 'edad', className: 'text-center' },
+            { data: 'telefono' },
+            { data: 'genero' },
+            { data: 'ciudad' },
+            { data: 'fecha_registro' },
+            { 
+                  data: function(row) {
+                      return `
+        <button type="button" name="btn_pdf" class="btn btn-danger btn-sm" data-id="${row.id_paciente}" title="Descargar PDF">
+            <i class="fas fa-file-pdf"></i>
+        </button>
+        <button type="button" name="btn_excel" class="btn btn-success btn-sm" data-id="${row.id_paciente}" title="Descargar Excel">
+            <i class="fas fa-file-excel"></i>
+        </button>
+        <button type="button" name="btn_editar" class="btn btn-warning btn-sm" data-id="${row.id_paciente}" title="Editar">
+            <i class="fas fa-edit"></i>
+        </button>
+        <button type="button" name="btn_eliminar" class="btn btn-secondary btn-sm" data-id="${row.id_paciente}" data-nombre="${row.nombre} ${row.apellido}" title="Eliminar">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+                      `;
+                },
+                className: 'text-center',
+                orderable: false  // Los botones no se ordenan
+            }
+        ],
+        order: [[8, 'desc']]  // Ordenar por fecha_registro descendente
+    });
+
+  
+} 
+  const verFichaPaciente = (id) => {
+    $.ajax({
+        url: `/api/v1/pacientes/${id}`,
+        type: 'GET',
+        success: function(response) {
+            if (!response.success || !response.data) {
+                alert('Error al cargar los datos del paciente');
+                return;
+            }
+            
+            const paciente = response.data;
+            
+            let html = `
+                <div class="mb-3">
+                    <button class="btn btn-danger btn-sm" onclick="descargarPDF(${id})">
+                        <i class="fas fa-file-pdf"></i> Descargar PDF
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="descargarExcel(${id})">
+                        <i class="fas fa-file-excel"></i> Descargar Excel
+                    </button>
+                </div>
+                <hr>
+                <!-- ... resto de tu HTML actual ... -->
+            `;
+            
+            // Tu código HTML existente aquí
+            
+            $('#contenidoVistaPaciente').html(html);
+            $('#modalVistaPaciente').modal('show');
+        }
+    });
+}
+
+// Funciones de descarga
+const descargarPDF = (id) => {
+    window.open(`/api/v1/pacientes/${id}/pdf`, '_blank');
+}
+
+const descargarExcel = (id) => {
+    window.open(`/api/v1/pacientes/${id}/excel`, '_blank');
+}
+
+
+// ============= GÉNERO =============
+const initDatatableGenero = () => {
+  $('#tblGenero').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: '/api/v1/generos',
+    columns: [
+      { data: 'descripcion' },
+      { data: function(row) {
+          return `<button type="button" name="btn_seleccionar_genero" class="btn btn-success" data-id="${row.id_genero}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+        }
+      }
+    ]
+  });
+  
+  $('#tblGenero').on('click', 'button[name="btn_seleccionar_genero"]', function () {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    $('#txtGenero').val(descripcion);
+    $('#id_genero').val(id);
+    $('#modalBuscarGenero').modal('hide');
+  });
+}
+
+const buscarGenero = () => {
+  $('#txtGenero').on('click', function () {
+    $('#modalBuscarGenero').modal();
+  });
+}
+
+// ============= ESTADO CIVIL =============
+const initDatatableEstadoCivil = () => {
+  $('#tblEstadoCivil').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: '/api/v1/estados-civiles',
+    columns: [
+      { data: 'descripcion' },
+      { data: function(row) {
+          return `<button type="button" name="btn_seleccionar_estado_civil" class="btn btn-success" data-id="${row.id_estado_civil}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+        }
+      }
+    ]
+  });
+  
+  $('#tblEstadoCivil').on('click', 'button[name="btn_seleccionar_estado_civil"]', function () {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    $('#txtEstado_civil').val(descripcion);
+    $('#id_estado_civil').val(id);
+    $('#modalBuscarEstadoCivil').modal('hide');
+  });
+}
+
+const buscarEstadoCivil = () => {
+  $('#txtEstado_civil').on('click', function () {
+    $('#modalBuscarEstadoCivil').modal();
+  });
+}
+
+// ============= CIUDAD =============
+const initDatatableCiudad = () => {
+  $('#tblCiudad').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: '/api/v1/ciudades',
+    columns: [
+      { data: 'descripcion' },
+      { data: function(row) {
+          return `<button type="button" name="btn_seleccionar_ciudad" class="btn btn-success" data-id="${row.id_ciudad}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+        }
+      }
+    ]
+  });
+  
+  $('#tblCiudad').on('click', 'button[name="btn_seleccionar_ciudad"]', function () {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    $('#txtCiudad').val(descripcion);
+    $('#id_ciudad').val(id);
+    $('#modalBuscarCiudad').modal('hide');
+  });
+}
+
+const buscarCiudad = () => {
+  $('#txtCiudad').on('click', function () {
+    $('#modalBuscarCiudad').modal();
+  });
+}
+
+// ============= CIUDAD DE NACIMIENTO =============
+const initDatatableCiudadNacimiento = () => {
+  $('#tblCiudadNacimiento').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: '/api/v1/ciudades',
+    columns: [
+      { data: 'descripcion' },
+      { data: function(row) {
+          return `<button type="button" name="btn_seleccionar_ciudad_nacimiento" class="btn btn-success" data-id="${row.id_ciudad}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+        }
+      }
+    ]
+  });
+  
+  $('#tblCiudadNacimiento').on('click', 'button[name="btn_seleccionar_ciudad_nacimiento"]', function () {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    $('#txtCiudad_nacimiento').val(descripcion);
+    $('#id_ciudad_nacimiento').val(id);
+    $('#modalBuscarCiudadNacimiento').modal('hide');
+  });
+}
+
+const buscarCiudadNacimiento = () => {
+  $('#txtCiudad_nacimiento').on('click', function () {
+    $('#modalBuscarCiudadNacimiento').modal();
+  });
+}
+
+// ============= NIVEL DE INSTRUCCIÓN =============
+const initDatatableNivelInstruccion = () => {
+  $('#tblNivelInstruccion').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: '/api/v1/niveles-instruccion',
+    columns: [
+      { data: 'descripcion' },
+      { data: function(row) {
+          return `<button type="button" name="btn_seleccionar_nivel_instruccion" class="btn btn-success" data-id="${row.id_nivel_instruccion}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+        }
+      }
+    ]
+  });
+  
+  $('#tblNivelInstruccion').on('click', 'button[name="btn_seleccionar_nivel_instruccion"]', function () {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    $('#txtNivel_instruccion').val(descripcion);
+    $('#id_nivel_instruccion').val(id);
+    $('#modalBuscarNivelInstruccion').modal('hide');
+  });
+}
+
+const buscarNivelInstruccion = () => {
+  $('#txtNivel_instruccion').on('click', function () {
+    $('#modalBuscarNivelInstruccion').modal();
+  });
+}
+
+// ============= PROFESIÓN =============
+const initDatatableProfesion = () => {
+  $('#tblProfesion').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: '/api/v1/profesiones',
+    columns: [
+      { data: 'descripcion' },
+      { data: function(row) {
+          return `<button type="button" name="btn_seleccionar_profesion" class="btn btn-success" data-id="${row.id_profesion}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
+        }
+      }
+    ]
+  });
+  
+  $('#tblProfesion').on('click', 'button[name="btn_seleccionar_profesion"]', function () {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    $('#txtProfesion').val(descripcion);
+    $('#id_profesion').val(id);
+    $('#modalBuscarProfesion').modal('hide');
+  });
+}
+
+const buscarProfesion = () => {
+  $('#txtProfesion').on('click', function () {
+    $('#modalBuscarProfesion').modal();
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const agregar = () => {
+    $('#btnAgregar').on('click', function(){
+        $('#modalTitle').text("Agregar Nuevo Paciente");
+        limpiarFormulario();
+        $('#modalFormulario').modal();
+    });
+}
+
+const limpiarFormulario = () => {
+    // Limpiar campos de persona
+    $('#txtIdPersona').val("");
+    $('#txtIdPaciente').val("");
+    $('#txtNombre').val("");
+    $('#txtApellido').val("");
+    $('#txtCedula').val("");
+    $('#txtFecha_nacimiento').val("");
+    $('#txtTelefono').val("");
+    $('#txtCorreo').val("");
+    $('#txtDomicilio').val("");
+    
+    // Limpiar campos de tablas referenciales
+    $('#txtGenero').val("");
+    $('#id_genero').val("");
+    $('#txtEstado_civil').val("");
+    $('#id_estado_civil').val("");
+    $('#txtCiudad').val("");
+    $('#id_ciudad').val("");
+    $('#txtCiudad_nacimiento').val("");
+    $('#id_ciudad_nacimiento').val("");
+    $('#txtNivel_instruccion').val("");
+    $('#id_nivel_instruccion').val("");
+    $('#txtProfesion').val("");
+    $('#id_profesion').val("");
+    
+    // Limpiar campos de paciente
+    $('#txtHistoria_clinica').val("");
+    $('#txtObservaciones').val("");
+    $('#chkEsMenor').prop('checked', false);
+    
+    // Limpiar campos de menor
+    $('#txtNomMadre').val("");
+    $('#txtTelMadre').val("");
+    $('#txtNomPadre').val("");
+    $('#txtTelPadre').val("");
+    $('#txtEducacion').val("");
+    $('#txtColegio').val("");
+    $('#txtTelColegio').val("");
+    
+    // Ocultar sección de menor
+    $('#seccionMenor').hide();
+}
+
+const guardar = () => {
+    $('#btnGuardar').on('click', function() {
+        const idPaciente = $('#txtIdPaciente').val();
+         // Validar que la fecha no esté vacía
+        const fechaNacimiento = $('#txtFecha_nacimiento').val();
+        if (!fechaNacimiento) {
+            Swal.fire('Error', 'La fecha de nacimiento es obligatoria', 'error');
+            return;
+        }
+        // Datos de persona
+        const nombre = $('#txtNombre').val();
+        const apellido = $('#txtApellido').val();
+        const cedula = $('#txtCedula').val();
+        const fecha_nacimiento = $('#txtFecha_nacimiento').val();
+        const telefono = $('#txtTelefono').val();
+        const correo = $('#txtCorreo').val() || null;
+        const domicilio = $('#txtDomicilio').val() || null;
+        
+        // IDs de tablas referenciales (pueden ser null)
+        const id_genero = $('#id_genero').val() || null;
+        const id_estado_civil = $('#id_estado_civil').val() || null;
+        const id_ciudad = $('#id_ciudad').val() || null;
+        const id_ciudad_nacimiento = $('#id_ciudad_nacimiento').val() || null;
+        const id_nivel_instruccion = $('#id_nivel_instruccion').val() || null;
+        const id_profesion = $('#id_profesion').val() || null;
+        
+        // Datos de paciente
+        const historia_clinica = $('#txtHistoria_clinica').val() || null;
+        const es_menor = $('#chkEsMenor').is(':checked');
+        const observaciones = $('#txtObservaciones').val() || null;
+        
+        // Datos de menor (solo si es menor)
+        const nom_madre = es_menor ? $('#txtNomMadre').val() || null : null;
+        const tel_madre = es_menor ? $('#txtTelMadre').val() || null : null;
+        const nom_padre = es_menor ? $('#txtNomPadre').val() || null : null;
+        const tel_padre = es_menor ? $('#txtTelPadre').val() || null : null;
+        const educacion = es_menor ? $('#txtEducacion').val() || null : null;
+        const colegio = es_menor ? $('#txtColegio').val() || null : null;
+        const tel_colegio = es_menor ? $('#txtTelColegio').val() || null : null;
+        
+        // Validaciones básicas
+        if (!nombre || !apellido || !cedula || !telefono) {
+            Swal.fire("Error", "Complete los campos obligatorios (Nombre, Apellido, Cédula, Teléfono)", "error");
+            return;
+        }
+        
+        const tabla = $('#tbl').DataTable();
+        const dataPaciente = {
+            nombre,
+            apellido,
+            cedula,
+            fecha_nacimiento,
+            telefono,
+            correo,
+            domicilio,
+            id_genero,
+            id_estado_civil,
+            id_ciudad,
+            id_ciudad_nacimiento,
+            id_nivel_instruccion,
+            id_profesion,
+            historia_clinica,
+            es_menor,
+            observaciones,
+            nom_madre,
+            tel_madre,
+            nom_padre,
+            tel_padre,
+            educacion,
+            colegio,
+            tel_colegio
+        };
+        
+        if (idPaciente) {
+            // UPDATE
+            fetch(`/api/v1/pacientes/${idPaciente}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRFToken
+                },
+                body: JSON.stringify(dataPaciente)
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data && data.success) {
+                    tabla.ajax.reload();
+                    $('#modalFormulario').modal("hide");
+                    Swal.fire("Actualizado", "El paciente ha sido actualizado correctamente.", "success");
+                } else {
+                    Swal.fire("Error", data.error || "Ocurrió un error al actualizar", "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Error", "Ocurrió un error al actualizar el paciente.", "error");
+            });
+        } else {
+            // INSERT
+            fetch(`/api/v1/pacientes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRFToken
+                },
+                body: JSON.stringify(dataPaciente)
+            })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data && data.success) {
+                    tabla.ajax.reload();
+                    $('#modalFormulario').modal("hide");
+                    Swal.fire("Agregado", "El paciente ha sido agregado correctamente.", "success");
+                } else {
+                    Swal.fire("Error", data.error || "Ocurrió un error al guardar", "error");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire("Error", "Ocurrió un error al guardar el paciente.", "error");
+            });
+        }
+    });
+}
+
+
+
+const editar = () => {
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
+        Swal.fire({
+            title: "¿Deseas editar este paciente?",
+            showCancelButton: true,
+            confirmButtonText: "Sí",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $('#modalTitle').text("Editar Paciente");
+                
+                const idPaciente = $(this).data('id');
+                $('#txtIdPaciente').val(idPaciente);
+                
+                // CAMBIO: Usar el endpoint /editar que devuelve IDs
+                fetch(`/api/v1/pacientes/${idPaciente}/editar`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRFToken
+                    }
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.error);
+                    }
+                    
+                    const paciente = data.data;
+                    
+                    // Datos básicos de persona
+                    $('#txtIdPersona').val(paciente.id_persona || '');
+                    $('#txtNombre').val(paciente.nombre || '');
+                    $('#txtApellido').val(paciente.apellido || '');
+                    $('#txtCedula').val(paciente.cedula || '');
+                    $('#txtFecha_nacimiento').val(paciente.fecha_nacimiento || '');
+                    $('#txtTelefono').val(paciente.telefono || '');
+                    $('#txtCorreo').val(paciente.correo || '');
+                    $('#txtDomicilio').val(paciente.domicilio || '');
+                    
+                    // Tablas referenciales - AHORA CON IDs
+                    $('#id_genero').val(paciente.id_genero || '');
+                    $('#id_estado_civil').val(paciente.id_estado_civil || '');
+                    $('#id_ciudad').val(paciente.id_ciudad || '');
+                    $('#id_ciudad_nacimiento').val(paciente.id_ciudad_nacimiento || '');
+                    $('#id_nivel_instruccion').val(paciente.id_nivel_instruccion || '');
+                    $('#id_profesion').val(paciente.id_profesion || '');
+                    
+                    // Datos del paciente
+                    $('#txtHistoria_clinica').val(paciente.historia_clinica || '');
+                    $('#txtObservaciones').val(paciente.observaciones || '');
+                    
+                    // Es menor
+                    const esMenor = paciente.es_menor || false;
+                    $('#chkEsMenor').prop('checked', esMenor);
+                    
+                    if (esMenor) {
+                        $('#seccionMenor').show();
+                        $('#txtNomMadre').val(paciente.nom_madre || '');
+                        $('#txtTelMadre').val(paciente.tel_madre || '');
+                        $('#txtNomPadre').val(paciente.nom_padre || '');
+                        $('#txtTelPadre').val(paciente.tel_padre || '');
+                        $('#txtEducacion').val(paciente.educacion || '');
+                        $('#txtColegio').val(paciente.colegio || '');
+                        $('#txtTelColegio').val(paciente.tel_colegio || '');
+                    } else {
+                        $('#seccionMenor').hide();
+                    }
+                    
+                    $('#modalFormulario').modal('show');
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire("Error", "No se pudo cargar los datos del paciente.", "error");
+                });
+            }
+        });
+    });
+}
+  const eliminar = () => {
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
+        const idPaciente = $(this).data('id');
+        const nombrePaciente = $(this).data('nombre');
+        
+        Swal.fire({
+            title: "¿Deseas eliminar este paciente?",
+            text: `Paciente: ${nombrePaciente}`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "No",
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/v1/pacientes/${idPaciente}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRFToken
+                    }
+                })
+                .then(resp => resp.json())
+                .then(data => {
+                    if (data && data.success) {
+                        const tabla = $('#tbl').DataTable();
+                        tabla.ajax.reload();
+                        Swal.fire("Eliminado", "El paciente ha sido eliminado correctamente.", "success");
+                    } else {
+                        Swal.fire("Error", data.error || "No se pudo eliminar el paciente.", "error");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Swal.fire("Error", "Ocurrió un error al eliminar el paciente.", "error");
+                });
+            }
+        });
+    });
+}
+
+// Agregar esta función antes de addEvents()
+const descargarArchivos = () => {
+  // Evento para descargar PDF
+  $('#tbl').on('click', 'button[name="btn_pdf"]', function() {
+    const id = $(this).data('id');
+    window.open(`/api/v1/pacientes/${id}/pdf`, '_blank');
+  });
+
+  // Evento para descargar Excel
+  $('#tbl').on('click', 'button[name="btn_excel"]', function() {
+    const id = $(this).data('id');
+    window.open(`/api/v1/pacientes/${id}/excel`, '_blank');
+  });
+}
+
+// ============= FUNCIONES PRINCIPALES =============
+const addEvents = () => {
+  initWizard();  // <-- AGREGAR ESTA LÍNEA
+  agregar();
+  guardar();
+  editar();
+  eliminar();
+  descargarArchivos();  // <-- AGREGAR ESTA LÍNEA
+  buscarGenero();
+  buscarEstadoCivil();
+  buscarCiudad();
+  buscarCiudadNacimiento();
+  buscarNivelInstruccion();
+  buscarProfesion();
+}
+
+// ============= INICIALIZACIÓN =============
+$(document).ready(function() {
+  // Inicializar DataTable principal
+  initDatatable();
+  
+  // Inicializar DataTables de tablas referenciales
+  initDatatableGenero();
+  initDatatableEstadoCivil();
+  initDatatableCiudad();
+  initDatatableCiudadNacimiento();
+  initDatatableNivelInstruccion();
+  initDatatableProfesion();
+  
+  // Activar todos los eventos
+  addEvents();
+});
+
+</script> 
+{% endblock %}

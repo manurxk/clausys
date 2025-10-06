@@ -6,9 +6,9 @@ class Conexion:
     """
     def __init__(self):
         # https://www.psycopg.org/docs/extensions.html#psycopg2.extensions.parse_dsn
-        dbname = "bdlp3"
-        user = "juandba"
-        password = "admin"
+        dbname = "claude"
+        user = "postgres"
+        password = "1873"
         host = "127.0.0.1"
         port = 5432
         #self.con = psycopg2.connect("dbname=veterinaria-db user=juandba host=localhost password=admin")

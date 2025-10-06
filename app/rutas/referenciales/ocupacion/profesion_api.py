@@ -1,69 +1,68 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.ciudad.CiudadDao import CiudadDao
+from app.dao.referenciales.profesion.Profesion_Dao import ProfesionDao
 
-ciuapi = Blueprint('ciuapi', __name__)
+profapi = Blueprint('profapi', __name__)
 
 # ===============================
-# Trae todas las ciudades
+# Trae todas las profesiones
 # ===============================
-@ciuapi.route('/ciudades', methods=['GET'])
-def getCiudades():
-    ciudao = CiudadDao()
+@profapi.route('/profesiones', methods=['GET'])
+def getProfesiones():
+    profdao = ProfesionDao()
 
     try:
-        ciudades = ciudao.getCiudades()
+        profesiones = profdao.getProfesiones()
 
         return jsonify({
             'success': True,
-            'data': ciudades,
+            'data': profesiones,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todas las ciudades: {str(e)}")
+        app.logger.error(f"Error al obtener todas las profesiones: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Trae una ciudad por ID
+# Trae una profesión por ID
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['GET'])
-def getCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@profapi.route('/profesiones/<int:profesion_id>', methods=['GET'])
+def getProfesion(profesion_id):
+    profdao = ProfesionDao()
 
     try:
-        ciudad = ciudao.getCiudadById(ciudad_id)
+        profesion = profdao.getProfesionById(profesion_id)
 
-        if ciudad:
+        if profesion:
             return jsonify({
                 'success': True,
-                'data': ciudad,
+                'data': profesion,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado.'
+                'error': 'No se encontró la profesión con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener ciudad: {str(e)}")
+        app.logger.error(f"Error al obtener profesión: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Agrega una nueva ciudad
+# Agrega una nueva profesión
 # ===============================
-@ciuapi.route('/ciudades', methods=['POST'])
-def addCiudad():
+@profapi.route('/profesiones', methods=['POST'])
+def addProfesion():
     data = request.get_json()
-    ciudao = CiudadDao()
+    profdao = ProfesionDao()
 
-    # Validar que el JSON tenga los campos necesarios
     campos_requeridos = ['descripcion', 'estado']
 
     for campo in campos_requeridos:
@@ -82,12 +81,18 @@ def addCiudad():
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        ciudad_id = ciudao.guardarCiudad(descripcion, estado)
-        if ciudad_id:
+        if not profdao.validarDescripcion(descripcion):
+            return jsonify({
+                'success': False,
+                'error': 'La descripción solo puede contener letras y acentos.'
+            }), 400
+
+        profesion_id = profdao.guardarProfesion(descripcion, estado)
+        if profesion_id:
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': profesion_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -96,22 +101,22 @@ def addCiudad():
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se pudo guardar la ciudad (duplicada o inválida).'
+                'error': 'No se pudo guardar la profesión (duplicada o inválida).'
             }), 400
     except Exception as e:
-        app.logger.error(f"Error al agregar ciudad: {str(e)}")
+        app.logger.error(f"Error al agregar profesión: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Actualiza una ciudad
+# Actualiza una profesión
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['PUT'])
-def updateCiudad(ciudad_id):
+@profapi.route('/profesiones/<int:profesion_id>', methods=['PUT'])
+def updateProfesion(profesion_id):
     data = request.get_json()
-    ciudao = CiudadDao()
+    profdao = ProfesionDao()
 
     campos_requeridos = ['descripcion', 'estado']
 
@@ -131,11 +136,17 @@ def updateCiudad(ciudad_id):
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        if ciudao.updateCiudad(ciudad_id, descripcion, estado):
+        if not profdao.validarDescripcion(descripcion):
+            return jsonify({
+                'success': False,
+                'error': 'La descripción solo puede contener letras y acentos.'
+            }), 400
+
+        if profdao.updateProfesion(profesion_id, descripcion, estado):
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': profesion_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -144,37 +155,43 @@ def updateCiudad(ciudad_id):
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró la profesión con el ID proporcionado o no se pudo actualizar.'
             }), 404
     except Exception as e:
-        app.logger.error(f"Error al actualizar ciudad: {str(e)}")
+        app.logger.error(f"Error al actualizar profesión: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Elimina una ciudad
+# Elimina una profesión
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['DELETE'])
-def deleteCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@profapi.route('/profesiones/<int:profesion_id>', methods=['DELETE'])
+def deleteProfesion(profesion_id):
+    profdao = ProfesionDao()
 
     try:
-        if ciudao.deleteCiudad(ciudad_id):
+        resultado = profdao.deleteProfesion(profesion_id)
+        if resultado is True:
             return jsonify({
                 'success': True,
-                'mensaje': f'Ciudad con ID {ciudad_id} eliminada correctamente.',
+                'mensaje': f'Profesión con ID {profesion_id} eliminada correctamente.',
                 'error': None
             }), 200
+        elif resultado == "en_uso":
+            return jsonify({
+                'success': False,
+                'error': 'No se puede eliminar esta profesión porque está siendo usada en otra tabla.'
+            }), 400
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se pudo eliminar la profesión porque está siendo usada.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar ciudad: {str(e)}")
+        app.logger.error(f"Error al eliminar profesión: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'

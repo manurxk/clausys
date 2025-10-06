@@ -1,69 +1,68 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.ciudad.CiudadDao import CiudadDao
+from app.dao.referenciales.grupo.GrupoDao import GrupoDao
 
-ciuapi = Blueprint('ciuapi', __name__)
+grupoapi = Blueprint('grupoapi', __name__)
 
 # ===============================
-# Trae todas las ciudades
+# Trae todos los grupos
 # ===============================
-@ciuapi.route('/ciudades', methods=['GET'])
-def getCiudades():
-    ciudao = CiudadDao()
+@grupoapi.route('/grupos', methods=['GET'])
+def getGrupos():
+    grupodao = GrupoDao()
 
     try:
-        ciudades = ciudao.getCiudades()
+        grupos = grupodao.getGrupos()
 
         return jsonify({
             'success': True,
-            'data': ciudades,
+            'data': grupos,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todas las ciudades: {str(e)}")
+        app.logger.error(f"Error al obtener todos los grupos: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Trae una ciudad por ID
+# Trae un grupo por ID
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['GET'])
-def getCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@grupoapi.route('/grupos/<int:grupo_id>', methods=['GET'])
+def getGrupo(grupo_id):
+    grupodao = GrupoDao()
 
     try:
-        ciudad = ciudao.getCiudadById(ciudad_id)
+        grupo = grupodao.getGrupoById(grupo_id)
 
-        if ciudad:
+        if grupo:
             return jsonify({
                 'success': True,
-                'data': ciudad,
+                'data': grupo,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado.'
+                'error': 'No se encontró el grupo con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener ciudad: {str(e)}")
+        app.logger.error(f"Error al obtener grupo: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Agrega una nueva ciudad
+# Agrega un nuevo grupo
 # ===============================
-@ciuapi.route('/ciudades', methods=['POST'])
-def addCiudad():
+@grupoapi.route('/grupos', methods=['POST'])
+def addGrupo():
     data = request.get_json()
-    ciudao = CiudadDao()
+    grupodao = GrupoDao()
 
-    # Validar que el JSON tenga los campos necesarios
     campos_requeridos = ['descripcion', 'estado']
 
     for campo in campos_requeridos:
@@ -82,12 +81,18 @@ def addCiudad():
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        ciudad_id = ciudao.guardarCiudad(descripcion, estado)
-        if ciudad_id:
+        if not grupodao.validarDescripcion(descripcion):
+            return jsonify({
+                'success': False,
+                'error': 'La descripción solo puede contener letras, números y acentos.'
+            }), 400
+
+        grupo_id = grupodao.guardarGrupo(descripcion, estado)
+        if grupo_id:
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': grupo_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -96,22 +101,22 @@ def addCiudad():
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se pudo guardar la ciudad (duplicada o inválida).'
+                'error': 'No se pudo guardar el grupo (duplicado o inválido).'
             }), 400
     except Exception as e:
-        app.logger.error(f"Error al agregar ciudad: {str(e)}")
+        app.logger.error(f"Error al agregar grupo: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Actualiza una ciudad
+# Actualiza un grupo
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['PUT'])
-def updateCiudad(ciudad_id):
+@grupoapi.route('/grupos/<int:grupo_id>', methods=['PUT'])
+def updateGrupo(grupo_id):
     data = request.get_json()
-    ciudao = CiudadDao()
+    grupodao = GrupoDao()
 
     campos_requeridos = ['descripcion', 'estado']
 
@@ -131,11 +136,17 @@ def updateCiudad(ciudad_id):
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        if ciudao.updateCiudad(ciudad_id, descripcion, estado):
+        if not grupodao.validarDescripcion(descripcion):
+            return jsonify({
+                'success': False,
+                'error': 'La descripción solo puede contener letras, números y acentos.'
+            }), 400
+
+        if grupodao.updateGrupo(grupo_id, descripcion, estado):
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': grupo_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -144,37 +155,43 @@ def updateCiudad(ciudad_id):
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró el grupo con el ID proporcionado o no se pudo actualizar.'
             }), 404
     except Exception as e:
-        app.logger.error(f"Error al actualizar ciudad: {str(e)}")
+        app.logger.error(f"Error al actualizar grupo: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Elimina una ciudad
+# Elimina un grupo
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['DELETE'])
-def deleteCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@grupoapi.route('/grupos/<int:grupo_id>', methods=['DELETE'])
+def deleteGrupo(grupo_id):
+    grupodao = GrupoDao()
 
     try:
-        if ciudao.deleteCiudad(ciudad_id):
+        resultado = grupodao.deleteGrupo(grupo_id)
+        if resultado is True:
             return jsonify({
                 'success': True,
-                'mensaje': f'Ciudad con ID {ciudad_id} eliminada correctamente.',
+                'mensaje': f'Grupo con ID {grupo_id} eliminado correctamente.',
                 'error': None
             }), 200
+        elif resultado == "en_uso":
+            return jsonify({
+                'success': False,
+                'error': 'No se puede eliminar este grupo porque está siendo usado en otra tabla.'
+            }), 400
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se pudo eliminar el grupo.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar ciudad: {str(e)}")
+        app.logger.error(f"Error al eliminar grupo: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'

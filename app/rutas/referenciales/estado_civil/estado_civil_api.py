@@ -1,67 +1,66 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.ciudad.CiudadDao import CiudadDao
+from app.dao.referenciales.estado_civil.EstadoCivilDao import EstadoCivilDao
 
-ciuapi = Blueprint('ciuapi', __name__)
+ecapi = Blueprint('ecapi', __name__)
 
 # ===============================
-# Trae todas las ciudades
+# Trae todos los estados civiles
 # ===============================
-@ciuapi.route('/ciudades', methods=['GET'])
-def getCiudades():
-    ciudao = CiudadDao()
+@ecapi.route('/estados-civiles', methods=['GET'])
+def getEstadosCiviles():
+    ecdao = EstadoCivilDao()
 
     try:
-        ciudades = ciudao.getCiudades()
-
+        estados = ecdao.getEstadosCiviles()
         return jsonify({
             'success': True,
-            'data': ciudades,
+            'data': estados,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todas las ciudades: {str(e)}")
+        app.logger.error(f"Error al obtener todos los estados civiles: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Trae una ciudad por ID
+# Trae un estado civil por ID
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['GET'])
-def getCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@ecapi.route('/estados-civiles/<int:estado_id>', methods=['GET'])
+def getEstadoCivil(estado_id):
+    ecdao = EstadoCivilDao()
 
     try:
-        ciudad = ciudao.getCiudadById(ciudad_id)
+        estado = ecdao.getEstadoCivilById(estado_id)
 
-        if ciudad:
+        if estado:
             return jsonify({
                 'success': True,
-                'data': ciudad,
+                'data': estado,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado.'
+                'error': 'No se encontró el estado civil con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener ciudad: {str(e)}")
+        app.logger.error(f"Error al obtener estado civil: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Agrega una nueva ciudad
+# Agrega un nuevo estado civil
 # ===============================
-@ciuapi.route('/ciudades', methods=['POST'])
-def addCiudad():
+@ecapi.route('/estados-civiles', methods=['POST'])
+def addEstadoCivil():
     data = request.get_json()
-    ciudao = CiudadDao()
+    ecdao = EstadoCivilDao()
 
     # Validar que el JSON tenga los campos necesarios
     campos_requeridos = ['descripcion', 'estado']
@@ -82,12 +81,12 @@ def addCiudad():
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        ciudad_id = ciudao.guardarCiudad(descripcion, estado)
-        if ciudad_id:
+        estado_id = ecdao.guardarEstadoCivil(descripcion, estado)
+        if estado_id:
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': estado_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -96,22 +95,22 @@ def addCiudad():
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se pudo guardar la ciudad (duplicada o inválida).'
+                'error': 'No se pudo guardar el estado civil (duplicado o inválido).'
             }), 400
     except Exception as e:
-        app.logger.error(f"Error al agregar ciudad: {str(e)}")
+        app.logger.error(f"Error al agregar estado civil: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Actualiza una ciudad
+# Actualiza un estado civil
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['PUT'])
-def updateCiudad(ciudad_id):
+@ecapi.route('/estados-civiles/<int:estado_id>', methods=['PUT'])
+def updateEstadoCivil(estado_id):
     data = request.get_json()
-    ciudao = CiudadDao()
+    ecdao = EstadoCivilDao()
 
     campos_requeridos = ['descripcion', 'estado']
 
@@ -131,11 +130,11 @@ def updateCiudad(ciudad_id):
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        if ciudao.updateCiudad(ciudad_id, descripcion, estado):
+        if ecdao.updateEstadoCivil(estado_id, descripcion, estado):
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': estado_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -144,37 +143,37 @@ def updateCiudad(ciudad_id):
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró el estado civil con el ID proporcionado o no se pudo actualizar.'
             }), 404
     except Exception as e:
-        app.logger.error(f"Error al actualizar ciudad: {str(e)}")
+        app.logger.error(f"Error al actualizar estado civil: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
 # ===============================
-# Elimina una ciudad
+# Elimina un estado civil
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['DELETE'])
-def deleteCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@ecapi.route('/estados-civiles/<int:estado_id>', methods=['DELETE'])
+def deleteEstadoCivil(estado_id):
+    ecdao = EstadoCivilDao()
 
     try:
-        if ciudao.deleteCiudad(ciudad_id):
+        if ecdao.deleteEstadoCivil(estado_id):
             return jsonify({
                 'success': True,
-                'mensaje': f'Ciudad con ID {ciudad_id} eliminada correctamente.',
+                'mensaje': f'Estado civil con ID {estado_id} eliminado correctamente.',
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se encontró el estado civil con el ID proporcionado o no se pudo eliminar.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar ciudad: {str(e)}")
+        app.logger.error(f"Error al eliminar estado civil: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'

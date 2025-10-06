@@ -5,42 +5,56 @@ from app.dao.referenciales.usuario.login_dao import LoginDao
 
 logmod = Blueprint('login', __name__, template_folder='templates')
 
+
 @logmod.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # lo que viene del formulario
+        # datos del form
         usuario_nombre = request.form['usuario_nombre']
         usuario_clave = request.form['usuario_clave']
-        # hacer la validacion contra la bd
+
+        # buscar usuario en la BD
         login_dao = LoginDao()
         usuario_encontrado = login_dao.buscarUsuario(usuario_nombre)
+
         if usuario_encontrado and 'usu_nick' in usuario_encontrado:
             password_hash_del_usuario = usuario_encontrado['usu_clave']
-            if check_password_hash(
-                pwhash=password_hash_del_usuario, password=usuario_clave):
-                # crear la sesión
-                session.clear() # limpiar cualquier sesión previa
+
+            if check_password_hash(pwhash=password_hash_del_usuario,
+                                   password=usuario_clave):
+                # login correcto → crear sesión
+                session.clear()
                 session.permanent = True
-                session['usu_id'] = usuario_encontrado['usu_id']
-                session['usuario_nombre'] = request.form['usuario_nombre']
+                session['id_usuario'] = usuario_encontrado['id_usuario']
+                session['usu_nick'] = usuario_encontrado['usu_nick']
                 session['nombre_persona'] = usuario_encontrado['nombre_persona']
                 session['grupo'] = usuario_encontrado['grupo']
+
                 return redirect(url_for('login.inicio'))
+            else:
+                flash('Contraseña incorrecta', 'danger')
+                return redirect(url_for('login.login'))
         else:
-            flash('Error de log in, no existe este usuario', 'warning')
+            flash('Usuario no encontrado', 'warning')
             return redirect(url_for('login.login'))
-    elif request.method == 'GET':
-        return render_template('login.html')
+
+    # si es GET
+    return render_template('login.html')
+
 
 @logmod.route('/logout')
 def logout():
-    session.clear() # limpiar cualquier sesión previa
-    flash('Sesion cerrada', 'warning')
+    session.clear()
+    flash('Sesión cerrada', 'info')
     return redirect(url_for('login.login'))
+
 
 @logmod.route('/')
 def inicio():
-    if 'usuario_nombre' in session:
-        return render_template('inicio.html')
+    if 'usu_nick' in session:
+        return render_template('inicio.html',
+                               usuario=session.get('nombre_persona'),
+                               grupo=session.get('grupo'))
     else:
+        flash('Debes iniciar sesión primero', 'warning')
         return redirect(url_for('login.login'))

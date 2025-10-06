@@ -1,0 +1,753 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Usuarios{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h3>Listar Usuarios</h3>
+
+    <!-- tarjeta -->
+    <div class="card">
+        <div class="card-header">
+            <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped" id="tbl">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Funcionario</th>
+                        <th>Cargo</th>
+                        <th>Grupo</th>
+                        <th>Estado</th>
+                        <th>Intentos</th>
+                        <th>Fecha Creación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <!-- /tarjeta -->
+
+    <!-- Modal formulario -->
+    <div class="modal" id="modalFormulario">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalTitle"></h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <!-- Wizard Steps -->
+                    <div class="stepwizard mb-4">
+                        <div class="stepwizard-row setup-panel">
+                            <div class="stepwizard-step col-xs-6">
+                                <button type="button" class="btn btn-primary btn-circle" data-step="1">1</button>
+                                <p><small>Datos de Usuario</small></p>
+                            </div>
+                            <div class="stepwizard-step col-xs-6">
+                                <button type="button" class="btn btn-default btn-circle" data-step="2">2</button>
+                                <p><small>Acceso y Permisos</small></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="formUsuario">
+                        <input type="hidden" id="txtIdUsuario" name="id_usuario">
+
+                        <!-- Paso 1: Datos de Usuario -->
+                        <div class="wizard-step" data-step="1">
+                            <h5 class="text-primary mb-3">Selección de Funcionario y Username</h5>
+                            
+                            <div class="form-group">
+                                <label for="id_funcionario">Funcionario <span class="text-danger">*</span></label>
+                                <select class="form-control" id="id_funcionario" name="id_funcionario" required>
+                                    <option value="">Seleccione un funcionario...</option>
+                                </select>
+                                <small class="form-text text-muted">
+                                    Solo se muestran funcionarios sin usuario asignado
+                                </small>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Cargo</label>
+                                        <input type="text" class="form-control" id="txtCargoFuncionario" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Cédula</label>
+                                        <input type="text" class="form-control" id="txtCedulaFuncionario" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="form-group">
+                                <label for="txtUsername">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="txtUsername" name="username" 
+                                       maxlength="30" required>
+                                <small id="usernameFeedback" class="form-text"></small>
+                            </div>
+                        </div>
+
+                        <!-- Paso 2: Acceso y Permisos -->
+                        <div class="wizard-step" data-step="2" style="display: none;">
+                            <h5 class="text-primary mb-3">Configuración de Acceso</h5>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtPassword">Contraseña <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="txtPassword" name="password" 
+                                               minlength="6" required>
+                                        <small id="passwordHelp" class="form-text text-muted">
+                                            Mínimo 6 caracteres
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="txtPasswordConfirmacion">Confirmar Contraseña <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="txtPasswordConfirmacion" 
+                                               name="password_confirmacion" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="id_grupo">Grupo de Acceso <span class="text-danger">*</span></label>
+                                        <select class="form-control" id="id_grupo" name="id_grupo" required>
+                                            <option value="">Seleccione un grupo...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="chkActivo">Estado:</label><br>
+                                        <input type="checkbox" id="chkActivo" checked> Activo
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info mt-3">
+                                <strong>Nota:</strong> El funcionario asociado no podrá ser cambiado una vez creado el usuario.
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnAnterior" style="display: none;">Anterior</button>
+                    <button type="button" class="btn btn-primary" id="btnSiguiente">Siguiente</button>
+                    <button type="button" class="btn btn-success" id="btnGuardar" style="display: none;">Guardar</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+
+
+{% block js %}
+<script> 
+// ==========================================
+// CONSTANTES Y CONFIGURACIÓN
+// ==========================================
+const CSRFToken = "{{ csrf_token() }}" || null;
+let currentStep = 1;
+const totalSteps = 2;
+
+// ==========================================
+// DATATABLE PRINCIPAL
+// ==========================================
+const initDatatable = () => {
+  $('#tbl').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: {
+      url: '/api/v1/usuarios',
+      dataSrc: function(json) {
+        if (!json.success) {
+          console.error('Error del servidor:', json.error);
+          return [];
+        }
+        return json.data;
+      },
+      error: function(xhr, error, thrown) {
+        console.error('Error en AJAX:', xhr.responseText);
+        alert('Error al cargar los usuarios.');
+      }
+    },
+    columns: [
+      { data: 'username' },
+      { data: 'funcionario' },
+      { data: 'cargo' },
+      { data: 'grupo' },
+      { 
+        data: function(row) {
+          return row.activo 
+            ? '<span class="badge badge-success">Activo</span>' 
+            : '<span class="badge badge-danger">Inactivo</span>';
+        },
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          const badgeClass = row.intentos > 2 ? 'badge-danger' : 'badge-secondary';
+          return `<span class="badge ${badgeClass}">${row.intentos}</span>`;
+        },
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          return row.fecha_creacion || '<span class="text-muted">-</span>';
+        },
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          return `
+            <button type="button" name="btn_editar" class="btn btn-warning btn-sm" 
+                    data-id="${row.id_usuario}" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            ${row.intentos > 0 ? `
+            <button type="button" name="btn_resetear" class="btn btn-info btn-sm" 
+                    data-id="${row.id_usuario}" title="Resetear intentos">
+              <i class="fas fa-redo"></i>
+            </button>` : ''}
+            <button type="button" name="btn_desactivar" class="btn btn-secondary btn-sm" 
+                    data-id="${row.id_usuario}" data-username="${row.username}" title="Desactivar">
+              <i class="fas fa-ban"></i>
+            </button>
+          `;
+        },
+        className: 'text-center',
+        orderable: false
+      }
+    ],
+    order: [[0, 'asc']]
+  });
+}
+
+// ==========================================
+// WIZARD - 2 PASOS
+// ==========================================
+const initWizard = () => {
+  $('#btnSiguiente').click(function() {
+    if (validateCurrentStep()) {
+      nextStep();
+    }
+  });
+
+  $('#btnAnterior').click(function() {
+    previousStep();
+  });
+  
+  // Al seleccionar funcionario, mostrar sus datos
+  $('#id_funcionario').change(function() {
+    const selectedOption = $(this).find('option:selected');
+    const cargo = selectedOption.data('cargo');
+    const cedula = selectedOption.data('cedula');
+    
+    if (cargo) {
+      $('#txtCargoFuncionario').val(cargo);
+      $('#txtCedulaFuncionario').val(cedula);
+    } else {
+      $('#txtCargoFuncionario').val('');
+      $('#txtCedulaFuncionario').val('');
+    }
+  });
+  
+  // Validación en tiempo real del username
+  let timeoutId;
+  $('#txtUsername').on('input', function() {
+    clearTimeout(timeoutId);
+    const username = $(this).val().trim();
+    const idUsuario = $('#txtIdUsuario').val();
+    
+    if (username.length >= 3) {
+      timeoutId = setTimeout(() => {
+        validarUsername(username, idUsuario);
+      }, 500);
+    }
+  });
+}
+
+const validarUsername = (username, idUsuario = null) => {
+  fetch('/api/v1/usuarios/validar-username', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': CSRFToken
+    },
+    body: JSON.stringify({ username, id_usuario: idUsuario })
+  })
+  .then(resp => resp.json())
+  .then(data => {
+    if (data.success && data.data.disponible) {
+      $('#txtUsername').removeClass('is-invalid').addClass('is-valid');
+      $('#usernameFeedback').text('Username disponible').removeClass('text-danger').addClass('text-success');
+    } else {
+      $('#txtUsername').removeClass('is-valid').addClass('is-invalid');
+      $('#usernameFeedback').text('Username no disponible').removeClass('text-success').addClass('text-danger');
+    }
+  })
+  .catch(err => console.error('Error al validar username:', err));
+}
+
+const showStep = (step) => {
+  $('.wizard-step').hide();
+  $(`.wizard-step[data-step="${step}"]`).fadeIn();
+  
+  // Actualizar indicadores
+  $('.stepwizard-step button').removeClass('btn-primary btn-success').addClass('btn-default');
+  $(`.stepwizard-step button[data-step="${step}"]`).removeClass('btn-default').addClass('btn-primary');
+  
+  // Marcar anteriores como completados
+  for (let i = 1; i < step; i++) {
+    $(`.stepwizard-step button[data-step="${i}"]`).removeClass('btn-default btn-primary').addClass('btn-success');
+  }
+  
+  // Controlar botones
+  $('#btnAnterior').toggle(step > 1);
+  
+  if (step === totalSteps) {
+    $('#btnSiguiente').hide();
+    $('#btnGuardar').show();
+  } else {
+    $('#btnSiguiente').show();
+    $('#btnGuardar').hide();
+  }
+}
+
+const nextStep = () => {
+  if (currentStep < totalSteps) {
+    currentStep++;
+    showStep(currentStep);
+  }
+}
+
+const previousStep = () => {
+  if (currentStep > 1) {
+    currentStep--;
+    showStep(currentStep);
+  }
+}
+
+const validateCurrentStep = () => {
+  let valid = true;
+  
+  if (currentStep === 1) {
+    // Validar funcionario y username
+    if (!$('#id_funcionario').val()) {
+      $('#id_funcionario').addClass('is-invalid');
+      valid = false;
+    } else {
+      $('#id_funcionario').removeClass('is-invalid');
+    }
+    
+    const username = $('#txtUsername').val().trim();
+    if (!username || username.length < 3) {
+      $('#txtUsername').addClass('is-invalid');
+      valid = false;
+    } else if ($('#txtUsername').hasClass('is-invalid')) {
+      valid = false;
+    }
+  }
+  
+  if (currentStep === 2) {
+    // Validar contraseña y grupo (solo al crear)
+    const idUsuario = $('#txtIdUsuario').val();
+    
+    if (!idUsuario) {
+      // Al crear, contraseña es obligatoria
+      const password = $('#txtPassword').val();
+      if (!password || password.length < 6) {
+        $('#txtPassword').addClass('is-invalid');
+        valid = false;
+      } else {
+        $('#txtPassword').removeClass('is-invalid');
+      }
+      
+      const passwordConf = $('#txtPasswordConfirmacion').val();
+      if (password !== passwordConf) {
+        $('#txtPasswordConfirmacion').addClass('is-invalid');
+        valid = false;
+      } else {
+        $('#txtPasswordConfirmacion').removeClass('is-invalid');
+      }
+    } else {
+      // Al editar, contraseña es opcional pero si se ingresa debe validarse
+      const password = $('#txtPassword').val();
+      if (password) {
+        if (password.length < 6) {
+          $('#txtPassword').addClass('is-invalid');
+          valid = false;
+        } else {
+          $('#txtPassword').removeClass('is-invalid');
+        }
+        
+        const passwordConf = $('#txtPasswordConfirmacion').val();
+        if (password !== passwordConf) {
+          $('#txtPasswordConfirmacion').addClass('is-invalid');
+          valid = false;
+        } else {
+          $('#txtPasswordConfirmacion').removeClass('is-invalid');
+        }
+      }
+    }
+    
+    if (!$('#id_grupo').val()) {
+      $('#id_grupo').addClass('is-invalid');
+      valid = false;
+    } else {
+      $('#id_grupo').removeClass('is-invalid');
+    }
+  }
+  
+  if (!valid) {
+    Swal.fire('Atención', 'Complete los campos obligatorios correctamente', 'warning');
+  }
+  
+  return valid;
+}
+
+// ==========================================
+// CRUD - FUNCIONES PRINCIPALES
+// ==========================================
+const agregar = () => {
+  $('#btnAgregar').on('click', function() {
+    $('#modalTitle').text("Agregar Nuevo Usuario");
+    limpiarFormulario();
+    cargarFuncionariosSinUsuario();
+    cargarGrupos();
+    currentStep = 1;
+    showStep(1);
+    $('#modalFormulario').modal();
+  });
+}
+
+const limpiarFormulario = () => {
+  $('#formUsuario')[0].reset();
+  $('#txtIdUsuario').val("");
+  $('#id_funcionario').val("").prop('disabled', false);
+  $('#txtCargoFuncionario').val("");
+  $('#txtCedulaFuncionario').val("");
+  $('#chkActivo').prop('checked', true);
+  $('.form-control').removeClass('is-invalid is-valid');
+  $('#usernameFeedback').text('').removeClass('text-success text-danger');
+  
+  // Hacer contraseña obligatoria al crear
+  $('#txtPassword').prop('required', true);
+  $('#txtPasswordConfirmacion').prop('required', true);
+  $('#passwordHelp').text('Mínimo 6 caracteres');
+}
+
+const cargarFuncionariosSinUsuario = () => {
+  fetch('/api/v1/funcionarios/sin-usuario')
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        let options = '<option value="">Seleccione un funcionario...</option>';
+        data.data.forEach(f => {
+          options += `<option value="${f.id_funcionario}" data-cargo="${f.cargo}" data-cedula="${f.cedula}">
+                        ${f.nombre_completo} - ${f.cargo}
+                      </option>`;
+        });
+        $('#id_funcionario').html(options);
+      }
+    })
+    .catch(err => console.error('Error al cargar funcionarios:', err));
+}
+
+const cargarGrupos = () => {
+  fetch('/api/v1/grupos')
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        let options = '<option value="">Seleccione un grupo...</option>';
+        data.data.forEach(g => {
+          options += `<option value="${g.id_grupo}">${g.descripcion}</option>`;
+        });
+        $('#id_grupo').html(options);
+      }
+    })
+    .catch(err => console.error('Error al cargar grupos:', err));
+}
+
+const guardar = () => {
+  $('#btnGuardar').on('click', function() {
+    const idUsuario = $('#txtIdUsuario').val();
+    
+    const username = $('#txtUsername').val().trim();
+    const password = $('#txtPassword').val();
+    const password_confirmacion = $('#txtPasswordConfirmacion').val();
+    const id_funcionario = $('#id_funcionario').val();
+    const id_grupo = $('#id_grupo').val();
+    const usu_estado = $('#chkActivo').is(':checked');
+    
+    // Validaciones
+    if (!username || !id_grupo) {
+      Swal.fire("Error", "Complete todos los campos obligatorios", "error");
+      return;
+    }
+    
+    if (!idUsuario) {
+      // Al crear, validar funcionario y contraseña
+      if (!id_funcionario) {
+        Swal.fire("Error", "Debe seleccionar un funcionario", "error");
+        return;
+      }
+      
+      if (!password || password.length < 6) {
+        Swal.fire("Error", "La contraseña debe tener al menos 6 caracteres", "error");
+        return;
+      }
+      
+      if (password !== password_confirmacion) {
+        Swal.fire("Error", "Las contraseñas no coinciden", "error");
+        return;
+      }
+    } else {
+      // Al editar, validar contraseña solo si se ingresó
+      if (password) {
+        if (password.length < 6) {
+          Swal.fire("Error", "La contraseña debe tener al menos 6 caracteres", "error");
+          return;
+        }
+        
+        if (password !== password_confirmacion) {
+          Swal.fire("Error", "Las contraseñas no coinciden", "error");
+          return;
+        }
+      }
+    }
+    
+    // Preparar datos
+    const dataUsuario = {
+      username: username,
+      id_grupo: parseInt(id_grupo),
+      usu_estado: usu_estado
+    };
+    
+    // Agregar password solo si se ingresó
+    if (password) {
+      dataUsuario.password = password;
+      dataUsuario.password_confirmacion = password_confirmacion;
+    }
+    
+    // Al crear, agregar id_funcionario
+    if (!idUsuario) {
+      dataUsuario.id_funcionario = parseInt(id_funcionario);
+    }
+    
+    const tabla = $('#tbl').DataTable();
+    const url = idUsuario ? `/api/v1/usuarios/${idUsuario}` : '/api/v1/usuarios';
+    const method = idUsuario ? 'PUT' : 'POST';
+    
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRFToken
+      },
+      body: JSON.stringify(dataUsuario)
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data && data.success) {
+        tabla.ajax.reload();
+        $('#modalFormulario').modal("hide");
+        Swal.fire("Éxito", `El usuario ha sido ${idUsuario ? 'actualizado' : 'creado'} correctamente.`, "success");
+      } else {
+        Swal.fire("Error", data.error || "Ocurrió un error", "error");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      Swal.fire("Error", "Ocurrió un error al guardar el usuario.", "error");
+    });
+  });
+}
+
+const editar = () => {
+  $('#tbl').on('click', 'button[name="btn_editar"]', function() {
+    Swal.fire({
+      title: "¿Deseas editar este usuario?",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "No"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $('#modalTitle').text("Editar Usuario");
+        
+        const idUsuario = $(this).data('id');
+        $('#txtIdUsuario').val(idUsuario);
+        
+        fetch(`/api/v1/usuarios/${idUsuario}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if (!data.success) {
+            throw new Error(data.error);
+          }
+          
+          const u = data.data;
+          
+          // Cargar grupos
+          cargarGrupos();
+          setTimeout(() => {
+            $('#id_grupo').val(u.id_grupo);
+          }, 200);
+          
+          // Datos del usuario
+          $('#txtUsername').val(u.username);
+          $('#chkActivo').prop('checked', u.activo);
+          
+          // Mostrar funcionario asociado (solo lectura)
+          $('#id_funcionario').html(`<option value="${u.id_funcionario}">${u.funcionario}</option>`);
+          $('#id_funcionario').prop('disabled', true);
+          $('#txtCargoFuncionario').val(u.cargo);
+          
+          // Limpiar contraseñas y hacerlas opcionales
+          $('#txtPassword').val('').prop('required', false);
+          $('#txtPasswordConfirmacion').val('').prop('required', false);
+          $('#passwordHelp').text('Dejar en blanco para mantener la contraseña actual');
+          
+          // Resetear wizard al paso 1
+          currentStep = 1;
+          showStep(1);
+          
+          $('#modalFormulario').modal('show');
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", "No se pudo cargar los datos del usuario.", "error");
+        });
+      }
+    });
+  });
+}
+
+const desactivar = () => {
+  $('#tbl').on('click', 'button[name="btn_desactivar"]', function() {
+    const idUsuario = $(this).data('id');
+    const username = $(this).data('username');
+    
+    Swal.fire({
+      title: "¿Deseas desactivar este usuario?",
+      text: `Usuario: ${username}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, desactivar",
+      cancelButtonText: "No",
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/api/v1/usuarios/${idUsuario}/desactivar`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if (data && data.success) {
+            const tabla = $('#tbl').DataTable();
+            tabla.ajax.reload();
+            Swal.fire("Desactivado", "El usuario ha sido desactivado correctamente.", "success");
+          } else {
+            Swal.fire("Error", data.error || "No se pudo desactivar el usuario.", "error");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al desactivar el usuario.", "error");
+        });
+      }
+    });
+  });
+}
+
+const resetearIntentos = () => {
+  $('#tbl').on('click', 'button[name="btn_resetear"]', function() {
+    const idUsuario = $(this).data('id');
+    
+    Swal.fire({
+      title: "¿Resetear intentos de login?",
+      text: "Esto pondrá el contador de intentos en 0",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Sí, resetear",
+      cancelButtonText: "No"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/api/v1/usuarios/${idUsuario}/resetear-intentos`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if (data && data.success) {
+            const tabla = $('#tbl').DataTable();
+            tabla.ajax.reload();
+            Swal.fire("Éxito", "Los intentos han sido reseteados.", "success");
+          } else {
+            Swal.fire("Error", data.error || "No se pudo resetear los intentos.", "error");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al resetear los intentos.", "error");
+        });
+      }
+    });
+  });
+}
+
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+const addEvents = () => {
+  initWizard();
+  agregar();
+  guardar();
+  editar();
+  desactivar();
+  resetearIntentos();
+}
+
+$(document).ready(function() {
+  initDatatable();
+  addEvents();
+});
+</script> 
+{% endblock %}

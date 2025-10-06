@@ -8,49 +8,45 @@ class LoginDao:
 
         buscar_usuario_sql = """
         SELECT
-            u.usu_id
-            , TRIM(u.usu_nick) nick
-            , u.usu_clave
-            , u.usu_nro_intentos
-            , u.fun_id
-            , u.gru_id
-            , u.usu_estado
-            , CONCAT(p.nombres, ' ', p.apellidos)nombre_persona
-            , g.gru_des grupo
-        FROM
-            usuarios u
-        left join
-            personas p on p.id_persona = u.fun_id
-        left join
-            grupos g ON g.gru_id = u.gru_id
-        WHERE
-            u.usu_nick = %s AND u.usu_estado is true
+            u.id_usuario,
+            TRIM(u.usu_nick) AS nick,
+            u.usu_clave,
+            u.usu_nro_intentos,
+            u.id_funcionario,
+            u.id_grupo,
+            u.usu_estado,
+            CONCAT(p.per_nombre, ' ', p.per_apellido) AS nombre_persona,
+            g.des_grupo AS grupo
+        FROM usuarios u
+        LEFT JOIN funcionarios f ON f.id_funcionario = u.id_funcionario
+        LEFT JOIN personas p ON p.id_persona = f.id_persona
+        LEFT JOIN grupos g ON g.id_grupo = u.id_grupo
+        WHERE u.usu_nick = %s AND u.usu_estado IS TRUE
         """
-        # objeto conexion
+
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(buscar_usuario_sql, (usu_nick,))
-            usuario_encontrado = cur.fetchone() # Obtener una sola fila
+            usuario_encontrado = cur.fetchone()
             if usuario_encontrado:
                 return {
-                        "usu_id": usuario_encontrado[0]
-                        , "usu_nick": usuario_encontrado[1]
-                        , "usu_clave": usuario_encontrado[2]
-                        , "usu_nro_intentos": usuario_encontrado[3]
-                        , "fun_id": usuario_encontrado[4]
-                        , "gru_id": usuario_encontrado[5]
-                        , "usu_estado": usuario_encontrado[6]
-                        , "nombre_persona": usuario_encontrado[7]
-                        , "grupo": usuario_encontrado[8]
-                    }  # Retornar los datos de la usuario
+                    "id_usuario": usuario_encontrado[0],
+                    "usu_nick": usuario_encontrado[1],
+                    "usu_clave": usuario_encontrado[2],
+                    "usu_nro_intentos": usuario_encontrado[3],
+                    "id_funcionario": usuario_encontrado[4],
+                    "id_grupo": usuario_encontrado[5],
+                    "usu_estado": usuario_encontrado[6],
+                    "nombre_persona": usuario_encontrado[7],
+                    "grupo": usuario_encontrado[8]
+                }
             else:
-                return None # Retornar None si no se encuentra el usuario
+                return None
         except Exception as e:
             app.logger.error(f"Error al obtener usuario: {str(e)}")
             return None
-
         finally:
             cur.close()
             con.close()

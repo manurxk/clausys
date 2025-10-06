@@ -1,69 +1,69 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.ciudad.CiudadDao import CiudadDao
+from app.dao.referenciales.nivel_instruccion.Nivel_InstruccionDao import NivelInstruccionDao
 
-ciuapi = Blueprint('ciuapi', __name__)
+nivapi = Blueprint('nivapi', __name__)
 
 # ===============================
-# Trae todas las ciudades
+# Trae todos los niveles de instrucción
 # ===============================
-@ciuapi.route('/ciudades', methods=['GET'])
-def getCiudades():
-    ciudao = CiudadDao()
+@nivapi.route('/niveles-instruccion', methods=['GET'])
+def getNivelesInstruccion():
+    ndao = NivelInstruccionDao()
 
     try:
-        ciudades = ciudao.getCiudades()
-
+        niveles = ndao.getNiveles()
         return jsonify({
             'success': True,
-            'data': ciudades,
+            'data': niveles,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todas las ciudades: {str(e)}")
+        app.logger.error(f"Error al obtener todos los niveles de instrucción: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
+
 # ===============================
-# Trae una ciudad por ID
+# Trae un nivel de instrucción por ID
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['GET'])
-def getCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@nivapi.route('/niveles-instruccion/<int:nivel_id>', methods=['GET'])
+def getNivelInstruccion(nivel_id):
+    ndao = NivelInstruccionDao()
 
     try:
-        ciudad = ciudao.getCiudadById(ciudad_id)
+        nivel = ndao.getNivelById(nivel_id)
 
-        if ciudad:
+        if nivel:
             return jsonify({
                 'success': True,
-                'data': ciudad,
+                'data': nivel,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado.'
+                'error': 'No se encontró el nivel de instrucción con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener ciudad: {str(e)}")
+        app.logger.error(f"Error al obtener nivel de instrucción: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# ===============================
-# Agrega una nueva ciudad
-# ===============================
-@ciuapi.route('/ciudades', methods=['POST'])
-def addCiudad():
-    data = request.get_json()
-    ciudao = CiudadDao()
 
-    # Validar que el JSON tenga los campos necesarios
+# ===============================
+# Agrega un nuevo nivel de instrucción
+# ===============================
+@nivapi.route('/niveles-instruccion', methods=['POST'])
+def addNivelInstruccion():
+    data = request.get_json()
+    ndao = NivelInstruccionDao()
+
     campos_requeridos = ['descripcion', 'estado']
 
     for campo in campos_requeridos:
@@ -82,12 +82,12 @@ def addCiudad():
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        ciudad_id = ciudao.guardarCiudad(descripcion, estado)
-        if ciudad_id:
+        nivel_id = ndao.guardarNivel(descripcion, estado)
+        if nivel_id:
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': nivel_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -96,22 +96,23 @@ def addCiudad():
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se pudo guardar la ciudad (duplicada o inválida).'
+                'error': 'No se pudo guardar el nivel de instrucción (duplicado o inválido).'
             }), 400
     except Exception as e:
-        app.logger.error(f"Error al agregar ciudad: {str(e)}")
+        app.logger.error(f"Error al agregar nivel de instrucción: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
+
 # ===============================
-# Actualiza una ciudad
+# Actualiza un nivel de instrucción
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['PUT'])
-def updateCiudad(ciudad_id):
+@nivapi.route('/niveles-instruccion/<int:nivel_id>', methods=['PUT'])
+def updateNivelInstruccion(nivel_id):
     data = request.get_json()
-    ciudao = CiudadDao()
+    ndao = NivelInstruccionDao()
 
     campos_requeridos = ['descripcion', 'estado']
 
@@ -131,11 +132,11 @@ def updateCiudad(ciudad_id):
         descripcion = data['descripcion'].upper()
         estado = bool(data['estado'])
 
-        if ciudao.updateCiudad(ciudad_id, descripcion, estado):
+        if ndao.updateNivel(nivel_id, descripcion, estado):
             return jsonify({
                 'success': True,
                 'data': {
-                    'id': ciudad_id,
+                    'id': nivel_id,
                     'descripcion': descripcion,
                     'estado': estado
                 },
@@ -144,37 +145,38 @@ def updateCiudad(ciudad_id):
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró el nivel de instrucción con el ID proporcionado o no se pudo actualizar.'
             }), 404
     except Exception as e:
-        app.logger.error(f"Error al actualizar ciudad: {str(e)}")
+        app.logger.error(f"Error al actualizar nivel de instrucción: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
+
 # ===============================
-# Elimina una ciudad
+# Elimina un nivel de instrucción
 # ===============================
-@ciuapi.route('/ciudades/<int:ciudad_id>', methods=['DELETE'])
-def deleteCiudad(ciudad_id):
-    ciudao = CiudadDao()
+@nivapi.route('/niveles-instruccion/<int:nivel_id>', methods=['DELETE'])
+def deleteNivelInstruccion(nivel_id):
+    ndao = NivelInstruccionDao()
 
     try:
-        if ciudao.deleteCiudad(ciudad_id):
+        if ndao.deleteNivel(nivel_id):
             return jsonify({
                 'success': True,
-                'mensaje': f'Ciudad con ID {ciudad_id} eliminada correctamente.',
+                'mensaje': f'Nivel de instrucción con ID {nivel_id} eliminado correctamente.',
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la ciudad con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se encontró el nivel de instrucción con el ID proporcionado o no se pudo eliminar.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar ciudad: {str(e)}")
+        app.logger.error(f"Error al eliminar nivel de instrucción: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'

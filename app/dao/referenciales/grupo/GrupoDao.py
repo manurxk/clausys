@@ -3,44 +3,44 @@ import re
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class CiudadDao:
+class GrupoDao:
 
-    def getCiudades(self):
+    def getGrupos(self):
         sql = """
-        SELECT id_ciudad, des_ciudad, est_ciudad
-        FROM ciudades
+        SELECT id_grupo, des_grupo, est_grupo
+        FROM grupos
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(sql)
-            ciudades = cur.fetchall()
-            return [{'id': c[0], 'descripcion': c[1], 'estado': c[2]} for c in ciudades]
+            grupos = cur.fetchall()
+            return [{'id': g[0], 'descripcion': g[1], 'estado': g[2]} for g in grupos]
         except Exception as e:
-            app.logger.error(f"Error al obtener todas las ciudades: {str(e)}")
+            app.logger.error(f"Error al obtener todos los grupos: {str(e)}")
             return []
         finally:
             cur.close()
             con.close()
 
-    def getCiudadById(self, id_ciudad):
+    def getGrupoById(self, id_grupo):
         sql = """
-        SELECT id_ciudad, des_ciudad, est_ciudad
-        FROM ciudades
-        WHERE id_ciudad=%s
+        SELECT id_grupo, des_grupo, est_grupo
+        FROM grupos
+        WHERE id_grupo=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql, (id_ciudad,))
-            ciudad = cur.fetchone()
-            if ciudad:
-                return {"id": ciudad[0], "descripcion": ciudad[1], "estado": ciudad[2]}
+            cur.execute(sql, (id_grupo,))
+            grupo = cur.fetchone()
+            if grupo:
+                return {"id": grupo[0], "descripcion": grupo[1], "estado": grupo[2]}
             return None
         except Exception as e:
-            app.logger.error(f"Error al obtener ciudad: {str(e)}")
+            app.logger.error(f"Error al obtener grupo: {str(e)}")
             return None
         finally:
             cur.close()
@@ -50,9 +50,9 @@ class CiudadDao:
     # VALIDACIONES
     # ============================
 
-    def ciudadExiste(self, descripcion):
-        """Verifica si ya existe la ciudad con el mismo nombre (case-insensitive)."""
-        sql = "SELECT 1 FROM ciudades WHERE LOWER(des_ciudad)=LOWER(%s)"
+    def grupoExiste(self, descripcion):
+        """Verifica si ya existe el grupo con el mismo nombre (case-insensitive)."""
+        sql = "SELECT 1 FROM grupos WHERE LOWER(des_grupo)=LOWER(%s)"
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
@@ -72,75 +72,75 @@ class CiudadDao:
     # CRUD
     # ============================
 
-    def guardarCiudad(self, descripcion, estado=True):
+    def guardarGrupo(self, descripcion, estado=True):
         # Validaciones
         if not self.validarDescripcion(descripcion):
             app.logger.warning("Descripción inválida: solo letras, números y acentos")
             return False
-        if self.ciudadExiste(descripcion):
-            app.logger.warning("La ciudad ya existe")
+        if self.grupoExiste(descripcion):
+            app.logger.warning("El grupo ya existe")
             return False
 
         sql = """
-        INSERT INTO ciudades(des_ciudad, est_ciudad)
+        INSERT INTO grupos(des_grupo, est_grupo)
         VALUES(%s, %s)
-        RETURNING id_ciudad
+        RETURNING id_grupo
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(sql, (descripcion, estado))
-            id_ciudad = cur.fetchone()[0]
+            id_grupo = cur.fetchone()[0]
             con.commit()
-            return id_ciudad
+            return id_grupo
         except Exception as e:
-            app.logger.error(f"Error al insertar ciudad: {str(e)}")
+            app.logger.error(f"Error al insertar grupo: {str(e)}")
             con.rollback()
             return False
         finally:
             cur.close()
             con.close()
 
-    def updateCiudad(self, id_ciudad, descripcion, estado=True):
+    def updateGrupo(self, id_grupo, descripcion, estado=True):
         # Validaciones
         if not self.validarDescripcion(descripcion):
             app.logger.warning("Descripción inválida")
             return False
 
         sql = """
-        UPDATE ciudades
-        SET des_ciudad=%s, est_ciudad=%s
-        WHERE id_ciudad=%s
+        UPDATE grupos
+        SET des_grupo=%s, est_grupo=%s
+        WHERE id_grupo=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql, (descripcion, estado, id_ciudad))
+            cur.execute(sql, (descripcion, estado, id_grupo))
             filas = cur.rowcount
             con.commit()
             return filas > 0
         except Exception as e:
-            app.logger.error(f"Error al actualizar ciudad: {str(e)}")
+            app.logger.error(f"Error al actualizar grupo: {str(e)}")
             con.rollback()
             return False
         finally:
             cur.close()
             con.close()
 
-    def deleteCiudad(self, id_ciudad):
-        sql = "DELETE FROM ciudades WHERE id_ciudad=%s"
+    def deleteGrupo(self, id_grupo):
+        sql = "DELETE FROM grupos WHERE id_grupo=%s"
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql, (id_ciudad,))
+            cur.execute(sql, (id_grupo,))
             filas = cur.rowcount
             con.commit()
             return filas > 0
         except Exception as e:
-            app.logger.error(f"Error al eliminar ciudad: {str(e)}")
+            app.logger.error(f"Error al eliminar grupo: {str(e)}")
             con.rollback()
             return False
         finally:

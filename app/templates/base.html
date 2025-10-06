@@ -71,6 +71,16 @@
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{{ url_for('ciudad.ciudadIndex') }}">Ciudad</a>
+                        <a class="collapse-item" href="{{ url_for('especialidad.especialidadIndex') }}">Especialidad</a>
+                        <a class="collapse-item" href="{{ url_for('genero.generoIndex') }}">Género</a>
+                        <a class="collapse-item" href="{{ url_for('estado_civil.estadoCivilIndex') }}">Estado Civil</a>
+                        <a class="collapse-item" href="{{ url_for('nivel_instruccion.nivelInstruccionIndex') }}">Nivel de Instrucción</a>
+                        <a class="collapse-item" href="{{ url_for('profesion.profesionIndex') }}">Profesión</a>
+                        <a class="collapse-item" href="#">----------------</a>
+                        <a class="collapse-item" href="{{ url_for('cargo.cargoIndex') }}">Cargo</a>
+                        <a class="collapse-item" href="{{ url_for('grupo.grupoIndex') }}">Grupo</a>
+                        <a class="collapse-item" href="{{ url_for('modulo.moduloIndex') }}">Módulo</a>
+
                     </div>
                 </div>
             </li>
@@ -80,11 +90,14 @@
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
                     aria-expanded="true" aria-controls="collapseUtilities">
                     <i class="fas fa-fw fa-wrench"></i>
-                    <span class="text-wrap">Gestionar Agendamiento</span>
+                    <span class="text-wrap">Registar</span>
                 </a>
                 <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url_for('paciente.pacienteIndex') }}">Paciente</a>
+                        <a class="collapse-item" href="{{ url_for('funcionario.funcionarioIndex') }}">Funcionario</a>
+                        <a class="collapse-item" href="{{ url_for('usuario.usuarioIndex') }}">Usuario</a>
                         <a class="collapse-item text-wrap" href="">Registrar pedido de compras</a>
                         <a class="collapse-item" href="">Proceso 2</a>
                         <a class="collapse-item" href="">Proceso 3</a>

@@ -3,44 +3,44 @@ import re
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class CiudadDao:
+class CargoDao:
 
-    def getCiudades(self):
+    def getCargos(self):
         sql = """
-        SELECT id_ciudad, des_ciudad, est_ciudad
-        FROM ciudades
+        SELECT id_cargo, des_cargo, est_cargo
+        FROM cargos
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(sql)
-            ciudades = cur.fetchall()
-            return [{'id': c[0], 'descripcion': c[1], 'estado': c[2]} for c in ciudades]
+            cargos = cur.fetchall()
+            return [{'id': c[0], 'descripcion': c[1], 'estado': c[2]} for c in cargos]
         except Exception as e:
-            app.logger.error(f"Error al obtener todas las ciudades: {str(e)}")
+            app.logger.error(f"Error al obtener todos los cargos: {str(e)}")
             return []
         finally:
             cur.close()
             con.close()
 
-    def getCiudadById(self, id_ciudad):
+    def getCargoById(self, id_cargo):
         sql = """
-        SELECT id_ciudad, des_ciudad, est_ciudad
-        FROM ciudades
-        WHERE id_ciudad=%s
+        SELECT id_cargo, des_cargo, est_cargo
+        FROM cargos
+        WHERE id_cargo=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql, (id_ciudad,))
-            ciudad = cur.fetchone()
-            if ciudad:
-                return {"id": ciudad[0], "descripcion": ciudad[1], "estado": ciudad[2]}
+            cur.execute(sql, (id_cargo,))
+            cargo = cur.fetchone()
+            if cargo:
+                return {"id": cargo[0], "descripcion": cargo[1], "estado": cargo[2]}
             return None
         except Exception as e:
-            app.logger.error(f"Error al obtener ciudad: {str(e)}")
+            app.logger.error(f"Error al obtener cargo: {str(e)}")
             return None
         finally:
             cur.close()
@@ -50,9 +50,9 @@ class CiudadDao:
     # VALIDACIONES
     # ============================
 
-    def ciudadExiste(self, descripcion):
-        """Verifica si ya existe la ciudad con el mismo nombre (case-insensitive)."""
-        sql = "SELECT 1 FROM ciudades WHERE LOWER(des_ciudad)=LOWER(%s)"
+    def cargoExiste(self, descripcion):
+        """Verifica si ya existe el cargo con el mismo nombre (case-insensitive)."""
+        sql = "SELECT 1 FROM cargos WHERE LOWER(des_cargo)=LOWER(%s)"
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
@@ -72,75 +72,75 @@ class CiudadDao:
     # CRUD
     # ============================
 
-    def guardarCiudad(self, descripcion, estado=True):
+    def guardarCargo(self, descripcion, estado=True):
         # Validaciones
         if not self.validarDescripcion(descripcion):
             app.logger.warning("Descripción inválida: solo letras, números y acentos")
             return False
-        if self.ciudadExiste(descripcion):
-            app.logger.warning("La ciudad ya existe")
+        if self.cargoExiste(descripcion):
+            app.logger.warning("El cargo ya existe")
             return False
 
         sql = """
-        INSERT INTO ciudades(des_ciudad, est_ciudad)
+        INSERT INTO cargos(des_cargo, est_cargo)
         VALUES(%s, %s)
-        RETURNING id_ciudad
+        RETURNING id_cargo
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
             cur.execute(sql, (descripcion, estado))
-            id_ciudad = cur.fetchone()[0]
+            id_cargo = cur.fetchone()[0]
             con.commit()
-            return id_ciudad
+            return id_cargo
         except Exception as e:
-            app.logger.error(f"Error al insertar ciudad: {str(e)}")
+            app.logger.error(f"Error al insertar cargo: {str(e)}")
             con.rollback()
             return False
         finally:
             cur.close()
             con.close()
 
-    def updateCiudad(self, id_ciudad, descripcion, estado=True):
+    def updateCargo(self, id_cargo, descripcion, estado=True):
         # Validaciones
         if not self.validarDescripcion(descripcion):
             app.logger.warning("Descripción inválida")
             return False
 
         sql = """
-        UPDATE ciudades
-        SET des_ciudad=%s, est_ciudad=%s
-        WHERE id_ciudad=%s
+        UPDATE cargos
+        SET des_cargo=%s, est_cargo=%s
+        WHERE id_cargo=%s
         """
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql, (descripcion, estado, id_ciudad))
+            cur.execute(sql, (descripcion, estado, id_cargo))
             filas = cur.rowcount
             con.commit()
             return filas > 0
         except Exception as e:
-            app.logger.error(f"Error al actualizar ciudad: {str(e)}")
+            app.logger.error(f"Error al actualizar cargo: {str(e)}")
             con.rollback()
             return False
         finally:
             cur.close()
             con.close()
 
-    def deleteCiudad(self, id_ciudad):
-        sql = "DELETE FROM ciudades WHERE id_ciudad=%s"
+    def deleteCargo(self, id_cargo):
+        sql = "DELETE FROM cargos WHERE id_cargo=%s"
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(sql, (id_ciudad,))
+            cur.execute(sql, (id_cargo,))
             filas = cur.rowcount
             con.commit()
             return filas > 0
         except Exception as e:
-            app.logger.error(f"Error al eliminar ciudad: {str(e)}")
+            app.logger.error(f"Error al eliminar cargo: {str(e)}")
             con.rollback()
             return False
         finally:
