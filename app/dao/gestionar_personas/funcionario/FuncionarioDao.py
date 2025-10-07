@@ -5,7 +5,7 @@ from datetime import date
 class FuncionarioDao:
     
     # IDs de cargos que requieren datos de especialista
-    CARGOS_ESPECIALISTAS = [3]  # Ajustar según tus IDs reales
+    CARGOS_ESPECIALISTAS = [3]  
     
     def es_cargo_especialista(self, id_cargo):
         """Verifica si un cargo requiere datos de especialista"""
@@ -34,7 +34,7 @@ class FuncionarioDao:
             JOIN personas p ON f.id_persona = p.id_persona
             JOIN cargos car ON f.id_cargo = car.id_cargo
             LEFT JOIN generos g ON p.id_genero = g.id_genero AND g.est_genero = TRUE
-            LEFT JOIN ciudades c ON p.id_ciudad = c.id_ciudad AND c.est_ciudad = TRUE
+            LEFT JOIN ciudades c ON p.id_ciudad = c.id_ciudad
             LEFT JOIN especialistas e ON f.id_funcionario = e.id_funcionario
             LEFT JOIN especialista_especialidades ee ON e.id_especialista = ee.id_especialista
             LEFT JOIN especialidades esp ON ee.id_especialidad = esp.id_especialidad AND esp.est_especialidad = TRUE

@@ -90,7 +90,6 @@ Pacientes
     </div>
 </div>
 
-    <!-- /tarjeta -->
 <!-- Modal con Wizard -->
 <div class="modal fade" id="modalFormulario" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -116,13 +115,13 @@ Pacientes
               <button type="button" class="btn btn-default btn-circle" data-step="3">3</button>
               <p><small>Académico</small></p>
             </div>
-            <div class="stepwizard-step">
+            <div class="stepwizard-step" id="step4Indicator">
               <button type="button" class="btn btn-default btn-circle" data-step="4">4</button>
-              <p><small>Clínico</small></p>
-            </div>
-            <div class="stepwizard-step" id="step5Indicator" style="display:none;">
-              <button type="button" class="btn btn-default btn-circle" data-step="5">5</button>
               <p><small>Tutor</small></p>
+            </div>
+            <div class="stepwizard-step">
+              <button type="button" class="btn btn-default btn-circle" data-step="5">5</button>
+              <p><small>Clínico</small></p>
             </div>
           </div>
         </div>
@@ -133,7 +132,7 @@ Pacientes
           
           <!-- PASO 1: Datos Personales -->
           <div class="wizard-step" data-step="1">
-            <h5 class="text-primary mb-3">Datos Personales</h5>
+            <h5 class="text-primary mb-3"><i class="fas fa-user"></i> Datos Personales</h5>
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -157,8 +156,17 @@ Pacientes
               </div>
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="txtFecha_nacimiento">Fecha de nacimiento: <span class="text-danger">*</span></label>
+                  <label for="txtFecha_nacimiento">
+                    Fecha de nacimiento: <span class="text-danger">*</span>
+                    <i class="fas fa-info-circle text-info" data-toggle="tooltip" 
+                       title="El sistema calculará automáticamente si es menor de edad"></i>
+                  </label>
                   <input type="date" class="form-control" id="txtFecha_nacimiento" required>
+                  
+                  <!-- Alerta de edad calculada (se muestra dinámicamente) -->
+                  <div id="alertaEdad" class="mt-2" style="display:none;">
+                    <!-- Se llena con JavaScript -->
+                  </div>
                 </div>
               </div>
             </div>
@@ -182,7 +190,7 @@ Pacientes
 
           <!-- PASO 2: Contacto -->
           <div class="wizard-step" data-step="2" style="display:none;">
-            <h5 class="text-primary mb-3">Datos de Contacto</h5>
+            <h5 class="text-primary mb-3"><i class="fas fa-address-book"></i> Datos de Contacto</h5>
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -225,7 +233,7 @@ Pacientes
 
           <!-- PASO 3: Académico -->
           <div class="wizard-step" data-step="3" style="display:none;">
-            <h5 class="text-primary mb-3">Datos Académicos y Profesionales</h5>
+            <h5 class="text-primary mb-3"><i class="fas fa-graduation-cap"></i> Datos Académicos y Profesionales</h5>
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
@@ -244,43 +252,24 @@ Pacientes
             </div>
           </div>
 
-          <!-- PASO 4: Clínico -->
+          <!-- PASO 4: Datos del Tutor (solo si es menor - se muestra/oculta automáticamente) -->
           <div class="wizard-step" data-step="4" style="display:none;">
-            <h5 class="text-primary mb-3">Datos Clínicos</h5>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="txtHistoria_clinica">Historia clínica:</label>
-                  <input type="text" class="form-control" placeholder="Se genera automáticamente" id="txtHistoria_clinica" readonly>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="txtObservaciones">Observaciones:</label>
-                  <textarea class="form-control" rows="3" placeholder="Observaciones generales" id="txtObservaciones"></textarea>
-                </div>
-              </div>
+            <h5 class="text-warning mb-3"><i class="fas fa-user-shield"></i> Datos del Tutor/Responsable</h5>
+            
+            <!-- Alerta informativa -->
+            <div class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle"></i>
+              <strong>Importante:</strong> Este paciente es menor de edad. Debe proporcionar al menos el nombre de la madre o del padre.
             </div>
+            
+            <h6 class="text-primary"><i class="fas fa-female"></i> Datos de la Madre</h6>
             <div class="row">
-              <div class="col-md-12">
-                <div class="custom-control custom-switch">
-                  <input type="checkbox" class="custom-control-input" id="chkEsMenor">
-                  <label class="custom-control-label" for="chkEsMenor">
-                    <strong>¿Es menor de edad?</strong>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtNomMadre">
+                    Nombre de la madre: 
+                    <span class="text-warning" id="spanObligatorioMadre">*</span>
                   </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- PASO 5: Datos del Tutor (solo si es menor) -->
-          <div class="wizard-step" data-step="5" style="display:none;">
-            <h5 class="text-warning mb-3">Datos del Tutor/Responsable</h5>
-            <h6 class="text-primary">Datos de la Madre</h6>
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label for="txtNomMadre">Nombre de la madre:</label>
                   <input type="text" class="form-control" placeholder="Nombre completo de la madre" id="txtNomMadre">
                 </div>
               </div>
@@ -291,12 +280,17 @@ Pacientes
                 </div>
               </div>
             </div>
+            
             <hr>
-            <h6 class="text-primary">Datos del Padre</h6>
+            
+            <h6 class="text-primary"><i class="fas fa-male"></i> Datos del Padre</h6>
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label for="txtNomPadre">Nombre del padre:</label>
+                  <label for="txtNomPadre">
+                    Nombre del padre: 
+                    <span class="text-warning" id="spanObligatorioPadre">*</span>
+                  </label>
                   <input type="text" class="form-control" placeholder="Nombre completo del padre" id="txtNomPadre">
                 </div>
               </div>
@@ -307,8 +301,14 @@ Pacientes
                 </div>
               </div>
             </div>
+            
+            <small class="form-text text-muted mb-3">
+              <i class="fas fa-info-circle"></i> * Al menos uno de los dos nombres es obligatorio
+            </small>
+            
             <hr>
-            <h6 class="text-primary">Datos Educativos</h6>
+            
+            <h6 class="text-primary"><i class="fas fa-school"></i> Datos Educativos</h6>
             <div class="row">
               <div class="col-md-12">
                 <div class="form-group">
@@ -333,6 +333,45 @@ Pacientes
             </div>
           </div>
 
+          <!-- PASO 5: Clínico (AHORA ES EL ÚLTIMO PASO) -->
+          <div class="wizard-step" data-step="5" style="display:none;">
+            <h5 class="text-primary mb-3"><i class="fas fa-notes-medical"></i> Datos Clínicos</h5>
+            
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtHistoria_clinica">
+                    Historia clínica: 
+                    <i class="fas fa-info-circle text-info" data-toggle="tooltip" 
+                       title="Se generará automáticamente con formato: Inicial Nombre + Inicial Apellido + Cédula"></i>
+                  </label>
+                  <input type="text" class="form-control" id="txtHistoria_clinica" readonly>
+                  
+                  <!-- Preview de historia clínica -->
+                  <small class="form-text text-muted">
+                    Vista previa: <strong id="previewHistoria" class="text-primary">--</strong>
+                    <span class="badge badge-info ml-2">Auto-generada</span>
+                  </small>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="txtObservaciones">Observaciones:</label>
+                  <textarea class="form-control" rows="3" placeholder="Observaciones generales del paciente" id="txtObservaciones"></textarea>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Resumen final (opcional) -->
+            <hr>
+            <div class="alert alert-info">
+              <h6><i class="fas fa-clipboard-check"></i> Resumen antes de guardar:</h6>
+              <div id="resumenDatos">
+                <!-- Se llena con JavaScript antes de guardar -->
+              </div>
+            </div>
+          </div>
+
         </form>
       </div>
       
@@ -344,7 +383,7 @@ Pacientes
           Siguiente <i class="fas fa-arrow-right"></i>
         </button>
         <button type="button" class="btn btn-success" id="btnGuardar" style="display:none;">
-          <i class="fas fa-save"></i> Guardar
+          <i class="fas fa-save"></i> Guardar Paciente
         </button>
       </div>
     </div>
@@ -400,9 +439,70 @@ Pacientes
   background-color: #28a745;
   color: white;
 }
+
+.btn-circle.btn-default {
+  background-color: #e9ecef;
+  color: #6c757d;
+  border: 2px solid #ddd;
+}
+
+/* Estilos para alertas de edad */
+.alerta-menor {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 5px;
+  padding: 10px;
+  color: #856404;
+}
+
+.alerta-mayor {
+  background-color: #d4edda;
+  border: 1px solid #28a745;
+  border-radius: 5px;
+  padding: 10px;
+  color: #155724;
+}
+
+.alerta-error {
+  background-color: #f8d7da;
+  border: 1px solid #dc3545;
+  border-radius: 5px;
+  padding: 10px;
+  color: #721c24;
+}
+
+/* Estilos para campos de selección clickeables */
+input[type="text"]:not([readonly]) {
+  cursor: text;
+}
+
+#txtGenero, #txtEstado_civil, #txtCiudad, #txtCiudad_nacimiento, 
+#txtNivel_instruccion, #txtProfesion {
+  cursor: pointer;
+  background-color: #f8f9fa;
+}
+
+#txtGenero:hover, #txtEstado_civil:hover, #txtCiudad:hover, 
+#txtCiudad_nacimiento:hover, #txtNivel_instruccion:hover, #txtProfesion:hover {
+  background-color: #e9ecef;
+}
+
+/* Historia clínica readonly mantiene su estilo */
+#txtHistoria_clinica {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* Animación de fade para los pasos */
+.wizard-step {
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 </style>
-
-
 
 <!-- Modal Buscar Género -->
 <div class="modal" id="modalBuscarGenero">
@@ -554,51 +654,7 @@ Pacientes
   </div>
 </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-    <div class="row mt-4 d-none" id="rowAlerta">
-      <div class="col col-md-12">
-        <div class="alert alert-success">
-          <strong>Registro Exitoso!</strong>
-          <div class="row" id="mostrarAlerta"></div>
-        </div>
-      </div>
-    </div>
-</div>
 {% endblock %}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -624,93 +680,435 @@ Pacientes
 
 {% block js %}
 
-
-<!-- JavaScript para manejar el switch -->
 <script>
+// ==========================================
+// CONSTANTES Y CONFIGURACIÓN
+// ==========================================
+const CSRFToken = "{{ csrf_token() }}" || null;
 let currentStep = 1;
-const totalSteps = 4; // o 5 si es menor
 
+// ==========================================
+// CONFIGURACIÓN DE BÚSQUEDAS UNIFICADAS
+// ==========================================
+const SEARCH_CONFIGS = {
+  genero: {
+    modalId: 'modalBuscarGenero',
+    tableId: 'tblGenero',
+    endpoint: '/api/v1/generos',
+    inputId: 'txtGenero',
+    hiddenId: 'id_genero',
+    dataKey: 'id',  // ✅ CORREGIDO: usar 'id' genérico
+    title: 'Seleccionar Sexo'
+  },
+  estadoCivil: {
+    modalId: 'modalBuscarEstadoCivil',
+    tableId: 'tblEstadoCivil',
+    endpoint: '/api/v1/estados-civiles',
+    inputId: 'txtEstado_civil',
+    hiddenId: 'id_estado_civil',
+    dataKey: 'id',  // ✅ CORREGIDO
+    title: 'Seleccionar Estado Civil'
+  },
+  ciudad: {
+    modalId: 'modalBuscarCiudad',
+    tableId: 'tblCiudad',
+    endpoint: '/api/v1/ciudades',
+    inputId: 'txtCiudad',
+    hiddenId: 'id_ciudad',
+    dataKey: 'id',  // ✅ CORREGIDO
+    title: 'Seleccionar Ciudad de Residencia'
+  },
+  ciudadNacimiento: {
+    modalId: 'modalBuscarCiudadNacimiento',
+    tableId: 'tblCiudadNacimiento',
+    endpoint: '/api/v1/ciudades',
+    inputId: 'txtCiudad_nacimiento',
+    hiddenId: 'id_ciudad_nacimiento',
+    dataKey: 'id',  // ✅ CORREGIDO
+    title: 'Seleccionar Ciudad de Nacimiento'
+  },
+  nivelInstruccion: {
+    modalId: 'modalBuscarNivelInstruccion',
+    tableId: 'tblNivelInstruccion',
+    endpoint: '/api/v1/niveles-instruccion',
+    inputId: 'txtNivel_instruccion',
+    hiddenId: 'id_nivel_instruccion',
+    dataKey: 'id',  // ✅ CORREGIDO
+    title: 'Seleccionar Nivel de Instrucción'
+  },
+  profesion: {
+    modalId: 'modalBuscarProfesion',
+    tableId: 'tblProfesion',
+    endpoint: '/api/v1/profesiones',
+    inputId: 'txtProfesion',
+    hiddenId: 'id_profesion',
+    dataKey: 'id',  // ✅ CORREGIDO
+    title: 'Seleccionar Profesión'
+  }
+};
+
+// ==========================================
+// FUNCIONES AUXILIARES
+// ==========================================
+
+/**
+ * Calcula la edad a partir de una fecha de nacimiento
+ */
+const calcularEdad = (fechaNacimiento) => {
+  if (!fechaNacimiento) return null;
+  
+  const hoy = new Date();
+  const nacimiento = new Date(fechaNacimiento);
+  
+  if (nacimiento > hoy) {
+    return { error: 'La fecha de nacimiento no puede ser futura' };
+  }
+  
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const mes = hoy.getMonth() - nacimiento.getMonth();
+  
+  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+    edad--;
+  }
+  
+  if (edad > 120) {
+    return { error: 'La fecha de nacimiento no puede ser mayor a 120 años' };
+  }
+  
+  return { edad, esMenor: edad < 18 };
+};
+
+/**
+ * Genera la historia clínica en formato: Inicial+Inicial+Cedula
+ */
+const generarHistoriaClinica = (nombre, apellido, cedula) => {
+  if (!nombre || !apellido || !cedula) return '';
+  
+  const inicialNombre = nombre.charAt(0).toUpperCase();
+  const inicialApellido = apellido.charAt(0).toUpperCase();
+  
+  return `${inicialNombre}${inicialApellido}${cedula}`;
+};
+
+/**
+ * Actualiza el preview de historia clínica en tiempo real
+ */
+const actualizarPreviewHistoria = () => {
+  const nombre = $('#txtNombre').val();
+  const apellido = $('#txtApellido').val();
+  const cedula = $('#txtCedula').val();
+  
+  const historia = generarHistoriaClinica(nombre, apellido, cedula);
+  
+  if (historia) {
+    $('#previewHistoria').text(historia).addClass('text-success').removeClass('text-muted');
+  } else {
+    $('#previewHistoria').text('--').addClass('text-muted').removeClass('text-success');
+  }
+};
+
+/**
+ * Muestra alerta visual de edad calculada
+ */
+const mostrarAlertaEdad = (resultado) => {
+  const alertaDiv = $('#alertaEdad');
+  
+  if (resultado.error) {
+    alertaDiv.html(`
+      <div class="alerta-error">
+        <i class="fas fa-exclamation-circle"></i> ${resultado.error}
+      </div>
+    `).show();
+    return;
+  }
+  
+  if (resultado.esMenor) {
+    alertaDiv.html(`
+      <div class="alerta-menor">
+        <i class="fas fa-child"></i> <strong>Menor de edad (${resultado.edad} años)</strong><br>
+        <small>Se habilitará el paso de datos del tutor</small>
+      </div>
+    `).show();
+  } else {
+    alertaDiv.html(`
+      <div class="alerta-mayor">
+        <i class="fas fa-user-check"></i> <strong>Mayor de edad (${resultado.edad} años)</strong>
+      </div>
+    `).show();
+  }
+};
+
+/**
+ * Ajusta el wizard según si es menor o no
+ */
+const ajustarWizardSegunEdad = (esMenor) => {
+  if (esMenor) {
+    $('.stepwizard-step').eq(3).show();
+    if (currentStep === 3) {
+      $('#btnSiguiente').show();
+      $('#btnGuardar').hide();
+    }
+  } else {
+    $('.stepwizard-step').eq(3).hide();
+    limpiarDatosMenor();
+    if (currentStep === 3) {
+      $('#btnSiguiente').hide();
+      $('#btnGuardar').show();
+    }
+  }
+};
+
+/**
+ * Limpia los datos del menor
+ */
+const limpiarDatosMenor = () => {
+  $('#txtNomMadre, #txtTelMadre, #txtNomPadre, #txtTelPadre, #txtEducacion, #txtColegio, #txtTelColegio').val('');
+};
+
+/**
+ * Función para sanitizar texto opcional
+ */
+const sanitizeText = (value) => {
+  if (value === undefined || value === null || value === '' || value === 'undefined' || value === 'null') {
+    return null;
+  }
+  return value;
+};
+
+/**
+ * Función para sanitizar IDs
+ */
+const sanitizeId = (value) => {
+  console.log(`🔍 sanitizeId input: "${value}" (tipo: ${typeof value})`);
+  
+  if (value === '' || value === 'undefined' || value === 'null' || value === undefined || value === null) {
+    console.log(`   ➡️ Retornando null (valor vacío)`);
+    return null;
+  }
+  
+  const num = Number(value);
+  
+  if (isNaN(num) || num <= 0) {
+    console.log(`   ➡️ Retornando null (NaN o <= 0)`);
+    return null;
+  }
+  
+  console.log(`   ➡️ Retornando ${num}`);
+  return num;
+};
+
+// ==========================================
+// EVENTOS DE CÁLCULO AUTOMÁTICO
+// ==========================================
+const initCalculoEdad = () => {
+  $('#txtFecha_nacimiento').on('change', function() {
+    const fecha = $(this).val();
+    
+    if (!fecha) {
+      $('#alertaEdad').hide();
+      ajustarWizardSegunEdad(false);
+      return;
+    }
+    
+    const resultado = calcularEdad(fecha);
+    mostrarAlertaEdad(resultado);
+    
+    if (!resultado.error) {
+      ajustarWizardSegunEdad(resultado.esMenor);
+    } else {
+      ajustarWizardSegunEdad(false);
+    }
+  });
+};
+
+const initPreviewHistoria = () => {
+  $('#txtNombre, #txtApellido, #txtCedula').on('input', actualizarPreviewHistoria);
+};
+
+// ==========================================
+// DATATABLE PRINCIPAL
+// ==========================================
+const initDatatable = () => {
+  $('#tbl').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: {
+      url: '/api/v1/pacientes',
+      dataSrc: function(json) {
+        if (!json.success) {
+          console.error('Error del servidor:', json.error);
+          return [];
+        }
+        return json.data;
+      },
+      error: function(xhr, error, thrown) {
+        console.error('Error en AJAX:', xhr.responseText);
+        Swal.fire('Error', 'Error al cargar los pacientes.', 'error');
+      }
+    },
+    columns: [
+      { data: 'historia_clinica' },
+      { data: 'nombre' },
+      { data: 'apellido' },
+      { data: 'cedula' },
+      { data: 'edad', className: 'text-center' },
+      { data: 'telefono' },
+      { data: 'genero' },
+      { data: 'ciudad' },
+      { data: 'fecha_registro' },
+      { 
+        data: function(row) {
+          return `
+            <button type="button" name="btn_ver" class="btn btn-info btn-sm" 
+                    data-id="${row.id_paciente}" title="Ver Ficha">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button type="button" name="btn_editar" class="btn btn-warning btn-sm" 
+                    data-id="${row.id_paciente}" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button type="button" name="btn_eliminar" class="btn btn-secondary btn-sm" 
+                    data-id="${row.id_paciente}" data-nombre="${row.nombre} ${row.apellido}" title="Eliminar">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          `;
+        },
+        className: 'text-center',
+        orderable: false
+      }
+    ],
+    order: [[8, 'desc']]
+  });
+};
+
+// ==========================================
+// SISTEMA DE BÚSQUEDA UNIFICADO
+// ==========================================
+const initSearchDatatable = (configKey) => {
+  const config = SEARCH_CONFIGS[configKey];
+  
+  const table = $(`#${config.tableId}`).DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: config.endpoint,
+    columns: [
+      { data: 'descripcion' },
+      { 
+        data: function(row) {
+          return `<button type="button" class="btn btn-success btn-sm btn-select-item" 
+                    data-id="${row[config.dataKey]}" 
+                    data-descripcion="${row.descripcion}">
+                    <i class="fa fa-check"></i> Seleccionar
+                  </button>`;
+        }
+      }
+    ]
+  });
+  
+  $(`#${config.tableId} tbody`).on('click', '.btn-select-item', function() {
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    
+    console.log(`✅ Seleccionado ${configKey}:`, {id, descripcion});
+    
+    $(`#${config.inputId}`).val(descripcion);
+    $(`#${config.hiddenId}`).val(id);
+    
+    console.log(`✔️ Verificación - Hidden: ${$('#' + config.hiddenId).val()}, Visible: ${$('#' + config.inputId).val()}`);
+    
+    $(`#${config.modalId}`).modal('hide');
+  });
+};
+
+const bindSearchClick = (configKey) => {
+  const config = SEARCH_CONFIGS[configKey];
+  
+  $(`#${config.inputId}`).css('cursor', 'pointer').on('click', function() {
+    $(`#${config.modalId}`).modal('show');
+  });
+  
+  $(`#${config.inputId}`).attr('title', 'Clic para buscar').tooltip();
+};
+
+// ==========================================
+// WIZARD - NAVEGACIÓN POR PASOS
+// ==========================================
 const initWizard = () => {
-  // Navegación entre pasos
   $('#btnSiguiente').click(function() {
     if (validateCurrentStep()) {
       nextStep();
     }
   });
 
-  $('#btnAnterior').click(function() {
-    previousStep();
-  });
-
-  // Mostrar paso 5 si es menor
-  $('#chkEsMenor').change(function() {
-    if (this.checked) {
-      $('#step5Indicator').show();
-      // Si estamos en el paso 4, mostrar botón siguiente en lugar de guardar
-      if (currentStep === 4) {
-        $('#btnGuardar').hide();
-        $('#btnSiguiente').show();
-      }
-    } else {
-      $('#step5Indicator').hide();
-      // Ocultar paso 5 si está visible
-      $(`.wizard-step[data-step="5"]`).hide();
-      // Si estamos en paso 4, mostrar guardar
-      if (currentStep === 4) {
-        $('#btnSiguiente').hide();
-        $('#btnGuardar').show();
-      }
-    }
-  });
-}
+  $('#btnAnterior').click(previousStep);
+};
 
 const showStep = (step) => {
   $('.wizard-step').hide();
   $(`.wizard-step[data-step="${step}"]`).fadeIn();
   
-  // Actualizar indicadores
   $('.stepwizard-step button').removeClass('btn-primary btn-success').addClass('btn-default');
   $(`.stepwizard-step button[data-step="${step}"]`).removeClass('btn-default').addClass('btn-primary');
   
-  // Marcar anteriores como completados
   for (let i = 1; i < step; i++) {
     $(`.stepwizard-step button[data-step="${i}"]`).removeClass('btn-default btn-primary').addClass('btn-success');
   }
   
-  // Controlar botones
   $('#btnAnterior').toggle(step > 1);
   
-  const esMenor = $('#chkEsMenor').is(':checked');
-  const lastStep = esMenor ? 5 : 4;
+  const fechaNac = $('#txtFecha_nacimiento').val();
+  const resultado = calcularEdad(fechaNac);
+  const esMenor = resultado && !resultado.error && resultado.esMenor;
   
-  if (step === lastStep) {
+  if (step === 5) {
     $('#btnSiguiente').hide();
     $('#btnGuardar').show();
+  } else if (step === 3 && !esMenor) {
+    $('#btnSiguiente').show();
+    $('#btnGuardar').hide();
   } else {
     $('#btnSiguiente').show();
     $('#btnGuardar').hide();
   }
-}
+};
 
 const nextStep = () => {
-  const esMenor = $('#chkEsMenor').is(':checked');
-  const maxStep = esMenor ? 5 : 4;
+  const fechaNac = $('#txtFecha_nacimiento').val();
+  const resultado = calcularEdad(fechaNac);
+  const esMenor = resultado && !resultado.error && resultado.esMenor;
   
-  if (currentStep < maxStep) {
-    currentStep++;
-    showStep(currentStep);
+  if (currentStep === 1) {
+    currentStep = 2;
+  } else if (currentStep === 2) {
+    currentStep = 3;
+  } else if (currentStep === 3) {
+    currentStep = esMenor ? 4 : 5;
+  } else if (currentStep === 4) {
+    currentStep = 5;
   }
-}
+  
+  showStep(currentStep);
+};
 
 const previousStep = () => {
-  if (currentStep > 1) {
+  const fechaNac = $('#txtFecha_nacimiento').val();
+  const resultado = calcularEdad(fechaNac);
+  const esMenor = resultado && !resultado.error && resultado.esMenor;
+  
+  if (currentStep === 5 && !esMenor) {
+    currentStep = 3;
+  } else if (currentStep > 1) {
     currentStep--;
-    showStep(currentStep);
   }
-}
+  
+  showStep(currentStep);
+};
 
 const validateCurrentStep = () => {
   let valid = true;
+  
   $(`.wizard-step[data-step="${currentStep}"] input[required]`).each(function() {
     if (!$(this).val()) {
       $(this).addClass('is-invalid');
@@ -720,703 +1118,488 @@ const validateCurrentStep = () => {
     }
   });
   
+  if (currentStep === 1) {
+    const fechaNac = $('#txtFecha_nacimiento').val();
+    if (!fechaNac) {
+      $('#txtFecha_nacimiento').addClass('is-invalid');
+      valid = false;
+    } else {
+      const resultado = calcularEdad(fechaNac);
+      if (resultado.error) {
+        $('#txtFecha_nacimiento').addClass('is-invalid');
+        Swal.fire('Error', resultado.error, 'error');
+        return false;
+      }
+    }
+  }
+  
+  if (currentStep === 4) {
+    const nomMadre = $('#txtNomMadre').val();
+    const nomPadre = $('#txtNomPadre').val();
+    
+    if (!nomMadre && !nomPadre) {
+      $('#txtNomMadre, #txtNomPadre').addClass('is-invalid');
+      Swal.fire('Error', 'Debe proporcionar al menos el nombre de la madre o del padre', 'error');
+      return false;
+    } else {
+      $('#txtNomMadre, #txtNomPadre').removeClass('is-invalid');
+    }
+  }
+  
   if (!valid) {
     Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
   }
   
   return valid;
-}
+};
 
-  
-</script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-
-  const CSRFToken = "{{ csrf_token() }}" || null;
-
-const initDatatable = () => {
-    $('#tbl').DataTable({
-        language: {
-            url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-        },
-        ajax: {
-            url: '/api/v1/pacientes',
-            dataSrc: function(json) {
-                // Manejo de errores
-                if (!json.success) {
-                    console.error('Error del servidor:', json.error);
-                    return [];
-                }
-                return json.data;  // Devuelve el array de pacientes
-            },
-            error: function(xhr, error, thrown) {
-                console.error('Error en AJAX:', xhr.responseText);
-                alert('Error al cargar los pacientes. Revise la consola.');
-            }
-        },
-        columns: [
-            { data: 'historia_clinica' },
-            { data: 'nombre' },
-            { data: 'apellido' },
-            { data: 'cedula' },
-            { data: 'edad', className: 'text-center' },
-            { data: 'telefono' },
-            { data: 'genero' },
-            { data: 'ciudad' },
-            { data: 'fecha_registro' },
-            { 
-                  data: function(row) {
-                      return `
-        <button type="button" name="btn_pdf" class="btn btn-danger btn-sm" data-id="${row.id_paciente}" title="Descargar PDF">
-            <i class="fas fa-file-pdf"></i>
-        </button>
-        <button type="button" name="btn_excel" class="btn btn-success btn-sm" data-id="${row.id_paciente}" title="Descargar Excel">
-            <i class="fas fa-file-excel"></i>
-        </button>
-        <button type="button" name="btn_editar" class="btn btn-warning btn-sm" data-id="${row.id_paciente}" title="Editar">
-            <i class="fas fa-edit"></i>
-        </button>
-        <button type="button" name="btn_eliminar" class="btn btn-secondary btn-sm" data-id="${row.id_paciente}" data-nombre="${row.nombre} ${row.apellido}" title="Eliminar">
-            <i class="fas fa-trash-alt"></i>
-        </button>
-                      `;
-                },
-                className: 'text-center',
-                orderable: false  // Los botones no se ordenan
-            }
-        ],
-        order: [[8, 'desc']]  // Ordenar por fecha_registro descendente
+// ==========================================
+// MODAL VER FICHA COMPLETA
+// ==========================================
+const verFichaPaciente = () => {
+  $('#tbl').on('click', 'button[name="btn_ver"]', function() {
+    const idPaciente = $(this).data('id');
+    
+    fetch(`/api/v1/pacientes/${idPaciente}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRFToken
+      }
+    })
+    .then(resp => resp.ok ? resp.json() : Promise.reject(resp))
+    .then(data => {
+      if (!data.success) throw new Error(data.error);
+      
+      const p = data.data;
+      let html = `
+        <div class="mb-3 text-right">
+          <button class="btn btn-danger btn-sm" onclick="descargarPDF(${idPaciente})">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn btn-success btn-sm" onclick="descargarExcel(${idPaciente})">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+        </div>
+        <hr>
+        <h5 class="mb-3"><i class="fas fa-user"></i> Datos Personales</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Nombre Completo:</strong> ${p.nombre || ''} ${p.apellido || ''}</p>
+            <p><strong>Cédula:</strong> ${p.cedula || 'N/A'}</p>
+            <p><strong>Fecha Nacimiento:</strong> ${p.fecha_nacimiento || 'N/A'}</p>
+            <p><strong>Edad:</strong> ${p.edad || 'N/A'} años</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Sexo:</strong> ${p.genero || 'N/A'}</p>
+            <p><strong>Estado Civil:</strong> ${p.estado_civil || 'N/A'}</p>
+            <p><strong>Teléfono:</strong> ${p.telefono || 'N/A'}</p>
+            <p><strong>Correo:</strong> ${p.correo || 'N/A'}</p>
+          </div>
+        </div>
+        <hr>
+        <h5 class="mb-3"><i class="fas fa-map-marker-alt"></i> Ubicación</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Domicilio:</strong> ${p.domicilio || 'N/A'}</p>
+            <p><strong>Ciudad Residencia:</strong> ${p.ciudad || 'N/A'}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Ciudad Nacimiento:</strong> ${p.ciudad_nacimiento || 'N/A'}</p>
+          </div>
+        </div>
+        <hr>
+        <h5 class="mb-3"><i class="fas fa-graduation-cap"></i> Formación</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Nivel Instrucción:</strong> ${p.nivel_instruccion || 'N/A'}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Profesión:</strong> ${p.profesion || 'N/A'}</p>
+          </div>
+        </div>
+        <hr>
+        <h5 class="mb-3"><i class="fas fa-notes-medical"></i> Datos Clínicos</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Historia Clínica:</strong> ${p.historia_clinica || 'N/A'}</p>
+            <p><strong>Fecha Registro:</strong> ${p.fecha_registro || 'N/A'}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Es Menor:</strong> ${p.es_menor ? 'Sí' : 'No'}</p>
+          </div>
+        </div>
+        ${p.observaciones ? `<p><strong>Observaciones:</strong> ${p.observaciones}</p>` : ''}
+      `;
+      
+      if (p.es_menor) {
+        html += `
+          <hr>
+          <h5 class="mb-3"><i class="fas fa-users"></i> Tutores</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Madre</h6>
+              <p><strong>Nombre:</strong> ${p.nom_madre || 'N/A'}</p>
+              <p><strong>Teléfono:</strong> ${p.tel_madre || 'N/A'}</p>
+            </div>
+            <div class="col-md-6">
+              <h6>Padre</h6>
+              <p><strong>Nombre:</strong> ${p.nom_padre || 'N/A'}</p>
+              <p><strong>Teléfono:</strong> ${p.tel_padre || 'N/A'}</p>
+            </div>
+          </div>
+          <hr>
+          <h5 class="mb-3"><i class="fas fa-school"></i> Escolares</h5>
+          <div class="row">
+            <div class="col-md-4"><p><strong>Educación:</strong> ${p.educacion || 'N/A'}</p></div>
+            <div class="col-md-4"><p><strong>Colegio:</strong> ${p.colegio || 'N/A'}</p></div>
+            <div class="col-md-4"><p><strong>Tel. Colegio:</strong> ${p.tel_colegio || 'N/A'}</p></div>
+          </div>
+        `;
+      }
+      
+      $('#contenidoVistaPaciente').html(html);
+      $('#modalVistaPaciente').modal('show');
+    })
+    .catch(err => {
+      console.error(err);
+      Swal.fire("Error", "No se pudo cargar los datos del paciente.", "error");
     });
-
-  
-} 
-  const verFichaPaciente = (id) => {
-    $.ajax({
-        url: `/api/v1/pacientes/${id}`,
-        type: 'GET',
-        success: function(response) {
-            if (!response.success || !response.data) {
-                alert('Error al cargar los datos del paciente');
-                return;
-            }
-            
-            const paciente = response.data;
-            
-            let html = `
-                <div class="mb-3">
-                    <button class="btn btn-danger btn-sm" onclick="descargarPDF(${id})">
-                        <i class="fas fa-file-pdf"></i> Descargar PDF
-                    </button>
-                    <button class="btn btn-success btn-sm" onclick="descargarExcel(${id})">
-                        <i class="fas fa-file-excel"></i> Descargar Excel
-                    </button>
-                </div>
-                <hr>
-                <!-- ... resto de tu HTML actual ... -->
-            `;
-            
-            // Tu código HTML existente aquí
-            
-            $('#contenidoVistaPaciente').html(html);
-            $('#modalVistaPaciente').modal('show');
-        }
-    });
-}
-
-// Funciones de descarga
-const descargarPDF = (id) => {
-    window.open(`/api/v1/pacientes/${id}/pdf`, '_blank');
-}
-
-const descargarExcel = (id) => {
-    window.open(`/api/v1/pacientes/${id}/excel`, '_blank');
-}
-
-
-// ============= GÉNERO =============
-const initDatatableGenero = () => {
-  $('#tblGenero').DataTable({
-    language: {
-      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-    },
-    ajax: '/api/v1/generos',
-    columns: [
-      { data: 'descripcion' },
-      { data: function(row) {
-          return `<button type="button" name="btn_seleccionar_genero" class="btn btn-success" data-id="${row.id_genero}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
-        }
-      }
-    ]
   });
-  
-  $('#tblGenero').on('click', 'button[name="btn_seleccionar_genero"]', function () {
-    const id = $(this).data('id');
-    const descripcion = $(this).data('descripcion');
-    $('#txtGenero').val(descripcion);
-    $('#id_genero').val(id);
-    $('#modalBuscarGenero').modal('hide');
-  });
-}
+};
 
-const buscarGenero = () => {
-  $('#txtGenero').on('click', function () {
-    $('#modalBuscarGenero').modal();
-  });
-}
+window.descargarPDF = (id) => window.open(`/api/v1/pacientes/${id}/pdf`, '_blank');
+window.descargarExcel = (id) => window.open(`/api/v1/pacientes/${id}/excel`, '_blank');
 
-// ============= ESTADO CIVIL =============
-const initDatatableEstadoCivil = () => {
-  $('#tblEstadoCivil').DataTable({
-    language: {
-      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-    },
-    ajax: '/api/v1/estados-civiles',
-    columns: [
-      { data: 'descripcion' },
-      { data: function(row) {
-          return `<button type="button" name="btn_seleccionar_estado_civil" class="btn btn-success" data-id="${row.id_estado_civil}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
-        }
-      }
-    ]
-  });
-  
-  $('#tblEstadoCivil').on('click', 'button[name="btn_seleccionar_estado_civil"]', function () {
-    const id = $(this).data('id');
-    const descripcion = $(this).data('descripcion');
-    $('#txtEstado_civil').val(descripcion);
-    $('#id_estado_civil').val(id);
-    $('#modalBuscarEstadoCivil').modal('hide');
-  });
-}
-
-const buscarEstadoCivil = () => {
-  $('#txtEstado_civil').on('click', function () {
-    $('#modalBuscarEstadoCivil').modal();
-  });
-}
-
-// ============= CIUDAD =============
-const initDatatableCiudad = () => {
-  $('#tblCiudad').DataTable({
-    language: {
-      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-    },
-    ajax: '/api/v1/ciudades',
-    columns: [
-      { data: 'descripcion' },
-      { data: function(row) {
-          return `<button type="button" name="btn_seleccionar_ciudad" class="btn btn-success" data-id="${row.id_ciudad}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
-        }
-      }
-    ]
-  });
-  
-  $('#tblCiudad').on('click', 'button[name="btn_seleccionar_ciudad"]', function () {
-    const id = $(this).data('id');
-    const descripcion = $(this).data('descripcion');
-    $('#txtCiudad').val(descripcion);
-    $('#id_ciudad').val(id);
-    $('#modalBuscarCiudad').modal('hide');
-  });
-}
-
-const buscarCiudad = () => {
-  $('#txtCiudad').on('click', function () {
-    $('#modalBuscarCiudad').modal();
-  });
-}
-
-// ============= CIUDAD DE NACIMIENTO =============
-const initDatatableCiudadNacimiento = () => {
-  $('#tblCiudadNacimiento').DataTable({
-    language: {
-      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-    },
-    ajax: '/api/v1/ciudades',
-    columns: [
-      { data: 'descripcion' },
-      { data: function(row) {
-          return `<button type="button" name="btn_seleccionar_ciudad_nacimiento" class="btn btn-success" data-id="${row.id_ciudad}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
-        }
-      }
-    ]
-  });
-  
-  $('#tblCiudadNacimiento').on('click', 'button[name="btn_seleccionar_ciudad_nacimiento"]', function () {
-    const id = $(this).data('id');
-    const descripcion = $(this).data('descripcion');
-    $('#txtCiudad_nacimiento').val(descripcion);
-    $('#id_ciudad_nacimiento').val(id);
-    $('#modalBuscarCiudadNacimiento').modal('hide');
-  });
-}
-
-const buscarCiudadNacimiento = () => {
-  $('#txtCiudad_nacimiento').on('click', function () {
-    $('#modalBuscarCiudadNacimiento').modal();
-  });
-}
-
-// ============= NIVEL DE INSTRUCCIÓN =============
-const initDatatableNivelInstruccion = () => {
-  $('#tblNivelInstruccion').DataTable({
-    language: {
-      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-    },
-    ajax: '/api/v1/niveles-instruccion',
-    columns: [
-      { data: 'descripcion' },
-      { data: function(row) {
-          return `<button type="button" name="btn_seleccionar_nivel_instruccion" class="btn btn-success" data-id="${row.id_nivel_instruccion}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
-        }
-      }
-    ]
-  });
-  
-  $('#tblNivelInstruccion').on('click', 'button[name="btn_seleccionar_nivel_instruccion"]', function () {
-    const id = $(this).data('id');
-    const descripcion = $(this).data('descripcion');
-    $('#txtNivel_instruccion').val(descripcion);
-    $('#id_nivel_instruccion').val(id);
-    $('#modalBuscarNivelInstruccion').modal('hide');
-  });
-}
-
-const buscarNivelInstruccion = () => {
-  $('#txtNivel_instruccion').on('click', function () {
-    $('#modalBuscarNivelInstruccion').modal();
-  });
-}
-
-// ============= PROFESIÓN =============
-const initDatatableProfesion = () => {
-  $('#tblProfesion').DataTable({
-    language: {
-      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
-    },
-    ajax: '/api/v1/profesiones',
-    columns: [
-      { data: 'descripcion' },
-      { data: function(row) {
-          return `<button type="button" name="btn_seleccionar_profesion" class="btn btn-success" data-id="${row.id_profesion}" data-descripcion="${row.descripcion}"><i class="fa fa-check"></i> Seleccionar</button>`;
-        }
-      }
-    ]
-  });
-  
-  $('#tblProfesion').on('click', 'button[name="btn_seleccionar_profesion"]', function () {
-    const id = $(this).data('id');
-    const descripcion = $(this).data('descripcion');
-    $('#txtProfesion').val(descripcion);
-    $('#id_profesion').val(id);
-    $('#modalBuscarProfesion').modal('hide');
-  });
-}
-
-const buscarProfesion = () => {
-  $('#txtProfesion').on('click', function () {
-    $('#modalBuscarProfesion').modal();
-  });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// ==========================================
+// CRUD - FUNCIONES PRINCIPALES
+// ==========================================
 const agregar = () => {
-    $('#btnAgregar').on('click', function(){
-        $('#modalTitle').text("Agregar Nuevo Paciente");
-        limpiarFormulario();
-        $('#modalFormulario').modal();
-    });
-}
+  $('#btnAgregar').on('click', function() {
+    $('#modalTitle').text("Agregar Nuevo Paciente");
+    limpiarFormulario();
+    currentStep = 1;
+    showStep(1);
+    $('#modalFormulario').modal();
+  });
+};
 
 const limpiarFormulario = () => {
-    // Limpiar campos de persona
-    $('#txtIdPersona').val("");
-    $('#txtIdPaciente').val("");
-    $('#txtNombre').val("");
-    $('#txtApellido').val("");
-    $('#txtCedula').val("");
-    $('#txtFecha_nacimiento').val("");
-    $('#txtTelefono').val("");
-    $('#txtCorreo').val("");
-    $('#txtDomicilio').val("");
-    
-    // Limpiar campos de tablas referenciales
-    $('#txtGenero').val("");
-    $('#id_genero').val("");
-    $('#txtEstado_civil').val("");
-    $('#id_estado_civil').val("");
-    $('#txtCiudad').val("");
-    $('#id_ciudad').val("");
-    $('#txtCiudad_nacimiento').val("");
-    $('#id_ciudad_nacimiento').val("");
-    $('#txtNivel_instruccion').val("");
-    $('#id_nivel_instruccion').val("");
-    $('#txtProfesion').val("");
-    $('#id_profesion').val("");
-    
-    // Limpiar campos de paciente
-    $('#txtHistoria_clinica').val("");
-    $('#txtObservaciones').val("");
-    $('#chkEsMenor').prop('checked', false);
-    
-    // Limpiar campos de menor
-    $('#txtNomMadre').val("");
-    $('#txtTelMadre').val("");
-    $('#txtNomPadre').val("");
-    $('#txtTelPadre').val("");
-    $('#txtEducacion').val("");
-    $('#txtColegio').val("");
-    $('#txtTelColegio').val("");
-    
-    // Ocultar sección de menor
-    $('#seccionMenor').hide();
-}
+  $('#formPaciente')[0].reset();
+  $('#txtIdPersona, #txtIdPaciente, #id_genero, #id_estado_civil, #id_ciudad, #id_ciudad_nacimiento, #id_nivel_instruccion, #id_profesion').val("");
+  $('#alertaEdad').hide();
+  $('.stepwizard-step').eq(3).hide();
+  limpiarDatosMenor();
+  $('#previewHistoria').text('--').addClass('text-muted').removeClass('text-success');
+  $('.form-control').removeClass('is-invalid');
+  currentStep = 1;
+};
 
 const guardar = () => {
-    $('#btnGuardar').on('click', function() {
-        const idPaciente = $('#txtIdPaciente').val();
-         // Validar que la fecha no esté vacía
-        const fechaNacimiento = $('#txtFecha_nacimiento').val();
-        if (!fechaNacimiento) {
-            Swal.fire('Error', 'La fecha de nacimiento es obligatoria', 'error');
-            return;
-        }
-        // Datos de persona
-        const nombre = $('#txtNombre').val();
-        const apellido = $('#txtApellido').val();
-        const cedula = $('#txtCedula').val();
-        const fecha_nacimiento = $('#txtFecha_nacimiento').val();
-        const telefono = $('#txtTelefono').val();
-        const correo = $('#txtCorreo').val() || null;
-        const domicilio = $('#txtDomicilio').val() || null;
-        
-        // IDs de tablas referenciales (pueden ser null)
-        const id_genero = $('#id_genero').val() || null;
-        const id_estado_civil = $('#id_estado_civil').val() || null;
-        const id_ciudad = $('#id_ciudad').val() || null;
-        const id_ciudad_nacimiento = $('#id_ciudad_nacimiento').val() || null;
-        const id_nivel_instruccion = $('#id_nivel_instruccion').val() || null;
-        const id_profesion = $('#id_profesion').val() || null;
-        
-        // Datos de paciente
-        const historia_clinica = $('#txtHistoria_clinica').val() || null;
-        const es_menor = $('#chkEsMenor').is(':checked');
-        const observaciones = $('#txtObservaciones').val() || null;
-        
-        // Datos de menor (solo si es menor)
-        const nom_madre = es_menor ? $('#txtNomMadre').val() || null : null;
-        const tel_madre = es_menor ? $('#txtTelMadre').val() || null : null;
-        const nom_padre = es_menor ? $('#txtNomPadre').val() || null : null;
-        const tel_padre = es_menor ? $('#txtTelPadre').val() || null : null;
-        const educacion = es_menor ? $('#txtEducacion').val() || null : null;
-        const colegio = es_menor ? $('#txtColegio').val() || null : null;
-        const tel_colegio = es_menor ? $('#txtTelColegio').val() || null : null;
-        
-        // Validaciones básicas
-        if (!nombre || !apellido || !cedula || !telefono) {
-            Swal.fire("Error", "Complete los campos obligatorios (Nombre, Apellido, Cédula, Teléfono)", "error");
-            return;
-        }
-        
-        const tabla = $('#tbl').DataTable();
-        const dataPaciente = {
-            nombre,
-            apellido,
-            cedula,
-            fecha_nacimiento,
-            telefono,
-            correo,
-            domicilio,
-            id_genero,
-            id_estado_civil,
-            id_ciudad,
-            id_ciudad_nacimiento,
-            id_nivel_instruccion,
-            id_profesion,
-            historia_clinica,
-            es_menor,
-            observaciones,
-            nom_madre,
-            tel_madre,
-            nom_padre,
-            tel_padre,
-            educacion,
-            colegio,
-            tel_colegio
-        };
-        
-        if (idPaciente) {
-            // UPDATE
-            fetch(`/api/v1/pacientes/${idPaciente}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': CSRFToken
-                },
-                body: JSON.stringify(dataPaciente)
-            })
-            .then(resp => resp.json())
-            .then(data => {
-                if (data && data.success) {
-                    tabla.ajax.reload();
-                    $('#modalFormulario').modal("hide");
-                    Swal.fire("Actualizado", "El paciente ha sido actualizado correctamente.", "success");
-                } else {
-                    Swal.fire("Error", data.error || "Ocurrió un error al actualizar", "error");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire("Error", "Ocurrió un error al actualizar el paciente.", "error");
-            });
-        } else {
-            // INSERT
-            fetch(`/api/v1/pacientes`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': CSRFToken
-                },
-                body: JSON.stringify(dataPaciente)
-            })
-            .then(resp => resp.json())
-            .then(data => {
-                if (data && data.success) {
-                    tabla.ajax.reload();
-                    $('#modalFormulario').modal("hide");
-                    Swal.fire("Agregado", "El paciente ha sido agregado correctamente.", "success");
-                } else {
-                    Swal.fire("Error", data.error || "Ocurrió un error al guardar", "error");
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                Swal.fire("Error", "Ocurrió un error al guardar el paciente.", "error");
-            });
-        }
+  $('#btnGuardar').on('click', function() {
+    const idPaciente = $('#txtIdPaciente').val();
+    
+    const fechaNacimiento = $('#txtFecha_nacimiento').val();
+    if (!fechaNacimiento) {
+      Swal.fire('Error', 'La fecha de nacimiento es obligatoria', 'error');
+      return;
+    }
+    
+    const resultadoEdad = calcularEdad(fechaNacimiento);
+    if (resultadoEdad.error) {
+      Swal.fire('Error', resultadoEdad.error, 'error');
+      return;
+    }
+    
+    const nombre = $('#txtNombre').val();
+    const apellido = $('#txtApellido').val();
+    const cedula = $('#txtCedula').val();
+    const telefono = $('#txtTelefono').val();
+    
+    if (!nombre || !apellido || !cedula || !telefono) {
+      Swal.fire("Error", "Complete los campos obligatorios", "error");
+      return;
+    }
+    
+    if (resultadoEdad.esMenor) {
+      const nomMadre = $('#txtNomMadre').val() || null;
+      const nomPadre = $('#txtNomPadre').val() || null;
+      
+      if (!nomMadre && !nomPadre) {
+        Swal.fire('Error', 'El paciente es menor de edad. Debe proporcionar al menos el nombre de la madre o del padre.', 'error');
+        return;
+      }
+    }
+    
+    // ✅ CAPTURA CORREGIDA
+    const correo = sanitizeText($('#txtCorreo').val());
+    const domicilio = sanitizeText($('#txtDomicilio').val());
+    
+    const id_genero = sanitizeId($('#id_genero').val());
+    const id_estado_civil = sanitizeId($('#id_estado_civil').val());
+    const id_ciudad = sanitizeId($('#id_ciudad').val());
+    const id_ciudad_nacimiento = sanitizeId($('#id_ciudad_nacimiento').val());
+    const id_nivel_instruccion = sanitizeId($('#id_nivel_instruccion').val());
+    const id_profesion = sanitizeId($('#id_profesion').val());
+    
+    console.log('📊 IDs capturados:');
+    console.log('  - id_genero:', id_genero);
+    console.log('  - id_estado_civil:', id_estado_civil);
+    console.log('  - id_ciudad:', id_ciudad);
+    console.log('  - id_ciudad_nacimiento:', id_ciudad_nacimiento);
+    console.log('  - id_nivel_instruccion:', id_nivel_instruccion);
+    console.log('  - id_profesion:', id_profesion);
+    
+    const observaciones = sanitizeText($('#txtObservaciones').val());
+    
+    const nom_madre = resultadoEdad.esMenor ? sanitizeText($('#txtNomMadre').val()) : null;
+    const tel_madre = resultadoEdad.esMenor ? sanitizeText($('#txtTelMadre').val()) : null;
+    const nom_padre = resultadoEdad.esMenor ? sanitizeText($('#txtNomPadre').val()) : null;
+    const tel_padre = resultadoEdad.esMenor ? sanitizeText($('#txtTelPadre').val()) : null;
+    const educacion = resultadoEdad.esMenor ? sanitizeText($('#txtEducacion').val()) : null;
+    const colegio = resultadoEdad.esMenor ? sanitizeText($('#txtColegio').val()) : null;
+    const tel_colegio = resultadoEdad.esMenor ? sanitizeText($('#txtTelColegio').val()) : null;
+    
+    const dataPaciente = {
+      nombre,
+      apellido,
+      cedula,
+      fecha_nacimiento: fechaNacimiento,
+      telefono,
+      correo,
+      domicilio,
+      id_genero,
+      id_estado_civil,
+      id_ciudad,
+      id_ciudad_nacimiento,
+      id_nivel_instruccion,
+      id_profesion,
+      observaciones,
+      nom_madre,
+      tel_madre,
+      nom_padre,
+      tel_padre,
+      educacion,
+      colegio,
+      tel_colegio
+    };
+    
+    if (idPaciente) {
+      dataPaciente.historia_clinica = $('#txtHistoria_clinica').val();
+    }
+    
+    console.log('📦 Datos a enviar:', dataPaciente);
+    
+    const tabla = $('#tbl').DataTable();
+    const url = idPaciente ? `/api/v1/pacientes/${idPaciente}` : '/api/v1/pacientes';
+    const method = idPaciente ? 'PUT' : 'POST';
+    
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRFToken
+      },
+      body: JSON.stringify(dataPaciente)
+    })
+    .then(resp => resp.ok ? resp.json() : Promise.reject(resp))
+    .then(data => {
+      if (data.success) {
+        tabla.ajax.reload();
+        $('#modalFormulario').modal("hide");
+        Swal.fire("Éxito", `Paciente ${idPaciente ? 'actualizado' : 'agregado'} correctamente.`, "success");
+      } else {
+        Swal.fire("Error", data.error || "Ocurrió un error", "error");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      Swal.fire("Error", "Ocurrió un error al guardar.", "error");
     });
-}
-
-
+  });
+};
 
 const editar = () => {
-    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
-        Swal.fire({
-            title: "¿Deseas editar este paciente?",
-            showCancelButton: true,
-            confirmButtonText: "Sí",
-            cancelButtonText: "No"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $('#modalTitle').text("Editar Paciente");
-                
-                const idPaciente = $(this).data('id');
-                $('#txtIdPaciente').val(idPaciente);
-                
-                // CAMBIO: Usar el endpoint /editar que devuelve IDs
-                fetch(`/api/v1/pacientes/${idPaciente}/editar`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': CSRFToken
-                    }
-                })
-                .then(resp => resp.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error(data.error);
-                    }
-                    
-                    const paciente = data.data;
-                    
-                    // Datos básicos de persona
-                    $('#txtIdPersona').val(paciente.id_persona || '');
-                    $('#txtNombre').val(paciente.nombre || '');
-                    $('#txtApellido').val(paciente.apellido || '');
-                    $('#txtCedula').val(paciente.cedula || '');
-                    $('#txtFecha_nacimiento').val(paciente.fecha_nacimiento || '');
-                    $('#txtTelefono').val(paciente.telefono || '');
-                    $('#txtCorreo').val(paciente.correo || '');
-                    $('#txtDomicilio').val(paciente.domicilio || '');
-                    
-                    // Tablas referenciales - AHORA CON IDs
-                    $('#id_genero').val(paciente.id_genero || '');
-                    $('#id_estado_civil').val(paciente.id_estado_civil || '');
-                    $('#id_ciudad').val(paciente.id_ciudad || '');
-                    $('#id_ciudad_nacimiento').val(paciente.id_ciudad_nacimiento || '');
-                    $('#id_nivel_instruccion').val(paciente.id_nivel_instruccion || '');
-                    $('#id_profesion').val(paciente.id_profesion || '');
-                    
-                    // Datos del paciente
-                    $('#txtHistoria_clinica').val(paciente.historia_clinica || '');
-                    $('#txtObservaciones').val(paciente.observaciones || '');
-                    
-                    // Es menor
-                    const esMenor = paciente.es_menor || false;
-                    $('#chkEsMenor').prop('checked', esMenor);
-                    
-                    if (esMenor) {
-                        $('#seccionMenor').show();
-                        $('#txtNomMadre').val(paciente.nom_madre || '');
-                        $('#txtTelMadre').val(paciente.tel_madre || '');
-                        $('#txtNomPadre').val(paciente.nom_padre || '');
-                        $('#txtTelPadre').val(paciente.tel_padre || '');
-                        $('#txtEducacion').val(paciente.educacion || '');
-                        $('#txtColegio').val(paciente.colegio || '');
-                        $('#txtTelColegio').val(paciente.tel_colegio || '');
-                    } else {
-                        $('#seccionMenor').hide();
-                    }
-                    
-                    $('#modalFormulario').modal('show');
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire("Error", "No se pudo cargar los datos del paciente.", "error");
-                });
-            }
-        });
-    });
-}
-  const eliminar = () => {
-    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
-        const idPaciente = $(this).data('id');
-        const nombrePaciente = $(this).data('nombre');
+  $('#tbl').on('click', 'button[name="btn_editar"]', function() {
+    Swal.fire({
+      title: "¿Deseas editar este paciente?",
+      showCancelButton: true,
+      confirmButtonText: "Sí",
+      cancelButtonText: "No"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $('#modalTitle').text("Editar Paciente");
         
-        Swal.fire({
-            title: "¿Deseas eliminar este paciente?",
-            text: `Paciente: ${nombrePaciente}`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "No",
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/api/v1/pacientes/${idPaciente}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': CSRFToken
-                    }
-                })
-                .then(resp => resp.json())
-                .then(data => {
-                    if (data && data.success) {
-                        const tabla = $('#tbl').DataTable();
-                        tabla.ajax.reload();
-                        Swal.fire("Eliminado", "El paciente ha sido eliminado correctamente.", "success");
-                    } else {
-                        Swal.fire("Error", data.error || "No se pudo eliminar el paciente.", "error");
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    Swal.fire("Error", "Ocurrió un error al eliminar el paciente.", "error");
-                });
+        const idPaciente = $(this).data('id');
+        $('#txtIdPaciente').val(idPaciente);
+        
+        fetch(`/api/v1/pacientes/${idPaciente}/editar`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => {
+          if (!resp.ok) {
+            return resp.json().then(data => {
+              throw new Error(data.error || 'Error del servidor');
+            });
+          }
+          return resp.json();
+        })
+        .then(data => {
+          if (!data.success) {
+            throw new Error(data.error);
+          }
+          
+          const p = data.data;
+          
+          $('#txtIdPersona').val(p.id_persona || '');
+          $('#txtNombre').val(p.nombre || '');
+          $('#txtApellido').val(p.apellido || '');
+          $('#txtCedula').val(p.cedula || '');
+          $('#txtFecha_nacimiento').val(p.fecha_nacimiento || '');
+          $('#txtTelefono').val(p.telefono || '');
+          $('#txtCorreo').val(p.correo || '');
+          $('#txtDomicilio').val(p.domicilio || '');
+          
+          $('#id_genero').val(p.id_genero || '');
+          $('#txtGenero').val(p.genero || '');
+          
+          $('#id_estado_civil').val(p.id_estado_civil || '');
+          $('#txtEstado_civil').val(p.estado_civil || '');
+          
+          $('#id_ciudad').val(p.id_ciudad || '');
+          $('#txtCiudad').val(p.ciudad || '');
+          
+          $('#id_ciudad_nacimiento').val(p.id_ciudad_nacimiento || '');
+          $('#txtCiudad_nacimiento').val(p.ciudad_nacimiento || '');
+          
+          $('#id_nivel_instruccion').val(p.id_nivel_instruccion || '');
+          $('#txtNivel_instruccion').val(p.nivel_instruccion || '');
+          
+          $('#id_profesion').val(p.id_profesion || '');
+          $('#txtProfesion').val(p.profesion || '');
+          
+          $('#txtHistoria_clinica').val(p.historia_clinica || '');
+          $('#txtObservaciones').val(p.observaciones || '');
+          
+          if (p.fecha_nacimiento) {
+            const resultado = calcularEdad(p.fecha_nacimiento);
+            mostrarAlertaEdad(resultado);
+            
+            if (!resultado.error && resultado.esMenor) {
+              $('.stepwizard-step').eq(3).show();
+              
+              $('#txtNomMadre').val(p.nom_madre || '');
+              $('#txtTelMadre').val(p.tel_madre || '');
+              $('#txtNomPadre').val(p.nom_padre || '');
+              $('#txtTelPadre').val(p.tel_padre || '');
+              $('#txtEducacion').val(p.educacion || '');
+              $('#txtColegio').val(p.colegio || '');
+              $('#txtTelColegio').val(p.tel_colegio || '');
+            } else {
+              $('.stepwizard-step').eq(3).hide();
             }
+          }
+          
+          actualizarPreviewHistoria();
+          
+          currentStep = 1;
+          showStep(1);
+          
+          $('#modalFormulario').modal('show');
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", err.message || "No se pudo cargar los datos del paciente.", "error");
         });
+      }
     });
-}
-
-// Agregar esta función antes de addEvents()
-const descargarArchivos = () => {
-  // Evento para descargar PDF
-  $('#tbl').on('click', 'button[name="btn_pdf"]', function() {
-    const id = $(this).data('id');
-    window.open(`/api/v1/pacientes/${id}/pdf`, '_blank');
   });
+};
 
-  // Evento para descargar Excel
-  $('#tbl').on('click', 'button[name="btn_excel"]', function() {
-    const id = $(this).data('id');
-    window.open(`/api/v1/pacientes/${id}/excel`, '_blank');
+const eliminar = () => {
+  $('#tbl').on('click', 'button[name="btn_eliminar"]', function() {
+    const idPaciente = $(this).data('id');
+    const nombrePaciente = $(this).data('nombre');
+    
+    Swal.fire({
+      title: "¿Deseas eliminar este paciente?",
+      text: `Paciente: ${nombrePaciente}`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "No",
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/api/v1/pacientes/${idPaciente}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => {
+          if (!resp.ok) {
+            return resp.json().then(data => {
+              throw new Error(data.error || 'Error del servidor');
+            });
+          }
+          return resp.json();
+        })
+        .then(data => {
+          if (data && data.success) {
+            const tabla = $('#tbl').DataTable();
+            tabla.ajax.reload();
+            Swal.fire("Eliminado", "El paciente ha sido eliminado correctamente.", "success");
+          } else {
+            Swal.fire("Error", data.error || "No se pudo eliminar el paciente.", "error");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", err.message || "Ocurrió un error al eliminar el paciente.", "error");
+        });
+      }
+    });
   });
-}
+};
 
-// ============= FUNCIONES PRINCIPALES =============
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
 const addEvents = () => {
-  initWizard();  // <-- AGREGAR ESTA LÍNEA
+  initWizard();
+  initCalculoEdad();
+  initPreviewHistoria();
   agregar();
   guardar();
   editar();
   eliminar();
-  descargarArchivos();  // <-- AGREGAR ESTA LÍNEA
-  buscarGenero();
-  buscarEstadoCivil();
-  buscarCiudad();
-  buscarCiudadNacimiento();
-  buscarNivelInstruccion();
-  buscarProfesion();
-}
+  verFichaPaciente();
+  
+  Object.keys(SEARCH_CONFIGS).forEach(key => {
+    bindSearchClick(key);
+  });
+  
+  $('[data-toggle="tooltip"]').tooltip();
+};
 
-// ============= INICIALIZACIÓN =============
 $(document).ready(function() {
-  // Inicializar DataTable principal
   initDatatable();
   
-  // Inicializar DataTables de tablas referenciales
-  initDatatableGenero();
-  initDatatableEstadoCivil();
-  initDatatableCiudad();
-  initDatatableCiudadNacimiento();
-  initDatatableNivelInstruccion();
-  initDatatableProfesion();
+  Object.keys(SEARCH_CONFIGS).forEach(key => {
+    initSearchDatatable(key);
+  });
   
-  // Activar todos los eventos
   addEvents();
+  
+  $('.stepwizard-step').eq(3).hide();
 });
 
-</script> 
+</script>
 {% endblock %}

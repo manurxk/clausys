@@ -15,6 +15,7 @@ pacienteapi = Blueprint('pacienteapi', __name__)
 # ============================================
 @pacienteapi.route('/pacientes/<int:pac_id>/pdf', methods=['GET'])
 def generarPDF(pac_id):
+    """Genera un PDF con la ficha del paciente"""
     pacientedao = PacienteDao()
     
     try:
@@ -42,6 +43,7 @@ def generarPDF(pac_id):
             f"Cédula: {paciente.get('cedula', 'N/A')}",
             f"Fecha Nacimiento: {paciente.get('fecha_nacimiento', 'N/A')}",
             f"Edad: {paciente.get('edad', 'N/A')} años",
+            f"Es menor de edad: {'Sí' if paciente.get('es_menor') else 'No'}",
             f"Género: {paciente.get('genero', 'N/A')}",
             f"Estado Civil: {paciente.get('estado_civil', 'N/A')}",
             f"Teléfono: {paciente.get('telefono', 'N/A')}",
@@ -56,15 +58,32 @@ def generarPDF(pac_id):
             p.drawString(50, y, dato)
             y -= 20
         
+        # Datos del tutor si es menor
         if paciente.get('es_menor') and (paciente.get('nom_madre') or paciente.get('nom_padre')):
             y -= 20
             p.setFont("Helvetica-Bold", 12)
             p.drawString(50, y, "Datos del Tutor:")
             y -= 20
             p.setFont("Helvetica", 12)
-            p.drawString(50, y, f"Madre: {paciente.get('nom_madre', 'N/A')} - Tel: {paciente.get('tel_madre', 'N/A')}")
+            
+            if paciente.get('nom_madre'):
+                p.drawString(50, y, f"Madre: {paciente.get('nom_madre', 'N/A')} - Tel: {paciente.get('tel_madre', 'N/A')}")
+                y -= 20
+            
+            if paciente.get('nom_padre'):
+                p.drawString(50, y, f"Padre: {paciente.get('nom_padre', 'N/A')} - Tel: {paciente.get('tel_padre', 'N/A')}")
+                y -= 20
+            
+            if paciente.get('colegio'):
+                p.drawString(50, y, f"Colegio: {paciente.get('colegio', 'N/A')} - Tel: {paciente.get('tel_colegio', 'N/A')}")
+        
+        if paciente.get('observaciones'):
+            y -= 30
+            p.setFont("Helvetica-Bold", 12)
+            p.drawString(50, y, "Observaciones:")
             y -= 20
-            p.drawString(50, y, f"Padre: {paciente.get('nom_padre', 'N/A')} - Tel: {paciente.get('tel_padre', 'N/A')}")
+            p.setFont("Helvetica", 10)
+            p.drawString(50, y, paciente.get('observaciones', ''))
         
         p.showPage()
         p.save()
@@ -82,6 +101,7 @@ def generarPDF(pac_id):
 # ============================================
 @pacienteapi.route('/pacientes/<int:pac_id>/excel', methods=['GET'])
 def generarExcel(pac_id):
+    """Genera un archivo Excel con los datos del paciente"""
     pacientedao = PacienteDao()
     
     try:
@@ -99,7 +119,7 @@ def generarExcel(pac_id):
         ws['A1'] = "Campo"
         ws['B1'] = "Valor"
         
-        # Datos
+        # Datos básicos
         datos = [
             ["Historia Clínica", paciente.get('historia_clinica', 'N/A')],
             ["Nombre", paciente.get('nombre', '')],
@@ -107,15 +127,33 @@ def generarExcel(pac_id):
             ["Cédula", paciente.get('cedula', 'N/A')],
             ["Fecha Nacimiento", paciente.get('fecha_nacimiento', 'N/A')],
             ["Edad", f"{paciente.get('edad', 'N/A')} años"],
+            ["Es menor de edad", 'Sí' if paciente.get('es_menor') else 'No'],
             ["Género", paciente.get('genero', 'N/A')],
             ["Estado Civil", paciente.get('estado_civil', 'N/A')],
             ["Teléfono", paciente.get('telefono', 'N/A')],
             ["Correo", paciente.get('correo', 'N/A')],
             ["Domicilio", paciente.get('domicilio', 'N/A')],
             ["Ciudad", paciente.get('ciudad', 'N/A')],
+            ["Ciudad Nacimiento", paciente.get('ciudad_nacimiento', 'N/A')],
             ["Nivel Instrucción", paciente.get('nivel_instruccion', 'N/A')],
             ["Profesión", paciente.get('profesion', 'N/A')],
         ]
+        
+        # Agregar datos del tutor si es menor
+        if paciente.get('es_menor'):
+            datos.extend([
+                ["--- Datos del Tutor ---", ""],
+                ["Nombre Madre", paciente.get('nom_madre', 'N/A')],
+                ["Teléfono Madre", paciente.get('tel_madre', 'N/A')],
+                ["Nombre Padre", paciente.get('nom_padre', 'N/A')],
+                ["Teléfono Padre", paciente.get('tel_padre', 'N/A')],
+                ["Educación", paciente.get('educacion', 'N/A')],
+                ["Colegio", paciente.get('colegio', 'N/A')],
+                ["Teléfono Colegio", paciente.get('tel_colegio', 'N/A')],
+            ])
+        
+        if paciente.get('observaciones'):
+            datos.append(["Observaciones", paciente.get('observaciones', '')])
         
         for idx, (campo, valor) in enumerate(datos, start=2):
             ws[f'A{idx}'] = campo
@@ -131,7 +169,6 @@ def generarExcel(pac_id):
     except Exception as e:
         app.logger.error(f"Error al generar Excel: {str(e)}")
         return jsonify({'success': False, 'error': 'Error al generar Excel'}), 500
-
 
 
 # ============================================
@@ -153,6 +190,31 @@ def getPacientes():
     
     except Exception as e:
         app.logger.error(f"Error al obtener todos los pacientes: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Ocurrió un error interno. Consulte con el administrador.'
+        }), 500
+
+
+# ============================================
+# OBTENER SOLO PACIENTES MENORES
+# ============================================
+@pacienteapi.route('/pacientes/menores', methods=['GET'])
+def getPacientesMenores():
+    """Obtiene solo los pacientes menores de edad (calculado automáticamente)"""
+    pacientedao = PacienteDao()
+    
+    try:
+        menores = pacientedao.getPacientesMenores()
+        
+        return jsonify({
+            'success': True,
+            'data': menores,
+            'error': None
+        }), 200
+    
+    except Exception as e:
+        app.logger.error(f"Error al obtener pacientes menores: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
@@ -191,94 +253,11 @@ def getPaciente(pac_id):
 
 
 # ============================================
-# CREAR NUEVO PACIENTE
+# OBTENER PACIENTE PARA EDITAR
 # ============================================
-@pacienteapi.route('/pacientes', methods=['POST'])
-def addPaciente():
-    """Crea un nuevo paciente con todos sus datos"""
-    data = request.get_json()
-    pacientedao = PacienteDao()
-
-    # Campos obligatorios REALES
-    campos_requeridos = [
-        'nombre', 'apellido', 'cedula', 'telefono'
-    ]
-
-    # Validar campos obligatorios
-    for campo in campos_requeridos:
-        if campo not in data or not data[campo]:
-            return jsonify({
-                'success': False,
-                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
-            }), 400
-
-    # Validar que si es_menor = true, tenga datos de tutores
-    es_menor = data.get('es_menor', False)
-    if es_menor and not (data.get('nom_madre') or data.get('nom_padre')):
-        return jsonify({
-            'success': False,
-            'error': 'Si el paciente es menor, debe proporcionar al menos el nombre de la madre o el padre.'
-        }), 400
-
-    try:
-        paciente_id = pacientedao.guardarPaciente(
-            # Datos de persona (obligatorios)
-            nombre=data['nombre'],
-            apellido=data['apellido'],
-            cedula=data['cedula'],
-            telefono=data['telefono'],
-            fecha_nacimiento=data['fecha_nacimiento'],
-            
-            # Datos de persona (opcionales)
-            id_genero=data.get('id_genero'),  # <-- Cambiado
-            estado_civil_id=data.get('id_estado_civil'),  # <-- Cambiado
-            correo=data.get('correo'),
-            domicilio=data.get('domicilio'),
-            id_ciudad=data.get('id_ciudad'),  # <-- Cambiado
-            ciudad_nacimiento_id=data.get('id_ciudad_nacimiento'),  # <-- Cambiado
-            nivel_instruccion_id=data.get('id_nivel_instruccion'),  # <-- Cambiado
-            profesion_ocupacion_id=data.get('id_profesion'),  # <-- Cambiado
-            
-            # Datos de paciente
-            historia_clinica=data.get('historia_clinica'),  # <-- AHORA OPCIONAL
-            es_menor=es_menor,
-            observaciones=data.get('observaciones'),
-            
-            # Datos del menor
-            nom_madre=data.get('nom_madre'),
-            tel_madre=data.get('tel_madre'),
-            nom_padre=data.get('nom_padre'),
-            tel_padre=data.get('tel_padre'),
-            educacion=data.get('educacion'),
-            colegio=data.get('colegio'),
-            tel_colegio=data.get('tel_colegio')
-        )
-
-        if paciente_id is not None:
-            return jsonify({
-                'success': True,
-                'data': {
-                    'id_paciente': paciente_id,  # <-- Cambiado
-                    'mensaje': 'Paciente creado exitosamente'
-                },
-                'error': None
-            }), 201
-        else:
-            return jsonify({
-                'success': False,
-                'error': 'No se pudo guardar el paciente. Consulte con el administrador.'
-            }), 500
-
-    except Exception as e:
-        app.logger.error(f"Error al agregar paciente: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': f'Ocurrió un error interno: {str(e)}'
-        }), 500
-    
-
 @pacienteapi.route('/pacientes/<int:pac_id>/editar', methods=['GET'])
 def getPacienteParaEditar(pac_id):
+    """Obtiene paciente con IDs originales para formulario de edición"""
     pacientedao = PacienteDao()
 
     try:
@@ -302,17 +281,97 @@ def getPacienteParaEditar(pac_id):
             'success': False,
             'error': 'Ocurrió un error interno.'
         }), 500
+
+
+# ============================================
+# CREAR NUEVO PACIENTE
+# ============================================
+@pacienteapi.route('/pacientes', methods=['POST'])
+def addPaciente():
+    """
+    Crea un nuevo paciente con todos sus datos.
+    """
+    data = request.get_json()
+    pacientedao = PacienteDao()
+
+    # ✅ CORRECCIÓN: Solo estos 4 campos son REALMENTE obligatorios
+    campos_requeridos = ['nombre', 'apellido', 'cedula', 'fecha_nacimiento']
+
+    # Validar campos obligatorios
+    for campo in campos_requeridos:
+        if campo not in data or not data[campo]:
+            return jsonify({
+                'success': False,
+                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
+            }), 400
+
+    try:
+        paciente_id = pacientedao.guardarPaciente(
+            # Obligatorios
+            nombre=data['nombre'],
+            apellido=data['apellido'],
+            cedula=data['cedula'],
+            fecha_nacimiento=data['fecha_nacimiento'],
+            
+            # ✅ Ahora telefono también es opcional (como género/ciudad)
+            telefono=data.get('telefono'),
+            
+            # Opcionales (ya estaban bien)
+            id_genero=data.get('id_genero'),
+            id_estado_civil=data.get('id_estado_civil'),
+            correo=data.get('correo'),
+            domicilio=data.get('domicilio'),
+            id_ciudad=data.get('id_ciudad'),
+            id_ciudad_nacimiento=data.get('id_ciudad_nacimiento'),
+            id_nivel_instruccion=data.get('id_nivel_instruccion'),
+            id_profesion=data.get('id_profesion'),
+            
+            # Datos de paciente
+            historia_clinica=data.get('historia_clinica'),
+            observaciones=data.get('observaciones'),
+            
+            # Datos del menor
+            nom_madre=data.get('nom_madre'),
+            tel_madre=data.get('tel_madre'),
+            nom_padre=data.get('nom_padre'),
+            tel_padre=data.get('tel_padre'),
+            educacion=data.get('educacion'),
+            colegio=data.get('colegio'),
+            tel_colegio=data.get('tel_colegio')
+        )
+
+        if paciente_id is not None:
+            return jsonify({
+                'success': True,
+                'data': {
+                    'id_paciente': paciente_id,
+                    'mensaje': 'Paciente creado exitosamente'
+                },
+                'error': None
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No se pudo crear el paciente. Verifique que: 1) La fecha de nacimiento sea válida, 2) Si es menor de edad, proporcione al menos el nombre de la madre o padre, 3) La historia clínica no esté duplicada.'
+            }), 400
+
+    except Exception as e:
+        app.logger.error(f"Error inesperado al agregar paciente: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': 'Ocurrió un error interno del servidor. Consulte con el administrador.'
+        }), 500
+
+
 # ============================================
 # ACTUALIZAR PACIENTE EXISTENTE
 # ============================================
 @pacienteapi.route('/pacientes/<int:pac_id>', methods=['PUT'])
 def updatePaciente(pac_id):
-    """Actualiza un paciente existente con todos sus datos"""
     data = request.get_json()
     pacientedao = PacienteDao()
-    app.logger.info(f"Datos recibidos para actualizar: {data}")
 
-    # Verificar que el paciente existe
+    # Verificar que existe
     paciente_existente = pacientedao.getPacienteById(pac_id)
     if not paciente_existente:
         return jsonify({
@@ -320,10 +379,8 @@ def updatePaciente(pac_id):
             'error': 'No se encontró el paciente con el ID proporcionado.'
         }), 404
 
-    # Campos obligatorios
-    campos_requeridos = [
-        'nombre', 'apellido', 'cedula', 'cedula'
-    ]
+    # ✅ CORRECCIÓN: historia_clinica es obligatorio en UPDATE, pero telefono NO
+    campos_requeridos = ['nombre', 'apellido', 'cedula', 'fecha_nacimiento', 'historia_clinica']
 
     for campo in campos_requeridos:
         if campo not in data or not data[campo]:
@@ -336,24 +393,27 @@ def updatePaciente(pac_id):
         resultado = pacientedao.updatePaciente(
             pac_id=pac_id,
             
-            # Datos de persona
+            # Obligatorios
             nombre=data['nombre'],
             apellido=data['apellido'],
             cedula=data['cedula'],
             fecha_nacimiento=data['fecha_nacimiento'],
-            id_genero=data.get('id_genero'),
-            estado_civil_id=data.get('estado_civil_id'),
+            historia_clinica=data['historia_clinica'],
+            
+            # ✅ Telefono ahora opcional
             telefono=data.get('telefono'),
+            
+            # Opcionales
+            id_genero=data.get('id_genero'),
+            id_estado_civil=data.get('id_estado_civil'),
             correo=data.get('correo'),
             domicilio=data.get('domicilio'),
             id_ciudad=data.get('id_ciudad'),
-            ciudad_nacimiento_id=data.get('ciudad_nacimiento_id'),
-            nivel_instruccion_id=data.get('nivel_instruccion_id'),
-            profesion_ocupacion_id=data.get('profesion_ocupacion_id'),
+            id_ciudad_nacimiento=data.get('id_ciudad_nacimiento'),
+            id_nivel_instruccion=data.get('id_nivel_instruccion'),
+            id_profesion=data.get('id_profesion'),
             
             # Datos de paciente
-            historia_clinica=data['historia_clinica'],
-            es_menor=data['es_menor'],
             observaciones=data.get('observaciones'),
             
             # Datos del menor
@@ -370,7 +430,7 @@ def updatePaciente(pac_id):
             return jsonify({
                 'success': True,
                 'data': {
-                    'pac_id': pac_id,
+                    'id_paciente': pac_id,
                     'mensaje': 'Paciente actualizado exitosamente'
                 },
                 'error': None
@@ -379,22 +439,24 @@ def updatePaciente(pac_id):
             return jsonify({
                 'success': False,
                 'error': 'No se pudo actualizar el paciente.'
-            }), 500
+            }), 400
 
     except Exception as e:
-        app.logger.error(f"Error al actualizar paciente: {str(e)}")
+        app.logger.error(f"Error al actualizar paciente: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
-            'error': f'Ocurrió un error interno: {str(e)}'
+            'error': 'Ocurrió un error interno.'
         }), 500
-
 
 # ============================================
 # ELIMINAR PACIENTE
 # ============================================
 @pacienteapi.route('/pacientes/<int:pac_id>', methods=['DELETE'])
 def deletePaciente(pac_id):
-    """Elimina un paciente y todos sus datos asociados"""
+    """
+    Elimina un paciente y todos sus datos asociados.
+    Eliminación en cascada: pacientes_menores -> pacientes -> personas
+    """
     pacientedao = PacienteDao()
 
     try:
@@ -411,37 +473,82 @@ def deletePaciente(pac_id):
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar paciente: {str(e)}")
+        app.logger.error(f"Error al eliminar paciente: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
-        }), 500
-
-
-# ============================================
-# FILTRAR PACIENTES POR FECHA DE REGISTRO
-# ============================================
-@pacienteapi.route('/pacientes/filtro/fecha', methods=['GET'])
-def getPacientesPorFecha():
-    """Filtra pacientes por rango de fechas de registro"""
+        }), 500@pacienteapi.route('/pacientes', methods=['POST'])
+def addPaciente():
+    """
+    Crea un nuevo paciente con todos sus datos.
+    """
+    data = request.get_json()
     pacientedao = PacienteDao()
-    
-    # Obtener parámetros de query string
-    fecha_inicio = request.args.get('fecha_inicio')
-    fecha_fin = request.args.get('fecha_fin')
+
+    # ✅ CORRECCIÓN: Solo estos 4 campos son REALMENTE obligatorios
+    campos_requeridos = ['nombre', 'apellido', 'cedula', 'fecha_nacimiento']
+
+    # Validar campos obligatorios
+    for campo in campos_requeridos:
+        if campo not in data or not data[campo]:
+            return jsonify({
+                'success': False,
+                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
+            }), 400
 
     try:
-        pacientes = pacientedao.getPacientesPorFechaRegistro(fecha_inicio, fecha_fin)
+        paciente_id = pacientedao.guardarPaciente(
+            # Obligatorios
+            nombre=data['nombre'],
+            apellido=data['apellido'],
+            cedula=data['cedula'],
+            fecha_nacimiento=data['fecha_nacimiento'],
+            
+            # ✅ Ahora telefono también es opcional (como género/ciudad)
+            telefono=data.get('telefono'),
+            
+            # Opcionales (ya estaban bien)
+            id_genero=data.get('id_genero'),
+            id_estado_civil=data.get('id_estado_civil'),
+            correo=data.get('correo'),
+            domicilio=data.get('domicilio'),
+            id_ciudad=data.get('id_ciudad'),
+            id_ciudad_nacimiento=data.get('id_ciudad_nacimiento'),
+            id_nivel_instruccion=data.get('id_nivel_instruccion'),
+            id_profesion=data.get('id_profesion'),
+            
+            # Datos de paciente
+            historia_clinica=data.get('historia_clinica'),
+            observaciones=data.get('observaciones'),
+            
+            # Datos del menor
+            nom_madre=data.get('nom_madre'),
+            tel_madre=data.get('tel_madre'),
+            nom_padre=data.get('nom_padre'),
+            tel_padre=data.get('tel_padre'),
+            educacion=data.get('educacion'),
+            colegio=data.get('colegio'),
+            tel_colegio=data.get('tel_colegio')
+        )
 
-        return jsonify({
-            'success': True,
-            'data': pacientes,
-            'error': None
-        }), 200
+        if paciente_id is not None:
+            return jsonify({
+                'success': True,
+                'data': {
+                    'id_paciente': paciente_id,
+                    'mensaje': 'Paciente creado exitosamente'
+                },
+                'error': None
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No se pudo crear el paciente. Verifique que: 1) La fecha de nacimiento sea válida, 2) Si es menor de edad, proporcione al menos el nombre de la madre o padre, 3) La historia clínica no esté duplicada.'
+            }), 400
 
     except Exception as e:
-        app.logger.error(f"Error al filtrar pacientes por fecha: {str(e)}")
+        app.logger.error(f"Error inesperado al agregar paciente: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
-            'error': 'Ocurrió un error interno. Consulte con el administrador.'
+            'error': 'Ocurrió un error interno del servidor. Consulte con el administrador.'
         }), 500

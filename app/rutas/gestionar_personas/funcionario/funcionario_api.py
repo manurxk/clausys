@@ -171,11 +171,11 @@ def addFuncionario():
             fecha_nacimiento=data.get('fecha_nacimiento'),
             
             # Datos de persona (opcionales)
-            id_genero=data.get('id_genero'),
+            genero_id=data.get('id_genero'),
             estado_civil_id=data.get('id_estado_civil'),
             correo=data.get('correo'),
             domicilio=data.get('domicilio'),
-            id_ciduad=data.get('id_ciudad'),
+            ciudad_id=data.get('id_ciudad'),
             ciudad_nacimiento_id=data.get('id_ciudad_nacimiento'),
             nivel_instruccion_id=data.get('id_nivel_instruccion'),
             profesion_id=data.get('id_profesion'),
