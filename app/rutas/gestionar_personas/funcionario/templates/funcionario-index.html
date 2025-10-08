@@ -591,23 +591,6 @@ Funcionarios
 
 {% endblock %}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {% block js %}
 
 <script>
@@ -616,6 +599,11 @@ Funcionarios
 // ==========================================
 const CSRFToken = "{{ csrf_token() }}" || null;
 let currentStep = 1;
+const totalSteps = 4; // o 5 si es especialista
+
+// IDs de cargos que son especialistas (psicólogos)
+// IMPORTANTE: Ajustar estos IDs según tu base de datos
+const CARGOS_ESPECIALISTAS = [3, 4]; // Ejemplo: 3=Psicólogo, 4=Psicóloga
 
 // ==========================================
 // CONFIGURACIÓN DE BÚSQUEDAS UNIFICADAS
@@ -627,7 +615,7 @@ const SEARCH_CONFIGS = {
     endpoint: '/api/v1/generos',
     inputId: 'txtGenero',
     hiddenId: 'id_genero',
-    dataKey: 'id',  // ← CORREGIDO: usa 'id' genérico
+    dataKey: 'id',
     title: 'Seleccionar Sexo'
   },
   estadoCivil: {
@@ -636,7 +624,7 @@ const SEARCH_CONFIGS = {
     endpoint: '/api/v1/estados-civiles',
     inputId: 'txtEstado_civil',
     hiddenId: 'id_estado_civil',
-    dataKey: 'id',  // ← CORREGIDO: usa 'id' genérico
+    dataKey: 'id',
     title: 'Seleccionar Estado Civil'
   },
   ciudad: {
@@ -645,7 +633,7 @@ const SEARCH_CONFIGS = {
     endpoint: '/api/v1/ciudades',
     inputId: 'txtCiudad',
     hiddenId: 'id_ciudad',
-    dataKey: 'id',  // ← CORREGIDO: usa 'id' genérico
+    dataKey: 'id',
     title: 'Seleccionar Ciudad de Residencia'
   },
   ciudadNacimiento: {
@@ -654,7 +642,7 @@ const SEARCH_CONFIGS = {
     endpoint: '/api/v1/ciudades',
     inputId: 'txtCiudad_nacimiento',
     hiddenId: 'id_ciudad_nacimiento',
-    dataKey: 'id',  // ← CORREGIDO: usa 'id' genérico
+    dataKey: 'id',
     title: 'Seleccionar Ciudad de Nacimiento'
   },
   nivelInstruccion: {
@@ -663,7 +651,7 @@ const SEARCH_CONFIGS = {
     endpoint: '/api/v1/niveles-instruccion',
     inputId: 'txtNivel_instruccion',
     hiddenId: 'id_nivel_instruccion',
-    dataKey: 'id',  // ← CORREGIDO: usa 'id' genérico
+    dataKey: 'id',
     title: 'Seleccionar Nivel de Instrucción'
   },
   profesion: {
@@ -672,210 +660,18 @@ const SEARCH_CONFIGS = {
     endpoint: '/api/v1/profesiones',
     inputId: 'txtProfesion',
     hiddenId: 'id_profesion',
-    dataKey: 'id',  // ← CORREGIDO: usa 'id' genérico
+    dataKey: 'id',
     title: 'Seleccionar Profesión'
+  },
+  cargo: {
+    modalId: 'modalBuscarCargo',
+    tableId: 'tblCargo',
+    endpoint: '/api/v1/cargos',
+    inputId: 'txtCargo',
+    hiddenId: 'id_cargo',
+    dataKey: 'id',
+    title: 'Seleccionar Cargo'
   }
-};
-
-// ==========================================
-// FUNCIONES AUXILIARES
-// ==========================================
-
-/**
- * Calcula la edad a partir de una fecha de nacimiento
- */
-const calcularEdad = (fechaNacimiento) => {
-  if (!fechaNacimiento) return null;
-  
-  const hoy = new Date();
-  const nacimiento = new Date(fechaNacimiento);
-  
-  // Validar que la fecha no sea futura
-  if (nacimiento > hoy) {
-    return { error: 'La fecha de nacimiento no puede ser futura' };
-  }
-  
-  // Validar que no sea mayor a 120 años
-  let edad = hoy.getFullYear() - nacimiento.getFullYear();
-  const mes = hoy.getMonth() - nacimiento.getMonth();
-  
-  if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-    edad--;
-  }
-  
-  if (edad > 120) {
-    return { error: 'La fecha de nacimiento no puede ser mayor a 120 años' };
-  }
-  
-  return { edad, esMenor: edad < 18 };
-};
-
-/**
- * Genera la historia clínica en formato: Inicial+Inicial+Cedula
- */
-const generarHistoriaClinica = (nombre, apellido, cedula) => {
-  if (!nombre || !apellido || !cedula) return '';
-  
-  const inicialNombre = nombre.charAt(0).toUpperCase();
-  const inicialApellido = apellido.charAt(0).toUpperCase();
-  
-  return `${inicialNombre}${inicialApellido}${cedula}`;
-};
-
-/**
- * Actualiza el preview de historia clínica en tiempo real
- */
-const actualizarPreviewHistoria = () => {
-  const nombre = $('#txtNombre').val();
-  const apellido = $('#txtApellido').val();
-  const cedula = $('#txtCedula').val();
-  
-  const historia = generarHistoriaClinica(nombre, apellido, cedula);
-  
-  if (historia) {
-    $('#previewHistoria').text(historia).addClass('text-success').removeClass('text-muted');
-  } else {
-    $('#previewHistoria').text('--').addClass('text-muted').removeClass('text-success');
-  }
-};
-
-/**
- * Muestra alerta visual de edad calculada
- */
-const mostrarAlertaEdad = (resultado) => {
-  const alertaDiv = $('#alertaEdad');
-  
-  if (resultado.error) {
-    alertaDiv.html(`
-      <div class="alerta-error">
-        <i class="fas fa-exclamation-circle"></i> ${resultado.error}
-      </div>
-    `).show();
-    return;
-  }
-  
-  if (resultado.esMenor) {
-    alertaDiv.html(`
-      <div class="alerta-menor">
-        <i class="fas fa-child"></i> <strong>Menor de edad (${resultado.edad} años)</strong><br>
-        <small>Se habilitará el paso de datos del tutor</small>
-      </div>
-    `).show();
-  } else {
-    alertaDiv.html(`
-      <div class="alerta-mayor">
-        <i class="fas fa-user-check"></i> <strong>Mayor de edad (${resultado.edad} años)</strong>
-      </div>
-    `).show();
-  }
-};
-
-/**
- * Ajusta el wizard según si es menor o no
- */
-const ajustarWizardSegunEdad = (esMenor) => {
-  if (esMenor) {
-    // Mostrar paso 4 (tutor)
-    $('.stepwizard-step').eq(3).show(); // Paso 4 visible
-    
-    // Si estamos en paso 3, mostrar botón siguiente
-    if (currentStep === 3) {
-      $('#btnSiguiente').show();
-      $('#btnGuardar').hide();
-    }
-  } else {
-    // Ocultar paso 4 (tutor)
-    $('.stepwizard-step').eq(3).hide();
-    limpiarDatosMenor();
-    
-    // Si estamos en paso 3, es el último paso
-    if (currentStep === 3) {
-      $('#btnSiguiente').hide();
-      $('#btnGuardar').show();
-    }
-  }
-};
-
-/**
- * Limpia los datos del menor
- */
-const limpiarDatosMenor = () => {
-  $('#txtNomMadre').val('');
-  $('#txtTelMadre').val('');
-  $('#txtNomPadre').val('');
-  $('#txtTelPadre').val('');
-  $('#txtEducacion').val('');
-  $('#txtColegio').val('');
-  $('#txtTelColegio').val('');
-};
-
-/**
- * Función para sanitizar texto opcional
- */
-const sanitizeText = (value) => {
-  if (value === undefined || value === null || value === '' || value === 'undefined' || value === 'null') {
-    return null;
-  }
-  return value;
-};
-
-/**
- * Función para sanitizar IDs
- */
-const sanitizeId = (value) => {
-  // Log para debugging
-  console.log(`🔍 sanitizeId input: "${value}" (tipo: ${typeof value})`);
-  
-  if (value === '' || value === 'undefined' || value === 'null' || value === undefined || value === null) {
-    console.log(`   ➡️ Retornando null (valor vacío)`);
-    return null;
-  }
-  const num = Number(value);
-  
-  if (isNaN(num)) {
-    console.log(`   ➡️ Retornando null (NaN)`);
-    return null;
-  }
-  
-  console.log(`   ➡️ Retornando ${num}`);
-  return num;
-};
-
-// ==========================================
-// EVENTOS DE CÁLCULO AUTOMÁTICO
-// ==========================================
-
-/**
- * Listener para calcular edad automáticamente
- */
-const initCalculoEdad = () => {
-  $('#txtFecha_nacimiento').on('change', function() {
-    const fecha = $(this).val();
-    
-    if (!fecha) {
-      $('#alertaEdad').hide();
-      ajustarWizardSegunEdad(false);
-      return;
-    }
-    
-    const resultado = calcularEdad(fecha);
-    mostrarAlertaEdad(resultado);
-    
-    if (!resultado.error) {
-      ajustarWizardSegunEdad(resultado.esMenor);
-    } else {
-      ajustarWizardSegunEdad(false);
-    }
-  });
-};
-
-/**
- * Listeners para actualizar preview de historia clínica
- */
-const initPreviewHistoria = () => {
-  $('#txtNombre, #txtApellido, #txtCedula').on('input', function() {
-    actualizarPreviewHistoria();
-  });
 };
 
 // ==========================================
@@ -887,7 +683,7 @@ const initDatatable = () => {
       url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
     },
     ajax: {
-      url: '/api/v1/pacientes',
+      url: '/api/v1/funcionarios',
       dataSrc: function(json) {
         if (!json.success) {
           console.error('Error del servidor:', json.error);
@@ -897,32 +693,47 @@ const initDatatable = () => {
       },
       error: function(xhr, error, thrown) {
         console.error('Error en AJAX:', xhr.responseText);
-        Swal.fire('Error', 'Error al cargar los pacientes.', 'error');
+        alert('Error al cargar los funcionarios.');
       }
     },
     columns: [
-      { data: 'historia_clinica' },
       { data: 'nombre' },
       { data: 'apellido' },
       { data: 'cedula' },
-      { data: 'edad', className: 'text-center' },
+      { data: 'cargo' },
       { data: 'telefono' },
       { data: 'genero' },
       { data: 'ciudad' },
-      { data: 'fecha_registro' },
+      { 
+        data: function(row) {
+          return row.activo 
+            ? '<span class="badge badge-success">Activo</span>' 
+            : '<span class="badge badge-secondary">Inactivo</span>';
+        },
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          return row.matricula || '<span class="text-muted">-</span>';
+        }
+      },
+      { 
+        data: function(row) {
+          if (row.especialidades && row.especialidades.length > 50) {
+            return `<span title="${row.especialidades}">${row.especialidades.substring(0, 47)}...</span>`;
+          }
+          return row.especialidades || '<span class="text-muted">-</span>';
+        }
+      },
       { 
         data: function(row) {
           return `
-            <button type="button" name="btn_ver" class="btn btn-info btn-sm" 
-                    data-id="${row.id_paciente}" title="Ver Ficha">
-              <i class="fas fa-eye"></i>
-            </button>
             <button type="button" name="btn_editar" class="btn btn-warning btn-sm" 
-                    data-id="${row.id_paciente}" title="Editar">
+                    data-id="${row.id_funcionario}" title="Editar">
               <i class="fas fa-edit"></i>
             </button>
             <button type="button" name="btn_eliminar" class="btn btn-secondary btn-sm" 
-                    data-id="${row.id_paciente}" data-nombre="${row.nombre} ${row.apellido}" title="Eliminar">
+                    data-id="${row.id_funcionario}" data-nombre="${row.nombre} ${row.apellido}" title="Eliminar">
               <i class="fas fa-trash-alt"></i>
             </button>
           `;
@@ -931,9 +742,9 @@ const initDatatable = () => {
         orderable: false
       }
     ],
-    order: [[8, 'desc']]
+    order: [[3, 'asc']]
   });
-};
+}
 
 // ==========================================
 // SISTEMA DE BÚSQUEDA UNIFICADO
@@ -965,28 +776,21 @@ const initSearchDatatable = (configKey) => {
     const id = $(this).data('id');
     const descripcion = $(this).data('descripcion');
     
-    console.log(`✅ Seleccionado ${configKey}: ID=${id}, Descripción=${descripcion}`);
-    
     $(`#${config.inputId}`).val(descripcion);
     $(`#${config.hiddenId}`).val(id);
     $(`#${config.modalId}`).modal('hide');
   });
-};
+}
 
 const bindSearchClick = (configKey) => {
   const config = SEARCH_CONFIGS[configKey];
-  
-  // Agregar cursor pointer y ícono de búsqueda
-  $(`#${config.inputId}`).css('cursor', 'pointer').on('click', function() {
+  $(`#${config.inputId}`).on('click', function() {
     $(`#${config.modalId}`).modal('show');
   });
-  
-  // Agregar tooltip informativo
-  $(`#${config.inputId}`).attr('title', 'Clic para buscar').tooltip();
-};
+}
 
 // ==========================================
-// WIZARD - NAVEGACIÓN POR PASOS
+// WIZARD - ESTRUCTURA SIMPLE COMO PACIENTES
 // ==========================================
 const initWizard = () => {
   $('#btnSiguiente').click(function() {
@@ -998,7 +802,27 @@ const initWizard = () => {
   $('#btnAnterior').click(function() {
     previousStep();
   });
-};
+
+  // Mostrar paso 5 si es especialista
+  $('#chkEsEspecialista').change(function() {
+    if (this.checked) {
+      $('#step5Indicator').show();
+      cargarEspecialidades();
+      if (currentStep === 4) {
+        $('#btnGuardar').hide();
+        $('#btnSiguiente').show();
+      }
+    } else {
+      $('#step5Indicator').hide();
+      $(`.wizard-step[data-step="5"]`).hide();
+      limpiarEspecialidades();
+      if (currentStep === 4) {
+        $('#btnSiguiente').hide();
+        $('#btnGuardar').show();
+      }
+    }
+  });
+}
 
 const showStep = (step) => {
   $('.wizard-step').hide();
@@ -1016,71 +840,37 @@ const showStep = (step) => {
   // Controlar botones
   $('#btnAnterior').toggle(step > 1);
   
-  // Determinar último paso según si es menor
-  const fechaNac = $('#txtFecha_nacimiento').val();
-  const resultado = calcularEdad(fechaNac);
-  const esMenor = resultado && !resultado.error && resultado.esMenor;
+  const esEspecialista = $('#chkEsEspecialista').is(':checked');
+  const lastStep = esEspecialista ? 5 : 4;
   
-  // Si es menor: paso 1,2,3,4(tutor),5(clínico) = último es 5
-  // Si es mayor: paso 1,2,3,5(clínico) = último es 5 también
-  // PERO paso 3 se comporta como último si NO es menor
-  
-  if (step === 5) {
-    // Paso 5 (clínico) siempre es el último para ambos casos
+  if (step === lastStep) {
     $('#btnSiguiente').hide();
     $('#btnGuardar').show();
-  } else if (step === 3 && !esMenor) {
-    // Paso 3 es el penúltimo para mayores, siguiente lleva a paso 5
-    $('#btnSiguiente').show();
-    $('#btnGuardar').hide();
   } else {
     $('#btnSiguiente').show();
     $('#btnGuardar').hide();
   }
-};
+}
 
 const nextStep = () => {
-  // Calcular dinámicamente si es menor
-  const fechaNac = $('#txtFecha_nacimiento').val();
-  const resultado = calcularEdad(fechaNac);
-  const esMenor = resultado && !resultado.error && resultado.esMenor;
+  const esEspecialista = $('#chkEsEspecialista').is(':checked');
+  const maxStep = esEspecialista ? 5 : 4;
   
-  // Navegación especial para saltar el paso 4 si NO es menor
-  if (currentStep === 1) {
-    currentStep = 2;
-  } else if (currentStep === 2) {
-    currentStep = 3;
-  } else if (currentStep === 3) {
-    // Si es menor, ir a paso 4 (tutor)
-    // Si NO es menor, saltar directo a paso 5 (clínico)
-    currentStep = esMenor ? 4 : 5;
-  } else if (currentStep === 4) {
-    // Solo se llega aquí si es menor
-    currentStep = 5;
+  if (currentStep < maxStep) {
+    currentStep++;
+    showStep(currentStep);
   }
-  
-  showStep(currentStep);
-};
+}
 
 const previousStep = () => {
-  // Si estamos en paso 5 y NO es menor, volver a paso 3
-  const fechaNac = $('#txtFecha_nacimiento').val();
-  const resultado = calcularEdad(fechaNac);
-  const esMenor = resultado && !resultado.error && resultado.esMenor;
-  
-  if (currentStep === 5 && !esMenor) {
-    currentStep = 3;
-  } else if (currentStep > 1) {
+  if (currentStep > 1) {
     currentStep--;
+    showStep(currentStep);
   }
-  
-  showStep(currentStep);
-};
+}
 
 const validateCurrentStep = () => {
   let valid = true;
-  
-  // Validar campos required del paso actual
   $(`.wizard-step[data-step="${currentStep}"] input[required]`).each(function() {
     if (!$(this).val()) {
       $(this).addClass('is-invalid');
@@ -1090,36 +880,21 @@ const validateCurrentStep = () => {
     }
   });
   
-  // Validación especial para paso 1
-  if (currentStep === 1) {
-    const fechaNac = $('#txtFecha_nacimiento').val();
-    
-    if (!fechaNac) {
-      $('#txtFecha_nacimiento').addClass('is-invalid');
-      valid = false;
-    } else {
-      const resultado = calcularEdad(fechaNac);
-      if (resultado.error) {
-        $('#txtFecha_nacimiento').addClass('is-invalid');
-        Swal.fire('Error', resultado.error, 'error');
-        return false;
-      }
-    }
+  // Validación especial para paso 4 (cargo obligatorio)
+  if (currentStep === 4 && !$('#id_cargo').val()) {
+    $('#txtCargo').addClass('is-invalid');
+    valid = false;
   }
   
-  // Validación especial para paso 4 (tutor) - CRÍTICO
-  if (currentStep === 4) {
-    const nomMadre = $('#txtNomMadre').val();
-    const nomPadre = $('#txtNomPadre').val();
-    
-    if (!nomMadre && !nomPadre) {
-      $('#txtNomMadre').addClass('is-invalid');
-      $('#txtNomPadre').addClass('is-invalid');
-      Swal.fire('Error', 'Debe proporcionar al menos el nombre de la madre o del padre', 'error');
-      return false;
-    } else {
-      $('#txtNomMadre').removeClass('is-invalid');
-      $('#txtNomPadre').removeClass('is-invalid');
+  // Validación para paso 5 (especialista)
+  if (currentStep === 5 && $('#chkEsEspecialista').is(':checked')) {
+    if (!$('#txtMatricula').val()) {
+      $('#txtMatricula').addClass('is-invalid');
+      valid = false;
+    }
+    if ($('.especialidad-check:checked').length === 0) {
+      Swal.fire('Atención', 'Debe seleccionar al menos una especialidad', 'warning');
+      valid = false;
     }
   }
   
@@ -1128,173 +903,99 @@ const validateCurrentStep = () => {
   }
   
   return valid;
-};
+}
 
 // ==========================================
-// MODAL VER FICHA COMPLETA
+// MANEJO DE ESPECIALIDADES
 // ==========================================
-const verFichaPaciente = () => {
-  $('#tbl').on('click', 'button[name="btn_ver"]', function() {
-    const idPaciente = $(this).data('id');
-    
-    // USAR ENDPOINT CORRECTO PARA VISUALIZACIÓN (no /editar)
-    fetch(`/api/v1/pacientes/${idPaciente}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': CSRFToken
-      }
-    })
-    .then(resp => {
-      if (!resp.ok) {
-        return resp.json().then(data => {
-          throw new Error(data.error || 'Error del servidor');
+const cargarEspecialidades = () => {
+  // Evitar cargar múltiples veces
+  if ($('#contenedorEspecialidades').children().length > 0) {
+    return;
+  }
+  
+  $.ajax({
+    url: '/api/v1/especialidades',
+    method: 'GET',
+    success: function(response) {
+      if (response.success && response.data) {
+        let html = '';
+        response.data.forEach(esp => {
+          // Detectar el nombre del campo ID (puede variar según tu API)
+          const espId = esp.id_especialidad || esp.id;
+          const espDesc = esp.descripcion || esp.des_especialidad;
+          
+          if (!espId) {
+            console.error('Especialidad sin ID:', esp);
+            return;
+          }
+          
+          html += `
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input especialidad-check" 
+                     id="esp_${espId}" value="${espId}">
+              <label class="custom-control-label" for="esp_${espId}">
+                ${espDesc}
+              </label>
+            </div>
+          `;
         });
+        $('#contenedorEspecialidades').html(html);
       }
-      return resp.json();
-    })
-    .then(data => {
-      if (!data.success) {
-        throw new Error(data.error);
-      }
-      
-      const p = data.data;
-      
-      // Construir HTML de vista
-      let html = `
-        <div class="mb-3 text-right">
-          <button class="btn btn-danger btn-sm" onclick="descargarPDF(${idPaciente})">
-            <i class="fas fa-file-pdf"></i> Descargar PDF
-          </button>
-          <button class="btn btn-success btn-sm" onclick="descargarExcel(${idPaciente})">
-            <i class="fas fa-file-excel"></i> Descargar Excel
-          </button>
-        </div>
-        <hr>
-        
-        <h5 class="mb-3"><i class="fas fa-user"></i> Datos Personales</h5>
-        <div class="row">
-          <div class="col-md-6">
-            <p><strong>Nombre Completo:</strong> ${p.nombre || ''} ${p.apellido || ''}</p>
-            <p><strong>Cédula:</strong> ${p.cedula || 'N/A'}</p>
-            <p><strong>Fecha de Nacimiento:</strong> ${p.fecha_nacimiento || 'N/A'}</p>
-            <p><strong>Edad:</strong> ${p.edad || 'N/A'} años</p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Sexo:</strong> ${p.genero || 'N/A'}</p>
-            <p><strong>Estado Civil:</strong> ${p.estado_civil || 'N/A'}</p>
-            <p><strong>Teléfono:</strong> ${p.telefono || 'N/A'}</p>
-            <p><strong>Correo:</strong> ${p.correo || 'N/A'}</p>
-          </div>
-        </div>
-        
-        <hr>
-        <h5 class="mb-3"><i class="fas fa-map-marker-alt"></i> Ubicación</h5>
-        <div class="row">
-          <div class="col-md-6">
-            <p><strong>Domicilio:</strong> ${p.domicilio || 'N/A'}</p>
-            <p><strong>Ciudad de Residencia:</strong> ${p.ciudad || 'N/A'}</p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Ciudad de Nacimiento:</strong> ${p.ciudad_nacimiento || 'N/A'}</p>
-          </div>
-        </div>
-        
-        <hr>
-        <h5 class="mb-3"><i class="fas fa-graduation-cap"></i> Formación</h5>
-        <div class="row">
-          <div class="col-md-6">
-            <p><strong>Nivel de Instrucción:</strong> ${p.nivel_instruccion || 'N/A'}</p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Profesión:</strong> ${p.profesion || 'N/A'}</p>
-          </div>
-        </div>
-        
-        <hr>
-        <h5 class="mb-3"><i class="fas fa-notes-medical"></i> Datos Clínicos</h5>
-        <div class="row">
-          <div class="col-md-6">
-            <p><strong>Historia Clínica:</strong> ${p.historia_clinica || 'N/A'}</p>
-            <p><strong>Fecha de Registro:</strong> ${p.fecha_registro || 'N/A'}</p>
-          </div>
-          <div class="col-md-6">
-            <p><strong>Es Menor:</strong> ${p.es_menor ? 'Sí' : 'No'}</p>
-          </div>
-        </div>
-        ${p.observaciones ? `<p><strong>Observaciones:</strong> ${p.observaciones}</p>` : ''}
-      `;
-      
-      // Si es menor, agregar datos de tutores
-      if (p.es_menor) {
-        html += `
-          <hr>
-          <h5 class="mb-3"><i class="fas fa-users"></i> Datos de Tutores</h5>
-          <div class="row">
-            <div class="col-md-6">
-              <h6>Madre</h6>
-              <p><strong>Nombre:</strong> ${p.nom_madre || 'N/A'}</p>
-              <p><strong>Teléfono:</strong> ${p.tel_madre || 'N/A'}</p>
-            </div>
-            <div class="col-md-6">
-              <h6>Padre</h6>
-              <p><strong>Nombre:</strong> ${p.nom_padre || 'N/A'}</p>
-              <p><strong>Teléfono:</strong> ${p.tel_padre || 'N/A'}</p>
-            </div>
-          </div>
-          <hr>
-          <h5 class="mb-3"><i class="fas fa-school"></i> Datos Escolares</h5>
-          <div class="row">
-            <div class="col-md-4">
-              <p><strong>Educación:</strong> ${p.educacion || 'N/A'}</p>
-            </div>
-            <div class="col-md-4">
-              <p><strong>Colegio:</strong> ${p.colegio || 'N/A'}</p>
-            </div>
-            <div class="col-md-4">
-              <p><strong>Tel. Colegio:</strong> ${p.tel_colegio || 'N/A'}</p>
-            </div>
-          </div>
-        `;
-      }
-      
-      $('#contenidoVistaPaciente').html(html);
-      $('#modalVistaPaciente').modal('show');
-    })
-    .catch(err => {
-      console.error(err);
-      Swal.fire("Error", err.message || "No se pudo cargar los datos del paciente.", "error");
-    });
+    },
+    error: function(xhr) {
+      console.error('Error al cargar especialidades:', xhr.responseText);
+      Swal.fire('Error', 'No se pudieron cargar las especialidades', 'error');
+    }
   });
-};
+}
 
-// Funciones de descarga (globales para usar desde onclick)
-window.descargarPDF = (id) => {
-  window.open(`/api/v1/pacientes/${id}/pdf`, '_blank');
-};
+const limpiarEspecialidades = () => {
+  $('#txtMatricula').val('');
+  $('#txtColorAgenda').val('#3498db');
+  $('.especialidad-check').prop('checked', false);
+}
 
-window.descargarExcel = (id) => {
-  window.open(`/api/v1/pacientes/${id}/excel`, '_blank');
-};
+const getEspecialidadesSeleccionadas = () => {
+  const especialidades = [];
+  $('.especialidad-check:checked').each(function() {
+    const valor = $(this).val();
+    const id = parseInt(valor);
+    
+    if (!isNaN(id) && id > 0) {
+      especialidades.push(id);
+    }
+  });
+  return especialidades;
+}
+
+const marcarEspecialidades = (ids) => {
+  $('.especialidad-check').prop('checked', false);
+  if (ids && ids.length > 0) {
+    ids.forEach(id => {
+      $(`#esp_${id}`).prop('checked', true);
+    });
+  }
+}
 
 // ==========================================
 // CRUD - FUNCIONES PRINCIPALES
 // ==========================================
 const agregar = () => {
   $('#btnAgregar').on('click', function() {
-    $('#modalTitle').text("Agregar Nuevo Paciente");
+    $('#modalTitle').text("Agregar Nuevo Funcionario");
     limpiarFormulario();
     currentStep = 1;
     showStep(1);
     $('#modalFormulario').modal();
   });
-};
+}
 
 const limpiarFormulario = () => {
-  $('#formPaciente')[0].reset();
+  $('#formFuncionario')[0].reset();
   
   $('#txtIdPersona').val("");
-  $('#txtIdPaciente').val("");
+  $('#txtIdFuncionario').val("");
   
   // Limpiar IDs ocultos
   $('#id_genero').val("");
@@ -1303,133 +1004,94 @@ const limpiarFormulario = () => {
   $('#id_ciudad_nacimiento').val("");
   $('#id_nivel_instruccion').val("");
   $('#id_profesion').val("");
+  $('#id_cargo').val("");
   
-  // Ocultar alerta de edad
-  $('#alertaEdad').hide();
+  // Valores por defecto
+  $('#chkActivo').prop('checked', true);
+  $('#chkEsEspecialista').prop('checked', false);
+  $('#txtColorAgenda').val('#3498db');
   
-  // Ocultar paso 4 (tutor) por defecto
-  $('.stepwizard-step').eq(3).hide();
-  limpiarDatosMenor();
-  
-  // Limpiar preview
-  $('#previewHistoria').text('--').addClass('text-muted').removeClass('text-success');
+  // Ocultar paso 5
+  $('#step5Indicator').hide();
+  $('#contenedorEspecialidades').empty();
   
   // Limpiar validaciones
   $('.form-control').removeClass('is-invalid');
-  
-  // Resetear wizard
-  currentStep = 1;
-};
+}
 
 const guardar = () => {
   $('#btnGuardar').on('click', function() {
-    const idPaciente = $('#txtIdPaciente').val();
+    const idFuncionario = $('#txtIdFuncionario').val();
     
-    // Validar fecha obligatoria
-    const fechaNacimiento = $('#txtFecha_nacimiento').val();
-    if (!fechaNacimiento) {
-      Swal.fire('Error', 'La fecha de nacimiento es obligatoria', 'error');
-      return;
-    }
-    
-    // Validar fecha
-    const resultadoEdad = calcularEdad(fechaNacimiento);
-    if (resultadoEdad.error) {
-      Swal.fire('Error', resultadoEdad.error, 'error');
-      return;
-    }
-    
-    // Datos básicos obligatorios
+    // Validaciones básicas
     const nombre = $('#txtNombre').val();
     const apellido = $('#txtApellido').val();
     const cedula = $('#txtCedula').val();
     const telefono = $('#txtTelefono').val();
+    const id_cargo = $('#id_cargo').val();
     
-    if (!nombre || !apellido || !cedula || !telefono) {
-      Swal.fire("Error", "Complete los campos obligatorios (Nombre, Apellido, Cédula, Teléfono)", "error");
+    // Debug
+    console.log('Cargo seleccionado:', {
+      visible: $('#txtCargo').val(),
+      hidden: id_cargo
+    });
+    
+    if (!nombre || !apellido || !cedula || !telefono || !id_cargo) {
+      // Marcar campos vacíos
+      if (!nombre) $('#txtNombre').addClass('is-invalid');
+      if (!apellido) $('#txtApellido').addClass('is-invalid');
+      if (!cedula) $('#txtCedula').addClass('is-invalid');
+      if (!telefono) $('#txtTelefono').addClass('is-invalid');
+      if (!id_cargo) $('#txtCargo').addClass('is-invalid');
+      
+      Swal.fire("Error", "Complete los campos obligatorios (Nombre, Apellido, Cédula, Teléfono, Cargo)", "error");
       return;
     }
     
-    // VALIDACIÓN CRÍTICA: Si es menor, validar tutores
-    if (resultadoEdad.esMenor) {
-      const nomMadre = sanitizeText($('#txtNomMadre').val());
-      const nomPadre = sanitizeText($('#txtNomPadre').val());
+    // Detectar si es especialista
+    const esEspecialista = $('#chkEsEspecialista').is(':checked');
+    
+    // Validar datos de especialista
+    if (esEspecialista) {
+      const matricula = $('#txtMatricula').val();
+      const especialidades = getEspecialidadesSeleccionadas();
       
-      if (!nomMadre && !nomPadre) {
-        Swal.fire('Error', 'El paciente es menor de edad. Debe proporcionar al menos el nombre de la madre o del padre.', 'error');
+      if (!matricula) {
+        Swal.fire("Error", "La matrícula es obligatoria para especialistas", "error");
+        return;
+      }
+      
+      if (especialidades.length === 0) {
+        Swal.fire("Error", "Debe seleccionar al menos una especialidad", "error");
         return;
       }
     }
     
-    // Datos opcionales
-    const correo = sanitizeText($('#txtCorreo').val());
-    const domicilio = sanitizeText($('#txtDomicilio').val());
-    
-    // IDs de tablas referenciales
-    const id_genero = sanitizeId($('#id_genero').val());
-    const id_estado_civil = sanitizeId($('#id_estado_civil').val());
-    const id_ciudad = sanitizeId($('#id_ciudad').val());
-    const id_ciudad_nacimiento = sanitizeId($('#id_ciudad_nacimiento').val());
-    const id_nivel_instruccion = sanitizeId($('#id_nivel_instruccion').val());
-    const id_profesion = sanitizeId($('#id_profesion').val());
-    
-    console.log('📊 IDs capturados:');
-    console.log('  - id_genero:', id_genero);
-    console.log('  - id_estado_civil:', id_estado_civil);
-    console.log('  - id_ciudad:', id_ciudad);
-    console.log('  - id_ciudad_nacimiento:', id_ciudad_nacimiento);
-    console.log('  - id_nivel_instruccion:', id_nivel_instruccion);
-    console.log('  - id_profesion:', id_profesion);
-    
-    // Datos de paciente
-    // IMPORTANTE: NO enviar historia_clinica en POST, dejar que el DAO la genere
-    // En PUT sí la enviamos porque ya existe
-    const historia_clinica = idPaciente ? sanitizeText($('#txtHistoria_clinica').val()) : null;
-    const observaciones = sanitizeText($('#txtObservaciones').val());
-    
-    // Datos de menor (solo si es menor)
-    const nom_madre = resultadoEdad.esMenor ? sanitizeText($('#txtNomMadre').val()) : null;
-    const tel_madre = resultadoEdad.esMenor ? sanitizeText($('#txtTelMadre').val()) : null;
-    const nom_padre = resultadoEdad.esMenor ? sanitizeText($('#txtNomPadre').val()) : null;
-    const tel_padre = resultadoEdad.esMenor ? sanitizeText($('#txtTelPadre').val()) : null;
-    const educacion = resultadoEdad.esMenor ? sanitizeText($('#txtEducacion').val()) : null;
-    const colegio = resultadoEdad.esMenor ? sanitizeText($('#txtColegio').val()) : null;
-    const tel_colegio = resultadoEdad.esMenor ? sanitizeText($('#txtTelColegio').val()) : null;
-    
-    const dataPaciente = {
-      nombre,
-      apellido,
-      cedula,
-      fecha_nacimiento: fechaNacimiento,
-      telefono,
-      correo,
-      domicilio,
-      id_genero,
-      id_estado_civil,
-      id_ciudad,
-      id_ciudad_nacimiento,
-      id_nivel_instruccion,
-      id_profesion,
-      observaciones,
-      nom_madre,
-      tel_madre,
-      nom_padre,
-      tel_padre,
-      educacion,
-      colegio,
-      tel_colegio
+    // Preparar datos
+    const dataFuncionario = {
+      nombre: nombre,
+      apellido: apellido,
+      cedula: cedula,
+      telefono: telefono,
+      id_cargo: parseInt(id_cargo), 
+      fecha_nacimiento: $('#txtFecha_nacimiento').val() || null,
+      correo: $('#txtCorreo').val() || null,
+      domicilio: $('#txtDomicilio').val() || null,
+      id_genero: $('#id_genero').val() ? parseInt($('#id_genero').val()) : null,
+      id_estado_civil: $('#id_estado_civil').val() ? parseInt($('#id_estado_civil').val()) : null,
+      id_ciudad: $('#id_ciudad').val() ? parseInt($('#id_ciudad').val()) : null,
+      id_ciudad_nacimiento: $('#id_ciudad_nacimiento').val() ? parseInt($('#id_ciudad_nacimiento').val()) : null,
+      id_nivel_instruccion: $('#id_nivel_instruccion').val() ? parseInt($('#id_nivel_instruccion').val()) : null,
+      id_profesion: $('#id_profesion').val() ? parseInt($('#id_profesion').val()) : null,
+      activo: $('#chkActivo').is(':checked'),
+      esp_matricula: esEspecialista ? $('#txtMatricula').val() : null,
+      esp_color_agenda: esEspecialista ? $('#txtColorAgenda').val() : null,
+      especialidades: esEspecialista ? getEspecialidadesSeleccionadas() : []
     };
     
-    // Solo agregar historia_clinica en PUT (actualización)
-    if (idPaciente && historia_clinica) {
-      dataPaciente.historia_clinica = historia_clinica;
-    }
-    
-    // IMPORTANTE: NO enviar es_menor - el backend lo calcula automáticamente
-    
     const tabla = $('#tbl').DataTable();
-    const url = idPaciente ? `/api/v1/pacientes/${idPaciente}` : '/api/v1/pacientes';
-    const method = idPaciente ? 'PUT' : 'POST';
+    const url = idFuncionario ? `/api/v1/funcionarios/${idFuncionario}` : '/api/v1/funcionarios';
+    const method = idFuncionario ? 'PUT' : 'POST';
     
     fetch(url, {
       method: method,
@@ -1437,126 +1099,102 @@ const guardar = () => {
         'Content-Type': 'application/json',
         'X-CSRFToken': CSRFToken
       },
-      body: JSON.stringify(dataPaciente)
+      body: JSON.stringify(dataFuncionario)
     })
-    .then(resp => {
-      if (!resp.ok) {
-        return resp.json().then(data => {
-          throw new Error(data.error || 'Error del servidor');
-        });
-      }
-      return resp.json();
-    })
+    .then(resp => resp.json())
     .then(data => {
       if (data && data.success) {
         tabla.ajax.reload();
         $('#modalFormulario').modal("hide");
-        Swal.fire("Éxito", `El paciente ha sido ${idPaciente ? 'actualizado' : 'agregado'} correctamente.`, "success");
+        Swal.fire("Éxito", `El funcionario ha sido ${idFuncionario ? 'actualizado' : 'agregado'} correctamente.`, "success");
       } else {
         Swal.fire("Error", data.error || "Ocurrió un error", "error");
       }
     })
     .catch(err => {
       console.error(err);
-      Swal.fire("Error", err.message || "Ocurrió un error al guardar el paciente.", "error");
+      Swal.fire("Error", "Ocurrió un error al guardar el funcionario.", "error");
     });
   });
-};
+}
 
 const editar = () => {
   $('#tbl').on('click', 'button[name="btn_editar"]', function() {
     Swal.fire({
-      title: "¿Deseas editar este paciente?",
+      title: "¿Deseas editar este funcionario?",
       showCancelButton: true,
       confirmButtonText: "Sí",
       cancelButtonText: "No"
     }).then((result) => {
       if (result.isConfirmed) {
-        $('#modalTitle').text("Editar Paciente");
+        $('#modalTitle').text("Editar Funcionario");
         
-        const idPaciente = $(this).data('id');
-        $('#txtIdPaciente').val(idPaciente);
+        const idFuncionario = $(this).data('id');
+        $('#txtIdFuncionario').val(idFuncionario);
         
-        // Usar endpoint /editar para obtener IDs originales
-        fetch(`/api/v1/pacientes/${idPaciente}/editar`, {
+        fetch(`/api/v1/funcionarios/${idFuncionario}/editar`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': CSRFToken
           }
         })
-        .then(resp => {
-          if (!resp.ok) {
-            return resp.json().then(data => {
-              throw new Error(data.error || 'Error del servidor');
-            });
-          }
-          return resp.json();
-        })
+        .then(resp => resp.json())
         .then(data => {
           if (!data.success) {
             throw new Error(data.error);
           }
           
-          const p = data.data;
+          const f = data.data;
           
           // Datos básicos
-          $('#txtIdPersona').val(p.id_persona || '');
-          $('#txtNombre').val(p.nombre || '');
-          $('#txtApellido').val(p.apellido || '');
-          $('#txtCedula').val(p.cedula || '');
-          $('#txtFecha_nacimiento').val(p.fecha_nacimiento || '');
-          $('#txtTelefono').val(p.telefono || '');
-          $('#txtCorreo').val(p.correo || '');
-          $('#txtDomicilio').val(p.domicilio || '');
+          $('#txtIdPersona').val(f.id_persona || '');
+          $('#txtNombre').val(f.nombre || '');
+          $('#txtApellido').val(f.apellido || '');
+          $('#txtCedula').val(f.cedula || '');
+          $('#txtFecha_nacimiento').val(f.fecha_nacimiento || '');
+          $('#txtTelefono').val(f.telefono || '');
+          $('#txtCorreo').val(f.correo || '');
+          $('#txtDomicilio').val(f.domicilio || '');
           
-          // IDs ocultos y textos visibles
-          $('#id_genero').val(p.id_genero || '');
-          $('#txtGenero').val(p.genero || '');
+          // IDs ocultos
+          $('#id_genero').val(f.id_genero || '');
+          $('#id_estado_civil').val(f.id_estado_civil || '');
+          $('#id_ciudad').val(f.id_ciudad || '');
+          $('#id_ciudad_nacimiento').val(f.id_ciudad_nacimiento || '');
+          $('#id_nivel_instruccion').val(f.id_nivel_instruccion || '');
+          $('#id_profesion').val(f.id_profesion || '');
+          $('#id_cargo').val(f.id_cargo || '');
           
-          $('#id_estado_civil').val(p.id_estado_civil || '');
-          $('#txtEstado_civil').val(p.estado_civil || '');
+          // Textos visibles
+          $('#txtGenero').val(f.genero || '');
+          $('#txtEstado_civil').val(f.estado_civil || '');
+          $('#txtCiudad').val(f.ciudad || '');
+          $('#txtCiudad_nacimiento').val(f.ciudad_nacimiento || '');
+          $('#txtNivel_instruccion').val(f.nivel_instruccion || '');
+          $('#txtProfesion').val(f.profesion || '');
+          $('#txtCargo').val(f.cargo || '');
           
-          $('#id_ciudad').val(p.id_ciudad || '');
-          $('#txtCiudad').val(p.ciudad || '');
+          // Checkbox activo
+          $('#chkActivo').prop('checked', f.activo);
           
-          $('#id_ciudad_nacimiento').val(p.id_ciudad_nacimiento || '');
-          $('#txtCiudad_nacimiento').val(p.ciudad_nacimiento || '');
+          // Manejo de especialista
+          const esEspecialista = !!(f.matricula);
+          $('#chkEsEspecialista').prop('checked', esEspecialista);
           
-          $('#id_nivel_instruccion').val(p.id_nivel_instruccion || '');
-          $('#txtNivel_instruccion').val(p.nivel_instruccion || '');
-          
-          $('#id_profesion').val(p.id_profesion || '');
-          $('#txtProfesion').val(p.profesion || '');
-          
-          // Datos del paciente
-          $('#txtHistoria_clinica').val(p.historia_clinica || '');
-          $('#txtObservaciones').val(p.observaciones || '');
-          
-          // RECALCULAR edad automáticamente desde la fecha
-          if (p.fecha_nacimiento) {
-            const resultado = calcularEdad(p.fecha_nacimiento);
-            mostrarAlertaEdad(resultado);
+          if (esEspecialista) {
+            $('#step5Indicator').show();
+            $('#txtMatricula').val(f.matricula || '');
+            $('#txtColorAgenda').val(f.color_agenda || '#3498db');
             
-            if (!resultado.error && resultado.esMenor) {
-              // Mostrar paso 4 y cargar datos de tutor
-              $('.stepwizard-step').eq(3).show();
-              
-              $('#txtNomMadre').val(p.nom_madre || '');
-              $('#txtTelMadre').val(p.tel_madre || '');
-              $('#txtNomPadre').val(p.nom_padre || '');
-              $('#txtTelPadre').val(p.tel_padre || '');
-              $('#txtEducacion').val(p.educacion || '');
-              $('#txtColegio').val(p.colegio || '');
-              $('#txtTelColegio').val(p.tel_colegio || '');
-            } else {
-              // Ocultar paso 4 si ya no es menor
-              $('.stepwizard-step').eq(3).hide();
-            }
+            // Cargar y marcar especialidades
+            cargarEspecialidades();
+            setTimeout(() => {
+              marcarEspecialidades(f.especialidades || []);
+            }, 300);
+          } else {
+            $('#step5Indicator').hide();
           }
-          
-          // Actualizar preview de historia clínica
-          actualizarPreviewHistoria();
           
           // Resetear wizard al paso 1
           currentStep = 1;
@@ -1566,21 +1204,21 @@ const editar = () => {
         })
         .catch(err => {
           console.error(err);
-          Swal.fire("Error", err.message || "No se pudo cargar los datos del paciente.", "error");
+          Swal.fire("Error", "No se pudo cargar los datos del funcionario.", "error");
         });
       }
     });
   });
-};
+}
 
 const eliminar = () => {
   $('#tbl').on('click', 'button[name="btn_eliminar"]', function() {
-    const idPaciente = $(this).data('id');
-    const nombrePaciente = $(this).data('nombre');
+    const idFuncionario = $(this).data('id');
+    const nombreFuncionario = $(this).data('nombre');
     
     Swal.fire({
-      title: "¿Deseas eliminar este paciente?",
-      text: `Paciente: ${nombrePaciente}`,
+      title: "¿Deseas eliminar este funcionario?",
+      text: `Funcionario: ${nombreFuncionario}`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Sí, eliminar",
@@ -1589,60 +1227,47 @@ const eliminar = () => {
       cancelButtonColor: '#3085d6'
     }).then((result) => {
       if (result.isConfirmed) {
-        fetch(`/api/v1/pacientes/${idPaciente}`, {
+        fetch(`/api/v1/funcionarios/${idFuncionario}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': CSRFToken
           }
         })
-        .then(resp => {
-          if (!resp.ok) {
-            return resp.json().then(data => {
-              throw new Error(data.error || 'Error del servidor');
-            });
-          }
-          return resp.json();
-        })
+        .then(resp => resp.json())
         .then(data => {
           if (data && data.success) {
             const tabla = $('#tbl').DataTable();
             tabla.ajax.reload();
-            Swal.fire("Eliminado", "El paciente ha sido eliminado correctamente.", "success");
+            Swal.fire("Eliminado", "El funcionario ha sido eliminado correctamente.", "success");
           } else {
-            Swal.fire("Error", data.error || "No se pudo eliminar el paciente.", "error");
+            Swal.fire("Error", data.error || "No se pudo eliminar el funcionario.", "error");
           }
         })
         .catch(err => {
           console.error(err);
-          Swal.fire("Error", err.message || "Ocurrió un error al eliminar el paciente.", "error");
+          Swal.fire("Error", "Ocurrió un error al eliminar el funcionario.", "error");
         });
       }
     });
   });
-};
+}
 
 // ==========================================
 // INICIALIZACIÓN
 // ==========================================
 const addEvents = () => {
   initWizard();
-  initCalculoEdad();
-  initPreviewHistoria();
   agregar();
   guardar();
   editar();
   eliminar();
-  verFichaPaciente();
   
-  // Vincular búsquedas unificadas
+  // Vincular búsquedas
   Object.keys(SEARCH_CONFIGS).forEach(key => {
     bindSearchClick(key);
   });
-  
-  // Activar tooltips de Bootstrap
-  $('[data-toggle="tooltip"]').tooltip();
-};
+}
 
 $(document).ready(function() {
   // Inicializar DataTable principal
@@ -1655,10 +1280,6 @@ $(document).ready(function() {
   
   // Activar todos los eventos
   addEvents();
-  
-  // Ocultar paso 4 (tutor) por defecto al cargar
-  $('.stepwizard-step').eq(3).hide();
 });
-
 </script>
 {% endblock %}
