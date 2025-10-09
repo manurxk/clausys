@@ -1,0 +1,1212 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Agenda de Especialistas
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <h3><i class="fas fa-calendar-alt"></i> Gestión de Agenda de Especialistas</h3>
+    
+    <!-- Tarjeta principal -->
+    <div class="card shadow">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white">
+            <button type="button" class="btn btn-light" id="btnAgregar">
+                <i class="fas fa-plus-circle"></i> Agregar Nueva Agenda
+            </button>
+        </div>
+
+        <!-- Cuerpo con tabla -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered w-100" id="tblAgenda">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Especialista</th>
+                            <th>Especialidad</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                            <th>Consultorio</th>
+                            <th>Turno</th>
+                            <th>Cupos</th>
+                            <th>Vigencia</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Formulario de Agenda -->
+<div class="modal fade" id="modalFormulario" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h4 class="modal-title" id="modalTitle">
+                    <i class="fas fa-calendar-plus"></i> Registrar Agenda Médica
+                </h4>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formAgenda">
+                    <input type="hidden" id="txtIdAgenda">
+                    
+                    <!-- Sección 1: Especialista y Especialidad -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-user-md"></i> Profesional
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="hidden" id="id_especialista">
+                                    <label for="txtEspecialista">
+                                        Especialista: <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" 
+                                               placeholder="Seleccione el especialista" 
+                                               id="txtEspecialista" 
+                                               readonly 
+                                               required>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text" 
+                                                  id="colorEspecialista" 
+                                                  style="background-color: #3498db; width: 40px;">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <input type="hidden" id="id_especialidad">
+                                    <label for="txtEspecialidad">
+                                        Especialidad: <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" 
+                                           placeholder="Primero seleccione especialista" 
+                                           id="txtEspecialidad" 
+                                           readonly 
+                                           required>
+                                    <small class="form-text text-muted">
+                                        Se cargan las especialidades del especialista
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección 2: Día y Consultorio -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-map-marker-alt"></i> Ubicación y Horario
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                  <input type="hidden" id="id_dia_semana"> <!-- FALTABA ESTE -->
+                                  <label for="txtDiaSemana">Día de la Semana:</label>
+                                  <input type="text" class="form-control" placeholder="Seleccione el día" id="txtDiaSemana" readonly>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                               <div class="form-group">
+                                <input type="hidden" id="id_consultorio"> <!-- FALTABA ESTE -->
+                                <label for="txtConsultorio">Consultorio:</label>
+                                <input type="text" class="form-control" placeholder="Seleccione el consultorio" id="txtConsultorio" readonly>
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección 3: Horarios -->
+                    <div class="border-bottom pb-3 mb-3">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-clock"></i> Configuración de Turnos
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtHoraInicio">
+                                        Hora inicio: <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="time" class="form-control" 
+                                           id="txtHoraInicio" 
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtHoraFin">
+                                        Hora fin: <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="time" class="form-control" 
+                                           id="txtHoraFin" 
+                                           required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="txtDuracionTurno">
+                                        Duración turno: <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-control" id="txtDuracionTurno" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="30">30 minutos</option>
+                                        <option value="60">60 minutos</option>
+                                        <option value="120">120 minutos</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Previsualización de cupos -->
+                        <div class="alert alert-info mb-0" id="alertaCupos" style="display:none;">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Cupos generados:</strong> 
+                            <span id="textoCupos"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Sección 4: Vigencia -->
+                    <div class="pb-3 mb-3">
+                        <h5 class="text-primary mb-3">
+                            <i class="fas fa-calendar-check"></i> Vigencia
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="txtFechaDesde">
+                                        Fecha desde: <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" 
+                                           id="txtFechaDesde" 
+                                           required>
+                                    <small class="form-text text-muted">
+                                        Por defecto: fecha de hoy
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="txtFechaHasta">Fecha hasta:</label>
+                                    <input type="date" class="form-control" 
+                                           id="txtFechaHasta">
+                                    <small class="form-text text-muted">
+                                        Dejar vacío para vigencia indefinida
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" 
+                                   id="chkVigenciaIndefinida">
+                            <label class="custom-control-label" for="chkVigenciaIndefinida">
+                                Vigencia indefinida
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardar">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Buscar Especialista -->
+<div class="modal" id="modalBuscarEspecialista">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fas fa-user-md"></i> Seleccionar Especialista
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered w-100" id="tblEspecialista">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Nombre Completo</th>
+                                <th>Matrícula</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Buscar Especialidad -->
+<div class="modal" id="modalBuscarEspecialidad">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fas fa-stethoscope"></i> Seleccionar Especialidad
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    Mostrando especialidades de: <strong id="nombreEspecialistaEsp"></strong>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered w-100" id="tblEspecialidad">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Especialidad</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Buscar Día -->
+<div class="modal" id="modalBuscarDia">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Día de la Semana</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblDia">
+            <thead>
+              <tr>
+                <th>Día de la Semana</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buscar Consultorio -->
+<div class="modal" id="modalBuscarConsultorio">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Seleccionar Consultorio</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered w-100" id="tblConsultorio">
+            <thead>
+              <tr>
+                <th>Consultorio</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Color del especialista en el formulario */
+#colorEspecialista {
+    border: 2px solid #dee2e6;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+/* Alert de cupos */
+#alertaCupos {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+{% endblock %}
+
+
+{% block js %}
+<script>
+
+
+// ==========================================
+// CONSTANTES Y CONFIGURACIÓN
+// ==========================================
+const CSRFToken = "{{ csrf_token() }}" || null;
+
+// ==========================================
+// CONFIGURACIÓN DE BÚSQUEDAS UNIFICADAS
+// ==========================================
+const SEARCH_CONFIGS = {
+  especialista: {
+    modalId: 'modalBuscarEspecialista',
+    tableId: 'tblEspecialista',
+    endpoint: '/api/v1/especialistas',
+    inputId: 'txtEspecialista',
+    hiddenId: 'id_especialista',
+    dataKey: 'id_especialista',
+    title: 'Seleccionar Especialista'
+  },
+  especialidad: {
+    modalId: 'modalBuscarEspecialidad',
+    tableId: 'tblEspecialidad',
+    endpoint: null, // Se carga dinámicamente
+    inputId: 'txtEspecialidad',
+    hiddenId: 'id_especialidad',
+    dataKey: 'id_especialidad',
+    title: 'Seleccionar Especialidad'
+  },
+  dia: {
+    modalId: 'modalBuscarDia',
+    tableId: 'tblDia',
+    endpoint: '/api/v1/dias-semana',
+    inputId: 'txtDiaSemana',
+    hiddenId: 'id_dia_semana',
+    dataKey: 'id_dia_semana',
+    title: 'Seleccionar Día'
+  },
+  consultorio: {
+    modalId: 'modalBuscarConsultorio',
+    tableId: 'tblConsultorio',
+    endpoint: '/api/v1/consultorios',
+    inputId: 'txtConsultorio',
+    hiddenId: 'id_consultorio',
+    dataKey: 'id_consultorio',
+    title: 'Seleccionar Consultorio'
+  }
+};
+
+// ==========================================
+// DATATABLE PRINCIPAL
+// ==========================================
+const initDatatable = () => {
+  $('#tblAgenda').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: {
+      url: '/api/v1/agenda',
+      dataSrc: function(json) {
+        console.log('Respuesta del servidor:', json);
+        if (json.success) {
+          return json.data;
+        } else {
+          console.error('Error del servidor:', json.error);
+          Swal.fire('Error', json.error || 'Error al cargar datos', 'error');
+          return [];
+        }
+      },
+      error: function(xhr, error, thrown) {
+        console.error('Error en AJAX:', xhr.responseText);
+        Swal.fire('Error', 'No se pudieron cargar las agendas: ' + xhr.responseText, 'error');
+      }
+    },
+    columns: [
+      { data: 'nombre_especialista', title: 'Especialista' },
+      { data: 'especialidad', title: 'Especialidad' },
+      { data: 'dia_semana', title: 'Día' },
+      { 
+        data: function(row) {
+          return `${row.hora_inicio} - ${row.hora_fin}`;
+        },
+        title: 'Horario'
+      },
+      { data: 'consultorio', title: 'Consultorio' },
+      { 
+        data: 'turno',
+        render: function(data, type, row) {
+          const turnoColor = {
+            'MAÑANA': 'warning',
+            'TARDE': 'info',
+            'NOCHE': 'primary',
+            'Mañana': 'warning',
+            'Tarde': 'info',
+            'Noche': 'primary'
+          }[data] || 'secondary';
+          return `<span class="badge badge-${turnoColor}">${data}</span>`;
+        },
+        title: 'Turno',
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          return `${row.cupos_totales}/${row.cupos_totales}`;
+        },
+        title: 'Cupos',
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          const hoy = new Date();
+          const fechaDesde = row.fecha_desde ? new Date(row.fecha_desde.split('/').reverse().join('-')) : null;
+          const fechaHasta = row.fecha_hasta ? new Date(row.fecha_hasta.split('/').reverse().join('-')) : null;
+          
+          let badge = '';
+          if (!fechaDesde) {
+            badge = '<span class="badge badge-secondary">Sin fecha</span>';
+          } else if (hoy < fechaDesde) {
+            badge = '<span class="badge badge-info">Próximo</span>';
+          } else if (!fechaHasta || hoy <= fechaHasta) {
+            badge = '<span class="badge badge-success">Vigente</span>';
+          } else {
+            badge = '<span class="badge badge-danger">Vencido</span>';
+          }
+          
+          const textoFecha = row.fecha_hasta 
+            ? `${row.fecha_desde} / ${row.fecha_hasta}`
+            : `Desde ${row.fecha_desde}`;
+          
+          return `${badge}<br><small>${textoFecha}</small>`;
+        },
+        title: 'Vigencia',
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          return `
+            <button type="button" name="btn_editar" class="btn btn-warning btn-sm" 
+                    data-id="${row.id_agenda_horario}" title="Editar">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button type="button" name="btn_eliminar" class="btn btn-danger btn-sm" 
+                    data-id="${row.id_agenda_horario}" 
+                    data-descripcion="${row.dia_semana} ${row.hora_inicio}-${row.hora_fin}" 
+                    title="Eliminar">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          `;
+        },
+        title: 'Acciones',
+        className: 'text-center',
+        orderable: false
+      }
+    ],
+    order: [[0, 'asc'], [2, 'asc']],
+    responsive: true,
+    pageLength: 10
+  });
+}
+
+// ==========================================
+// SISTEMA DE BÚSQUEDA UNIFICADO
+// ==========================================
+const initSearchDatatable = (configKey) => {
+  const config = SEARCH_CONFIGS[configKey];
+  
+  // Destruir tabla existente si ya está inicializada
+  if ($.fn.DataTable.isDataTable(`#${config.tableId}`)) {
+    $(`#${config.tableId}`).DataTable().destroy();
+  }
+
+  // Configurar columnas según el tipo de búsqueda
+  let columns = [];
+  
+  if (configKey === 'especialista') {
+    columns = [
+      { data: 'nombre_completo', title: 'Nombre Completo' },
+      { data: 'matricula', title: 'Matrícula' }
+    ];
+  } else if (configKey === 'especialidad') {
+    columns = [
+      { 
+        data: null,
+        title: 'Especialidad',
+        render: function(data, type, row) {
+          return row.des_especialidad || row.descripcion || row.nombre || '';
+        }
+      }
+    ];
+  } else if (configKey === 'dia') {
+    columns = [
+      { 
+        data: null,
+        title: 'Día',
+        render: function(data, type, row) {
+          return row.des_dia_semana || row.descripcion || row.nombre || '';
+        }
+      }
+    ];
+  } else if (configKey === 'consultorio') {
+    columns = [
+      { 
+        data: null,
+        title: 'Consultorio',
+        render: function(data, type, row) {
+          return row.des_consultorio || row.descripcion || row.nombre || '';
+        }
+      }
+    ];
+  }
+
+  // Agregar columna de acciones
+  columns.push({
+    data: function(row) {
+      const id = row[config.dataKey];
+      let descripcion = '';
+      
+      if (configKey === 'especialista') {
+        descripcion = row.nombre_completo;
+      } else if (configKey === 'especialidad') {
+        descripcion = row.des_especialidad || row.descripcion || row.nombre;
+      } else if (configKey === 'dia') {
+        descripcion = row.des_dia_semana || row.descripcion || row.nombre;
+      } else if (configKey === 'consultorio') {
+        descripcion = row.des_consultorio || row.descripcion || row.nombre;
+      }
+      
+      return `
+        <button type="button" class="btn btn-success btn-sm btn-select-item" 
+                data-id="${id}" 
+                data-descripcion="${descripcion}"
+                data-row='${JSON.stringify(row).replace(/'/g, "&#39;")}'>
+          <i class="fa fa-check"></i> Seleccionar
+        </button>
+      `;
+    },
+    title: 'Acciones',
+    orderable: false,
+    className: 'text-center'
+  });
+
+  const tableOptions = {
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: {
+      url: config.endpoint,
+      dataSrc: function(json) {
+        console.log(`Datos recibidos para ${configKey}:`, json);
+        return json.success ? json.data : [];
+      },
+      error: function(xhr) {
+        console.error(`Error cargando ${config.title}:`, xhr.responseText);
+        Swal.fire('Error', `No se pudieron cargar los datos`, 'error');
+      }
+    },
+    columns: columns,
+    responsive: true,
+    pageLength: 8,
+    order: [[0, 'asc']]
+  };
+
+  // Configuración especial para especialidades
+  if (configKey === 'especialidad') {
+    tableOptions.ajax = function(data, callback, settings) {
+      const idEspecialista = $('#id_especialista').val();
+      
+      if (!idEspecialista) {
+        callback({ success: true, data: [] });
+        return;
+      }
+      
+      $.ajax({
+        url: `/api/v1/especialistas/${idEspecialista}/especialidades`,
+        success: function(json) {
+          console.log('Especialidades recibidas:', json);
+          callback(json.success ? { data: json.data } : { data: [] });
+        },
+        error: function(xhr) {
+          console.error('Error cargando especialidades:', xhr.responseText);
+          callback({ data: [] });
+        }
+      });
+    };
+  }
+
+  const table = $(`#${config.tableId}`).DataTable(tableOptions);
+
+  // Evento de selección usando delegación
+  $(`#${config.tableId} tbody`).off('click', '.btn-select-item').on('click', '.btn-select-item', function() {
+    try {
+      const rowData = JSON.parse($(this).attr('data-row').replace(/&#39;/g, "'"));
+      selectSearchItem(configKey, rowData);
+    } catch(e) {
+      console.error('Error al parsear datos:', e);
+      const id = $(this).data('id');
+      const descripcion = $(this).data('descripcion');
+      
+      // Asignación directa si falla el parsing
+      $(`#${config.inputId}`).val(descripcion);
+      $(`#${config.hiddenId}`).val(id);
+      $(`#${config.modalId}`).modal('hide');
+    }
+  });
+
+  return table;
+}
+
+const selectSearchItem = (configKey, rowData) => {
+  const config = SEARCH_CONFIGS[configKey];
+  
+  console.log(`🔍 Seleccionando ${configKey}:`, rowData);
+  console.log(`📋 Config dataKey esperado:`, config.dataKey);
+  console.log(`📋 Todas las claves disponibles en rowData:`, Object.keys(rowData));
+  
+  // Mapeo de campos según el tipo
+  let id, descripcion;
+  
+  if (configKey === 'especialista') {
+    id = rowData.id_especialista || rowData.id;
+    descripcion = rowData.nombre_completo || rowData.descripcion || rowData.nombre;
+    
+    // Extras para especialista
+    $('#colorEspecialista').css('background-color', rowData.color_agenda || '#3498db');
+    $('#txtEspecialidad').val('');
+    $('#id_especialidad').val('');
+    
+    // Cargar especialidades
+    if (id) {
+      cargarEspecialidadesPorEspecialista(id, descripcion);
+    }
+    
+  } else if (configKey === 'especialidad') {
+    // Intentar múltiples variantes de ID
+    id = rowData.id_especialidad || rowData.id;
+    descripcion = rowData.des_especialidad || rowData.descripcion || rowData.nombre;
+    
+  } else if (configKey === 'dia') {
+    // Intentar múltiples variantes de ID
+    id = rowData.id_dia_semana || rowData.id;
+    descripcion = rowData.des_dia_semana || rowData.descripcion || rowData.nombre || rowData.dia;
+    
+  } else if (configKey === 'consultorio') {
+    // Intentar múltiples variantes de ID
+    id = rowData.id_consultorio || rowData.id;
+    descripcion = rowData.des_consultorio || rowData.descripcion || rowData.nombre || rowData.consultorio;
+  }
+
+  // Validar que tengamos datos
+  if (!id) {
+    console.error(`❌ No se pudo obtener el ID para ${configKey}`);
+    console.error(`   Datos recibidos:`, rowData);
+    console.error(`   Se esperaba la clave: ${config.dataKey}`);
+    console.error(`   Claves disponibles:`, Object.keys(rowData));
+    
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de configuración',
+      html: `
+        <p>No se pudo obtener el ID del elemento seleccionado.</p>
+        <small>Claves disponibles: ${Object.keys(rowData).join(', ')}</small>
+        <br>
+        <small>Clave esperada: ${config.dataKey}</small>
+      `
+    });
+    return;
+  }
+
+  if (!descripcion) {
+    console.warn(`⚠️ No se pudo obtener la descripción para ${configKey}`, rowData);
+    descripcion = 'Sin descripción';
+  }
+
+  // Asignar valores
+  console.log(`📝 Asignando a input: #${config.inputId} = "${descripcion}"`);
+  console.log(`📝 Asignando a hidden: #${config.hiddenId} = "${id}"`);
+  
+  $(`#${config.inputId}`).val(descripcion);
+  $(`#${config.hiddenId}`).val(id);
+  
+  // Remover clase de error si existía
+  $(`#${config.inputId}`).removeClass('is-invalid');
+  $(`#${config.hiddenId}`).removeClass('is-invalid');
+
+  // Verificar que se asignó correctamente
+  const inputVal = $(`#${config.inputId}`).val();
+  const hiddenVal = $(`#${config.hiddenId}`).val();
+  
+  console.log(`✅ Valores asignados correctamente:`);
+  console.log(`   Input visible: "${inputVal}"`);
+  console.log(`   Hidden ID: "${hiddenVal}"`);
+
+  // Cerrar modal
+  $(`#${config.modalId}`).modal('hide');
+}
+
+const bindSearchClick = (configKey) => {
+  const config = SEARCH_CONFIGS[configKey];
+  
+  $(`#${config.inputId}`).off('click').on('click', function() {
+    console.log(`Abriendo modal de búsqueda: ${configKey}`);
+    
+    // Validación especial para especialidad
+    if (configKey === 'especialidad') {
+      const idEspecialista = $('#id_especialista').val();
+      if (!idEspecialista) {
+        Swal.fire('Atención', 'Primero debe seleccionar un especialista', 'warning');
+        return;
+      }
+    }
+    
+    // Abrir modal
+    $(`#${config.modalId}`).modal('show');
+    
+    // Recargar datos
+    if ($.fn.DataTable.isDataTable(`#${config.tableId}`)) {
+      $(`#${config.tableId}`).DataTable().ajax.reload();
+    }
+  });
+}
+
+// ==========================================
+// CARGAR ESPECIALIDADES POR ESPECIALISTA
+// ==========================================
+const cargarEspecialidadesPorEspecialista = (idEspecialista, nombreEspecialista) => {
+  console.log('Cargando especialidades para:', idEspecialista, nombreEspecialista);
+  
+  // Actualizar nombre del especialista en el modal
+  $('#nombreEspecialistaEsp').text(nombreEspecialista);
+  
+  // Mostrar loading
+  $('#tblEspecialidad tbody').html(`
+    <tr>
+      <td colspan="2" class="text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Cargando...</span>
+        </div>
+        <p class="mt-2">Cargando especialidades...</p>
+      </td>
+    </tr>
+  `);
+  
+  // Recargar la tabla si ya está inicializada
+  if ($.fn.DataTable.isDataTable('#tblEspecialidad')) {
+    setTimeout(() => {
+      $('#tblEspecialidad').DataTable().ajax.reload();
+    }, 300);
+  }
+}
+
+// ==========================================
+// CÁLCULO DE CUPOS EN TIEMPO REAL
+// ==========================================
+const calcularCupos = () => {
+  const horaInicio = $('#txtHoraInicio').val();
+  const horaFin = $('#txtHoraFin').val();
+  const duracion = parseInt($('#txtDuracionTurno').val());
+  
+  if (horaInicio && horaFin && duracion && duracion > 0) {
+    const [h1, m1] = horaInicio.split(':').map(Number);
+    const [h2, m2] = horaFin.split(':').map(Number);
+    
+    const minutosTotales = (h2 * 60 + m2) - (h1 * 60 + m1);
+    
+    if (minutosTotales > 0) {
+      const cupos = Math.floor(minutosTotales / duracion);
+      $('#textoCupos').text(`${cupos} turnos de ${duracion} minutos`);
+      $('#alertaCupos').fadeIn();
+    } else {
+      $('#alertaCupos').fadeOut();
+    }
+  } else {
+    $('#alertaCupos').fadeOut();
+  }
+}
+
+// ==========================================
+// CRUD - FUNCIONES PRINCIPALES
+// ==========================================
+const agregar = () => {
+  $('#btnAgregar').on('click', function() {
+    $('#modalTitle').html('<i class="fas fa-calendar-plus"></i> Registrar Agenda Médica');
+    limpiarFormulario();
+    $('#modalFormulario').modal('show');
+  });
+}
+
+const limpiarFormulario = () => {
+  $('#formAgenda')[0].reset();
+  $('#txtIdAgenda').val('');
+  
+  // Limpiar IDs ocultos
+  $('#id_especialista').val('');
+  $('#id_especialidad').val('');
+  $('#id_dia_semana').val('');
+  $('#id_consultorio').val('');
+  
+  // Color por defecto
+  $('#colorEspecialista').css('background-color', '#3498db');
+  
+  // Fecha desde por defecto (hoy)
+  const hoy = new Date().toISOString().split('T')[0];
+  $('#txtFechaDesde').val(hoy);
+  
+  // Ocultar alerta de cupos
+  $('#alertaCupos').hide();
+  
+  // Limpiar validaciones
+  $('.form-control').removeClass('is-invalid');
+  
+  // Habilitar campo fecha hasta
+  $('#txtFechaHasta').prop('disabled', false);
+  $('#chkVigenciaIndefinida').prop('checked', false);
+}
+
+const guardar = () => {
+  $('#btnGuardar').on('click', function() {
+    const idAgenda = $('#txtIdAgenda').val();
+    
+    console.log('🔍 Verificando campos antes de guardar:');
+    console.log('   id_especialista:', $('#id_especialista').val());
+    console.log('   id_especialidad:', $('#id_especialidad').val());
+    console.log('   id_dia_semana:', $('#id_dia_semana').val());
+    console.log('   id_consultorio:', $('#id_consultorio').val());
+    
+    // Validar campos obligatorios
+    const camposRequeridos = {
+      'id_especialista': 'Especialista',
+      'id_especialidad': 'Especialidad',
+      'id_dia_semana': 'Día de la semana',
+      'id_consultorio': 'Consultorio',
+      'txtHoraInicio': 'Hora de inicio',
+      'txtHoraFin': 'Hora de fin',
+      'txtDuracionTurno': 'Duración del turno',
+      'txtFechaDesde': 'Fecha desde'
+    };
+    
+    let valido = true;
+    let camposFaltantes = [];
+    
+    Object.keys(camposRequeridos).forEach(campo => {
+      const valor = $(`#${campo}`).val();
+      console.log(`   Validando ${campo}: "${valor}"`);
+      
+      if (!valor) {
+        $(`#${campo}`).addClass('is-invalid');
+        
+        // También marcar el input visible si es un campo oculto
+        if (campo.startsWith('id_')) {
+          const txtCampo = campo.replace('id_', 'txt');
+          const txtCampoCapital = 'txt' + campo.replace('id_', '').charAt(0).toUpperCase() + campo.replace('id_', '').slice(1);
+          $(`#${txtCampo}`).addClass('is-invalid');
+          $(`#${txtCampoCapital}`).addClass('is-invalid');
+        }
+        
+        camposFaltantes.push(camposRequeridos[campo]);
+        valido = false;
+      } else {
+        $(`#${campo}`).removeClass('is-invalid');
+      }
+    });
+    
+    if (!valido) {
+      console.error('❌ Validación fallida. Campos faltantes:', camposFaltantes);
+      Swal.fire('Error', `Complete los siguientes campos: ${camposFaltantes.join(', ')}`, 'error');
+      return;
+    }
+    
+    // Validar que hora_fin > hora_inicio
+    const horaInicio = $('#txtHoraInicio').val();
+    const horaFin = $('#txtHoraFin').val();
+    if (horaFin <= horaInicio) {
+      Swal.fire('Error', 'La hora de fin debe ser mayor a la hora de inicio', 'error');
+      $('#txtHoraFin').addClass('is-invalid');
+      return;
+    }
+    
+    // Calcular cupos
+    const duracion = parseInt($('#txtDuracionTurno').val());
+    const [h1, m1] = horaInicio.split(':').map(Number);
+    const [h2, m2] = horaFin.split(':').map(Number);
+    const minutosTotales = (h2 * 60 + m2) - (h1 * 60 + m1);
+    const cuposTotales = Math.floor(minutosTotales / duracion);
+    
+    // Determinar turno automáticamente
+    let turno = 'Mañana';
+    if (h1 >= 12 && h1 < 18) {
+      turno = 'Tarde';
+    } else if (h1 >= 18) {
+      turno = 'Noche';
+    }
+    
+    // Preparar datos
+    const dataAgenda = {
+      id_especialista: parseInt($('#id_especialista').val()),
+      id_especialidad: parseInt($('#id_especialidad').val()),
+      id_consultorio: parseInt($('#id_consultorio').val()),
+      id_dia_semana: parseInt($('#id_dia_semana').val()),
+      hora_inicio: horaInicio + ':00',
+      hora_fin: horaFin + ':00',
+      duracion_turno: duracion,
+      turno: turno,
+      cupos_totales: cuposTotales,
+      fecha_desde: $('#txtFechaDesde').val(),
+      fecha_hasta: $('#chkVigenciaIndefinida').is(':checked') ? null : ($('#txtFechaHasta').val() || null),
+      activo: true
+    };
+    
+    console.log('📤 Enviando datos:', dataAgenda);
+    
+    const tabla = $('#tblAgenda').DataTable();
+    const url = idAgenda ? `/api/v1/agenda/${idAgenda}` : '/api/v1/agenda';
+    const method = idAgenda ? 'PUT' : 'POST';
+    
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRFToken
+      },
+      body: JSON.stringify(dataAgenda)
+    })
+    .then(resp => {
+      if (!resp.ok) {
+        throw new Error(`HTTP error! status: ${resp.status}`);
+      }
+      return resp.json();
+    })
+    .then(data => {
+      console.log('📥 Respuesta del servidor:', data);
+      if (data && data.success) {
+        tabla.ajax.reload();
+        $('#modalFormulario').modal('hide');
+        Swal.fire('Éxito', data.mensaje || `La agenda ha sido ${idAgenda ? 'actualizada' : 'creada'} correctamente`, 'success');
+      } else {
+        Swal.fire('Error', data.error || 'Ocurrió un error al guardar', 'error');
+      }
+    })
+    .catch(err => {
+      console.error('❌ Error en fetch:', err);
+      Swal.fire('Error', 'Ocurrió un error al guardar la agenda: ' + err.message, 'error');
+    });
+  });
+}
+
+const editar = () => {
+  $('#tblAgenda').on('click', 'button[name="btn_editar"]', function() {
+    Swal.fire({
+      title: '¿Deseas editar esta agenda?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, editar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        $('#modalTitle').html('<i class="fas fa-calendar-edit"></i> Editar Agenda Médica');
+        
+        const idAgenda = $(this).data('id');
+        $('#txtIdAgenda').val(idAgenda);
+        
+        fetch(`/api/v1/agenda/${idAgenda}/editar`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => {
+          if (!resp.ok) {
+            throw new Error(`HTTP error! status: ${resp.status}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          if (!data.success) {
+            throw new Error(data.error);
+          }
+          
+          const agenda = data.data;
+          console.log('Datos de agenda para editar:', agenda);
+          
+          // Especialista
+          $('#id_especialista').val(agenda.id_especialista);
+          $('#txtEspecialista').val(agenda.nombre_especialista);
+          $('#colorEspecialista').css('background-color', agenda.color_agenda || '#3498db');
+          
+          // Especialidad
+          $('#id_especialidad').val(agenda.id_especialidad);
+          $('#txtEspecialidad').val(agenda.especialidad);
+          
+          // Día
+          $('#id_dia_semana').val(agenda.id_dia_semana);
+          $('#txtDiaSemana').val(agenda.dia_semana);
+          
+          // Consultorio
+          $('#id_consultorio').val(agenda.id_consultorio);
+          $('#txtConsultorio').val(agenda.consultorio);
+          
+          // Horarios
+          $('#txtHoraInicio').val(agenda.hora_inicio);
+          $('#txtHoraFin').val(agenda.hora_fin);
+          $('#txtDuracionTurno').val(agenda.duracion_turno);
+          
+          // Fechas
+          $('#txtFechaDesde').val(agenda.fecha_desde);
+          if (agenda.fecha_hasta) {
+            $('#txtFechaHasta').val(agenda.fecha_hasta);
+            $('#chkVigenciaIndefinida').prop('checked', false);
+            $('#txtFechaHasta').prop('disabled', false);
+          } else {
+            $('#txtFechaHasta').val('');
+            $('#chkVigenciaIndefinida').prop('checked', true);
+            $('#txtFechaHasta').prop('disabled', true);
+          }
+          
+          // Calcular cupos
+          calcularCupos();
+          
+          $('#modalFormulario').modal('show');
+        })
+        .catch(err => {
+          console.error('Error al cargar datos para editar:', err);
+          Swal.fire('Error', 'No se pudo cargar los datos de la agenda: ' + err.message, 'error');
+        });
+      }
+    });
+  });
+}
+
+const eliminar = () => {
+  $('#tblAgenda').on('click', 'button[name="btn_eliminar"]', function() {
+    const idAgenda = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
+    
+    Swal.fire({
+      title: '¿Estás seguro de eliminar esta agenda?',
+      text: `Horario: ${descripcion}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetch(`/api/v1/agenda/${idAgenda}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          }
+        })
+        .then(resp => {
+          if (!resp.ok) {
+            throw new Error(`HTTP error! status: ${resp.status}`);
+          }
+          return resp.json();
+        })
+        .then(data => {
+          if (data && data.success) {
+            const tabla = $('#tblAgenda').DataTable();
+            tabla.ajax.reload();
+            Swal.fire('Eliminado', data.mensaje || 'La agenda ha sido eliminada correctamente', 'success');
+          } else {
+            Swal.fire('Error', data.error || 'No se pudo eliminar la agenda', 'error');
+          }
+        })
+        .catch(err => {
+          console.error('Error al eliminar:', err);
+          Swal.fire('Error', 'Ocurrió un error al eliminar la agenda: ' + err.message, 'error');
+        });
+      }
+    });
+  });
+}
+
+// ==========================================
+// CHECKBOX VIGENCIA INDEFINIDA
+// ==========================================
+const manejarVigenciaIndefinida = () => {
+  $('#chkVigenciaIndefinida').on('change', function() {
+    if (this.checked) {
+      $('#txtFechaHasta').val('').prop('disabled', true);
+    } else {
+      $('#txtFechaHasta').prop('disabled', false);
+    }
+  });
+}
+
+// ==========================================
+// AGREGAR EVENTOS
+// ==========================================
+const addEvents = () => {
+  agregar();
+  guardar();
+  editar();
+  eliminar();
+  manejarVigenciaIndefinida();
+  
+  // Vincular búsquedas
+  Object.keys(SEARCH_CONFIGS).forEach(key => {
+    bindSearchClick(key);
+  });
+  
+  // Calcular cupos en tiempo real
+  $('#txtHoraInicio, #txtHoraFin, #txtDuracionTurno').on('change', calcularCupos);
+}
+
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+$(document).ready(function() {
+  console.log('🚀 Inicializando sistema de agendas...');
+  
+  // 1. Inicializar DataTable principal
+  initDatatable();
+  console.log('✅ DataTable principal inicializado');
+  
+  // 2. Inicializar DataTables de búsqueda
+  const searchTables = ['especialista', 'especialidad', 'dia', 'consultorio'];
+  searchTables.forEach(table => {
+    try {
+      initSearchDatatable(table);
+      console.log(`✅ Tabla de búsqueda ${table} inicializada`);
+    } catch(e) {
+      console.error(`❌ Error inicializando ${table}:`, e);
+    }
+  });
+  
+  // 3. Activar todos los eventos
+  addEvents();
+  
+  console.log('✅ Sistema de agendas completamente inicializado');
+});
+  
+
+</script>
+{% endblock %}

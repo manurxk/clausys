@@ -1,87 +1,151 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="es">
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="Inicio de sesión">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/icono.png') }}">
     <title>Login</title>
 
-    <!-- Custom fonts for this template-->
+    <!-- Fuentes y estilos -->
     <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
-    <!-- Custom styles for this template-->
+    <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
 
+    <style>
+        /* Fondo con overlay oscuro */
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.20)),
+            url('{{ url_for("static", filename="img/fondo3.webp") }}');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            font-family: 'Nunito', sans-serif;
+        }
+
+
+        /* Efecto glass en la tarjeta */
+        .card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Imagen */
+        .login-logo {
+            max-width: 80%;
+            margin-top: 3rem;
+            filter: drop-shadow(0 0 10px rgba(0,0,0,0.3));
+        }
+
+        /* Animación suave */
+        .p-5 {
+            animation: fadeInUp 0.8s ease-in-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Botón con hover */
+        .btn-dark {
+            background-color: #212529;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .btn-dark:hover {
+            background-color: #343a40;
+            transform: translateY(-2px);
+        }
+
+        /* Campos */
+        .form-control-user {
+            background-color: rgba(255,255,255,0.8);
+            border-radius: 10px;
+        }
+
+        /* Mensajes */
+        .alert {
+            border-radius: 12px;
+        }
+    </style>
 </head>
 
-<body class="bg-gradient-primary">
+<body>
 
-    <div class="container">
-
-        <!-- Outer Row -->
+    <div class="container min-vh-100 d-flex align-items-center justify-content-center">
         <div class="row justify-content-center">
-
-            <div class="col-xl-10 col-lg-12 col-md-9">
-
+            <div class="col-xl-10 col-lg-12 col-md-10">
                 <div class="card o-hidden border-0 shadow-lg my-5">
                     <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
                         <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
+                            <!-- Imagen a la izquierda -->
+                            <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center">
+                                <img src="{{ url_for('static', filename='img/SPS+Logo.png') }}" class="login-logo" alt="Logo">
+                            </div>
+
+                            <!-- Formulario a la derecha -->
+                            <div class="col-lg-6 d-flex align-items-center">
+                                <div class="p-5 w-100">
                                     <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back Aipo!</h1>
+                                        <h2 class="text-light mb-3 font-weight-bold" style="font-size: 2.8rem;">Bienvenido</h2>
+                                        <p class="text-light-50 mb-4">Ingrese sus credenciales para continuar</p>
                                     </div>
+
+                                    <!-- Mensajes flash -->
+                                    {% with messages = get_flashed_messages(with_categories=true) %}
+                                        {% if messages %}
+                                            <div class="alert alert-warning">
+                                                {% for category, message in messages %}
+                                                    <strong>{{ category.capitalize() }}:</strong> {{ message }} <br>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+
+                                    <!-- Usuario logueado -->
+                                    {% if session.get('usuario_nombre') and session.get('usuario_rol') %}
+                                        <div class="alert alert-success text-center">
+                                            Ingresaste como: <strong>{{ session['usuario_nombre'] }}</strong> ({{ session['usuario_rol'] }})
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Formulario de login -->
                                     <form class="user" method="post" action="{{ url_for('login.login') }}">
-                                        <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}" />
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                         <div class="form-group">
                                             <input type="text" class="form-control form-control-user"
-                                                name="usuario_nombre"
-                                                aria-describedby="usuario_nombre"
-                                                placeholder="Ingrese un usuario" required>
+                                                   name="usuario_nombre" placeholder="Ingrese un usuario"
+                                                   required autocomplete="off">
                                         </div>
                                         <div class="form-group">
                                             <input type="password" class="form-control form-control-user"
-                                                name="usuario_clave"
-                                                placeholder="Password" required>
+                                                   name="usuario_clave" placeholder="Contraseña" required>
                                         </div>
-
-                                        <button type="submit" class="btn btn-primary btn-user btn-block">Eike</button>
-                                        <hr>
+                                        <button type="submit" class="btn btn-dark btn-user btn-block">
+                                            INGRESAR
+                                        </button>
                                     </form>
-                                    <hr>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
+                    </div> <!-- /card-body -->
+                </div> <!-- /card -->
             </div>
-
         </div>
-
     </div>
 
-    <!-- Bootstrap core JavaScript-->
+    <!-- Scripts -->
     <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-
-    <!-- Core plugin JavaScript-->
     <script src="{{ url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-
-    <!-- Custom scripts for all pages-->
     <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
 
 </body>
-
 </html>

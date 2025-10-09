@@ -3,29 +3,29 @@
 <html lang="en">
 
 <head>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/cin.avif') }}">
 
     <title>{% block titulo %}{% endblock %}</title>
 
     <!-- CSS de iconos y fuentes-->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <!-- Tailwind CSS (en el head, ya importado) -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <!-- CSS principal-->
     <link href="{{ url_for('static', filename='css/sb-admin-2.min.css') }}" rel="stylesheet">
-
     <!-- CSS de Datatables -->
     <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
-
+    <!-- CSS de Datatables -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
 </head>
+
 
 <body id="page-top">
 
@@ -76,6 +76,10 @@
                         <a class="collapse-item" href="{{ url_for('estado_civil.estadoCivilIndex') }}">Estado Civil</a>
                         <a class="collapse-item" href="{{ url_for('nivel_instruccion.nivelInstruccionIndex') }}">Nivel de Instrucción</a>
                         <a class="collapse-item" href="{{ url_for('profesion.profesionIndex') }}">Profesión</a>
+                        <a class="collapse-item" href="{{ url_for('dia.diaIndex') }}">Días</a>
+                        <a class="collapse-item" href="{{ url_for('consultorio.consultorioIndex') }}">Consultorio</a>
+
+
                         <a class="collapse-item" href="#">----------------</a>
                         <a class="collapse-item" href="{{ url_for('cargo.cargoIndex') }}">Cargo</a>
                         <a class="collapse-item" href="{{ url_for('grupo.grupoIndex') }}">Grupo</a>
@@ -99,6 +103,27 @@
                         <a class="collapse-item" href="{{ url_for('funcionario.funcionarioIndex') }}">Funcionario</a>
                         <a class="collapse-item" href="{{ url_for('usuario.usuarioIndex') }}">Usuario</a>
                         <a class="collapse-item text-wrap" href="">Registrar pedido de compras</a>
+                        <a class="collapse-item" href="">Proceso 2</a>
+                        <a class="collapse-item" href="">Proceso 3</a>
+                        <a class="collapse-item" href="">Proceso 4</a>
+                    </div>
+                </div>
+            </li>
+
+
+
+
+            <!-- Nav Item - Utilities Collapse Menu -->
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
+                    aria-expanded="true" aria-controls="collapseUtilities">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span class="text-wrap">Agendamiento</span>
+                </a>
+                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
+                    data-parent="#accordionSidebar">
+                    <div class="bg-white py-2 collapse-inner rounded">
+                        <a class="collapse-item" href="{{ url_for('agenda.agendaIndex') }}">Registrar Agenda Médica</a>
                         <a class="collapse-item" href="">Proceso 2</a>
                         <a class="collapse-item" href="">Proceso 3</a>
                         <a class="collapse-item" href="">Proceso 4</a>
@@ -339,13 +364,53 @@
             <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="sticky-footer bg-white">
-                <div class="container my-auto">
-                    <div class="copyright text-center my-auto">
-                        <span>Copyright &copy; Your Website 2020</span>
-                    </div>
+           <footer class="bg-gray-100 border-t border-gray-300 py-4 mt-10">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 text-gray-600 text-sm">
+                <p class="text-center md:text-left">
+                © {{ current_year }} Clínica Integral Neuropsicológica — Todos los derechos reservados
+                </p>
+                <div class="flex items-center gap-4 mt-2 md:mt-0">
+                <a href="#" class="hover:text-indigo-600 transition">Política de Privacidad</a>
+                <a href="#" class="hover:text-indigo-600 transition">Términos de Uso</a>
+                <a href="#" class="hover:text-indigo-600 transition">Contacto</a>
                 </div>
+            </div>
             </footer>
+
+
+
+
+<footer class="bg-indigo-700 text-white py-6 mt-16">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4">
+    <div class="text-center md:text-left">
+      <h4 class="text-lg font-semibold">Clínica Integral Neuropsicológica</h4>
+      <p class="text-sm text-indigo-200">Sistema de gestión de consultorios psicológicos</p>
+    </div>
+    <div class="flex items-center gap-4 mt-3 md:mt-0 text-sm">
+      <a href="#" class="hover:underline text-indigo-200">Soporte</a>
+      <a href="#" class="hover:underline text-indigo-200">Contacto</a>
+      <a href="#" class="hover:underline text-indigo-200">Política de Privacidad</a>
+    </div>
+  </div>
+  <div class="border-t border-indigo-500 mt-4 pt-2 text-center text-sm text-indigo-200">
+    © {{ current_year }} — Todos los derechos reservados
+  </div>
+</footer>
+
+
+<footer class="bg-gray-900 text-gray-300 py-6 mt-16">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4">
+    <p class="text-sm">
+      © {{ current_year }} Clínica Integral Neuropsicológica — Desarrollado por <span class="text-indigo-400">Auditec</span>
+    </p>
+    <div class="flex gap-4 text-sm mt-3 md:mt-0">
+      <a href="#" class="hover:text-white transition">Soporte</a>
+      <a href="#" class="hover:text-white transition">Contacto</a>
+    </div>
+  </div>
+</footer>
+
+
             <!-- End of Footer -->
 
         </div>

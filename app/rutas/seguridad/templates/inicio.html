@@ -1,5 +1,473 @@
 {% extends 'base.html' %}
-    
+
 {% block titulo %}
 Inicio
 {% endblock %}
+
+{% block contenido %}
+
+
+
+
+
+
+</head>
+<style>
+  body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .container {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 40px 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+  }
+
+  .card {
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn {
+    border-radius: 20px;
+    font-weight: bold;
+  }
+
+  .text-xs {
+    font-size: 0.75rem;
+  }
+
+  .h5 {
+    font-size: 1.25rem;
+  }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f5;
+    }
+
+    header {
+      background-color: #2e3b3e;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    nav a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .dashboard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 30px;
+      gap: 20px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 370px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card h2 {
+      color: #2e3b3e;
+    }
+
+    .card p {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .card button {
+      margin-top: 15px;
+      background-color: #2479e1;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .card button:hover {
+      background-color: #1a5eb8;
+    }
+
+    .open {
+      color: green;
+      font-weight: bold;
+    }
+
+    .closed {
+      color: red;
+      font-weight: bold;
+    }
+
+</style>
+
+<body>
+
+
+
+
+<!-- Contenedor principal con flex y espacio -->
+<div class="flex flex-col lg:flex-row items-start gap-6 px-4 mb-8">
+
+
+  <!-- Bloque izquierdo con los módulos (flex-grow para ocupar más espacio) -->
+  <div class="flex-grow">
+    <!-- Bloque informativo superior -->
+   <div class="bg-indigo-100 border-l-4 border-indigo-500 text-indigo-700 p-6 mb-6 rounded shadow">
+  <div class="flex flex-col md:flex-row items-center md:items-start">
+    
+    <!-- Columna izquierda: texto -->
+    <div class="md:w-2/3 text-center md:text-left">
+      <h5 class="text-3xl  font-extrabold text-indigo-800">CLÍNICA INTEGRAL NEUROPSICOLÓGICA</h5>
+      <p class="text-lg font-semibold mt-2">Bienvenido al sistema de gestión de clínicas psicológicas</p>
+      <p class="text-sm mt-2">Desde aquí podés acceder a los módulos principales del sistema: agendamiento, fichas médicas, facturación y más.</p>
+    </div>
+
+    <!-- Columna derecha: imagen -->
+    <div class="md:w-1/3 mt-8 md:mt-0 md:pl-12 flex justify-center md:justify-end">
+      <img src="{{ url_for('static', filename='img/cin.avif') }}" alt="Logo CIN" class="max-h-32 rounded shadow-md">
+    </div>
+
+  </div>
+</div>
+
+
+    <!-- Grid de módulos -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-6 h-full">
+
+      <!-- Módulo Agendamiento -->
+      <div class="bg-white rounded shadow h-full py-8 border-l-4 border-blue-600 flex flex-col justify-center items-center text-center">
+        <div>
+          <div class="text-xs font-bold uppercase text-blue-600 mb-2">Agendamiento</div>
+          <div class="text-xl font-bold text-gray-800">Gestionar Citas</div>
+        </div>
+        <div class="mt-6">
+<a href="#"             class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded transition">
+            Ir al módulo
+          </a>
+        </div>
+      </div>
+
+      <!-- Módulo Consultorio -->
+      <div class="bg-white rounded shadow h-full py-8 border-l-4 border-green-600 flex flex-col justify-center items-center text-center">
+        <div>
+          <div class="text-xs font-bold uppercase text-green-600 mb-2">Consultorio</div>
+          <div class="text-xl font-bold text-gray-800">Ficha Médica</div>
+        </div>
+        <div class="mt-6">
+<a href="#"             class="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-5 rounded transition">
+            Ir a Consultorio
+          </a>
+        </div>
+      </div>
+
+      <!-- Módulo Facturación -->
+      <div class="bg-white rounded shadow h-full py-8 border-l-4 border-yellow-500 flex flex-col justify-center items-center text-center">
+        <div>
+          <div class="text-xs font-bold uppercase text-yellow-500 mb-2">Facturación</div>
+          <div class="text-xl font-bold text-gray-800">Pagos y Cobros</div>
+        </div>
+        <div class="mt-6">
+<a href="#"             class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-5 rounded transition">
+            Ir a Ventas
+          </a>
+        </div>
+      </div>
+      <!-- Módulo Reportes -->
+      <div class="bg-white rounded shadow h-full py-8 border-l-4 border-purple-600 flex flex-col justify-center items-center text-center">
+        <div>
+          <div class="text-xs font-bold uppercase text-purple-600 mb-2">Reportes</div>
+          <div class="text-xl font-bold text-gray-800">Estado</div>
+        </div>
+        <div class="mt-6">
+          <a href="#"
+            class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-5 rounded transition">
+            Ir a Reportes
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Columna derecha informativa (con altura fija y sin flex) -->
+<div class="w-full lg:w-1/4 flex-shrink-0">
+  <div class="bg-white rounded shadow p-6 border-l-4 border-indigo-500 h-[600px] overflow-auto">
+    <div>
+      <h2 class="text-lg font-bold text-indigo-600 mb-3">Info del Sistema</h2>
+      <p class="text-gray-700 text-sm mb-4">
+        Este sistema te permite gestionar integralmente tu consultorio, abarcando la atención médica, la organización de agendas y el control financiero.
+      </p>
+      <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+        <li>Administrá pacientes, profesionales y especialidades.</li>
+        <li>Organizá horarios, turnos y consultorios con la agenda médica.</li>
+        <li>Registrá consultas, diagnósticos, síntomas, signos y tratamientos.</li>
+        <li>Generá órdenes de estudios, análisis, recetas y justificativos.</li>
+        <li>Gestioná citas, recordatorios y fichas médicas.</li>
+        <li>Controlá ventas, formas de cobro, cajas y cuentas por cobrar.</li>
+      </ul>
+      
+    <p class="text-gray-700 text-sm mb-4">
+        Este sistema te permite gestionar integralmente tu consultorio, abarcando la atención médica, la organización de agendas y el control financiero.
+      </p>
+      <p class="text-gray-700 text-sm mb-4">
+        Este sistema te permite gestionar integralmente tu consultorio, abarcando la  y el control financiero.
+      </p>
+    </div>
+    <div class="mt-4">
+      <a href="#" class="text-indigo-600 hover:underline text-sm">Ver más información</a>
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+<body onload="actualizarFechaHora()">
+
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+
+
+  <main class="max-w-7xl mx-auto p-6 space-y-10">
+
+    <!-- 1. Cuadro simple con título y texto -->
+    <section class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold mb-2">1. Cuadro Simple</h2>
+      <p>Este es un cuadro básico con texto simple para mostrar información relevante.</p>
+    </section>
+
+    <!-- 2. Cuadro con columnas -->
+    <section class="bg-white rounded-lg shadow p-6 grid grid-cols-3 gap-6">
+      <div class="bg-indigo-50 p-4 rounded">Columna 1: contenido breve</div>
+      <div class="bg-indigo-50 p-4 rounded">Columna 2: contenido más largo con más texto para llenar espacio</div>
+      <div class="bg-indigo-50 p-4 rounded">Columna 3</div>
+    </section>
+
+    <!-- 3. Botones primarios y secundarios -->
+    <section class="bg-white rounded-lg shadow p-6 flex space-x-4">
+      <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-semibold transition">Botón Primario</button>
+      <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded font-semibold transition">Botón Secundario</button>
+      <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-semibold transition">Botón Éxito</button>
+      <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold transition">Botón Peligro</button>
+    </section>
+
+    <!-- 4. Cuadro con imagen y texto -->
+    <section class="bg-white rounded-lg shadow p-6 flex items-center space-x-6">
+      <img src="https://source.unsplash.com/100x100/?technology" alt="Tecnología" class="rounded-full w-24 h-24 object-cover" />
+      <div>
+        <h3 class="text-lg font-bold">Tecnología</h3>
+        <p>Una breve descripción de esta sección con imagen decorativa.</p>
+      </div>
+    </section>
+
+    <!-- 5. Tarjetas con iconos y botones -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center text-center space-y-4">
+        <svg class="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M12 4v16m8-8H4"></path>
+        </svg>
+        <h4 class="font-semibold text-lg">Agregar Nuevo</h4>
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">Crear</button>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center text-center space-y-4">
+        <svg class="w-12 h-12 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 16v-4m0-4h.01" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <h4 class="font-semibold text-lg">Información</h4>
+        <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">Ver Más</button>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow flex flex-col items-center text-center space-y-4">
+        <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <h4 class="font-semibold text-lg">Eliminar</h4>
+        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Borrar</button>
+      </div>
+    </section>
+
+    <!-- 6. Lista con íconos y colores -->
+    <section class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-lg font-bold mb-4">Lista de tareas</h3>
+      <ul class="space-y-3">
+        <li class="flex items-center space-x-3">
+          <span class="inline-block w-4 h-4 bg-green-500 rounded-full"></span>
+          <span>Completar reporte mensual</span>
+        </li>
+        <li class="flex items-center space-x-3">
+          <span class="inline-block w-4 h-4 bg-yellow-400 rounded-full"></span>
+          <span>Revisar correos importantes</span>
+        </li>
+        <li class="flex items-center space-x-3">
+          <span class="inline-block w-4 h-4 bg-red-500 rounded-full"></span>
+          <span>Actualizar base de datos</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- 7. Tarjeta con progreso -->
+    <section class="bg-white rounded-lg shadow p-6 w-full max-w-md mx-auto">
+      <h3 class="text-lg font-bold mb-4">Progreso del Proyecto</h3>
+      <div class="w-full bg-gray-200 rounded-full h-4">
+        <div class="bg-indigo-600 h-4 rounded-full" style="width: 65%"></div>
+      </div>
+      <p class="mt-2 text-sm text-gray-600">65% completado</p>
+    </section>
+
+    <!-- 8. Cuadro con grid y botones -->
+    <section class="bg-white rounded-lg shadow p-6 grid grid-cols-2 gap-6 max-w-xl mx-auto">
+      <div>
+        <h4 class="font-semibold mb-2">Configuración de cuenta</h4>
+        <p>Modifica tus preferencias y datos personales aquí.</p>
+      </div>
+      <div class="flex flex-col justify-center space-y-3">
+        <button class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded">Editar Perfil</button>
+        <button class="bg-red-500 hover:bg-red-600 text-white py-2 rounded">Cerrar Sesión</button>
+      </div>
+    </section>
+
+    <!-- 9. Tarjeta con barra lateral -->
+    <section class="bg-white rounded-lg shadow p-6 flex max-w-4xl mx-auto">
+      <aside class="w-1/4 bg-indigo-100 p-4 rounded-l-lg font-semibold text-indigo-800">
+        Menú
+        <ul class="mt-4 space-y-2 text-indigo-700">
+          <li><a href="#" class="hover:underline">Inicio</a></li>
+          <li><a href="#" class="hover:underline">Perfil</a></li>
+          <li><a href="#" class="hover:underline">Configuración</a></li>
+        </ul>
+      </aside>
+      <div class="flex-1 p-4">
+        <h3 class="text-xl font-bold mb-2">Contenido Principal</h3>
+        <p>Esta sección muestra la información más importante del panel.</p>
+      </div>
+    </section>
+
+    <!-- 10. Cuadro con tarjeta y botones de acción -->
+    <section class="bg-white rounded-lg shadow p-6 max-w-lg mx-auto">
+      <h3 class="text-xl font-bold mb-4">Perfil de Usuario</h3>
+      <div class="flex items-center space-x-4 mb-4">
+        <img src="https://source.unsplash.com/80x80/?face" alt="Usuario" class="rounded-full" />
+        <div>
+          <h4 class="font-semibold text-lg">Juan Pérez</h4>
+          <p class="text-gray-600">Administrador</p>
+        </div>
+      </div>
+      <div class="flex space-x-4">
+        <button class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded">Editar</button>
+        <button class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded">Eliminar</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-gray-200 text-center p-4 mt-16">
+    <small>© 2025 Tu Aplicación Web - Todos los derechos reservados</small>
+  </footer>
+
+</body>
+</html>
+
+
+{% endblock %}
+
+{% block js %}
+<!-- Aquí irían los scripts adicionales -->
+{% endblock %}
+
+
+
