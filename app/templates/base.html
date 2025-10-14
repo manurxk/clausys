@@ -124,6 +124,9 @@
                     data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" href="{{ url_for('agenda.agendaIndex') }}">Registrar Agenda Médica</a>
+                        <a class="collapse-item" href="{{ url_for('cita.citaIndex') }}">Registrar Cita Médica</a>
+ <div class="
+ fdcx76.47"></div>
                         <a class="collapse-item" href="">Proceso 2</a>
                         <a class="collapse-item" href="">Proceso 3</a>
                         <a class="collapse-item" href="">Proceso 4</a>
@@ -363,19 +366,7 @@
             </div>
             <!-- End of Main Content -->
 
-            <!-- Footer -->
-           <footer class="bg-gray-100 border-t border-gray-300 py-4 mt-10">
-            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4 text-gray-600 text-sm">
-                <p class="text-center md:text-left">
-                © {{ current_year }} Clínica Integral Neuropsicológica — Todos los derechos reservados
-                </p>
-                <div class="flex items-center gap-4 mt-2 md:mt-0">
-                <a href="#" class="hover:text-indigo-600 transition">Política de Privacidad</a>
-                <a href="#" class="hover:text-indigo-600 transition">Términos de Uso</a>
-                <a href="#" class="hover:text-indigo-600 transition">Contacto</a>
-                </div>
-            </div>
-            </footer>
+
 
 
 
@@ -398,17 +389,6 @@
 </footer>
 
 
-<footer class="bg-gray-900 text-gray-300 py-6 mt-16">
-  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between px-4">
-    <p class="text-sm">
-      © {{ current_year }} Clínica Integral Neuropsicológica — Desarrollado por <span class="text-indigo-400">Auditec</span>
-    </p>
-    <div class="flex gap-4 text-sm mt-3 md:mt-0">
-      <a href="#" class="hover:text-white transition">Soporte</a>
-      <a href="#" class="hover:text-white transition">Contacto</a>
-    </div>
-  </div>
-</footer>
 
 
             <!-- End of Footer -->
@@ -424,24 +404,7 @@
         <i class="fas fa-angle-up"></i>
     </a>
 
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                    <a class="btn btn-primary" href="login.html">Logout</a>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     <!-- Bootstrap core JavaScript-->

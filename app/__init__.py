@@ -101,3 +101,13 @@ app.register_blueprint(agendamod, url_prefix='/agenda')
 
 # Agenda Médica - API (Endpoints JSON) - Igual que especialidad  
 app.register_blueprint(agendaapi, url_prefix='/api/v1')
+
+
+
+# Citas - Routes (HTML)
+from app.rutas.modulos.cita.cita_routes import citamod
+app.register_blueprint(citamod, url_prefix='/cita')
+
+# Citas - API (Endpoints JSON)
+from app.rutas.modulos.cita.cita_api import citaapi
+app.register_blueprint(citaapi, url_prefix='/api/v1')
