@@ -1,6 +1,8 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 from datetime import datetime, date
+from app.dao.gestionar_personas.paciente.PacienteDao import PacienteDao
+    
 
 class CitaDao:
     
@@ -473,7 +475,55 @@ class CitaDao:
         finally:
             cur.close()
             con.close()
-    
+
+
+
+
+
+
+
+
+
+
+
+    def registrarPacienteRapido(self, nombre, apellido, cedula, fecha_nacimiento):
+        """
+        Registro rápido de paciente desde módulo de citas
+        Solo con datos básicos: nombre, apellido, cédula, fecha nacimiento
+        """
+
+        paciente_dao = PacienteDao()
+        
+        try:
+            # Usar el método guardarPaciente existente con valores mínimos
+            paciente_id = paciente_dao.guardarPaciente(
+                nombre=nombre,
+                apellido=apellido,
+                cedula=cedula,
+                fecha_nacimiento=fecha_nacimiento,
+                telefono=None,  # Opcional
+                id_genero=None,
+                id_estado_civil=None
+            )
+            
+            if paciente_id:
+                # Obtener datos completos del paciente recién creado
+                paciente = paciente_dao.getPacienteById(paciente_id)
+                return paciente
+            
+            return None
+            
+        except Exception as e:
+            app.logger.error(f"Error en registro rápido de paciente: {str(e)}")
+            return None
+
+
+
+
+
+
+
+
     def guardarCita(self, id_paciente, id_agenda_horario, id_especialista, id_especialidad,
                     cita_fecha, cita_hora_inicio, cita_hora_fin, cita_tipo, cita_motivo,
                     cita_creacion_usuario, id_estado_cita=1, cita_observaciones=None,

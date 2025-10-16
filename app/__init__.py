@@ -111,3 +111,110 @@ app.register_blueprint(citamod, url_prefix='/cita')
 # Citas - API (Endpoints JSON)
 from app.rutas.modulos.cita.cita_api import citaapi
 app.register_blueprint(citaapi, url_prefix='/api/v1')
+
+
+
+
+# ✅ CORRECTO
+from app.rutas.modulos.consulta.consulta_routes import consultamod
+app.register_blueprint(consultamod, url_prefix='/consulta')
+
+# ✅ CORRECTO
+from app.rutas.modulos.consulta.consulta_api import consultaapi
+app.register_blueprint(consultaapi, url_prefix='/api/v1')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from app.rutas.referenciales.diagnostico.diagnostico_routes import diagmod
+from app.rutas.referenciales.diagnostico.diagnostico_api import diagapi
+
+app.register_blueprint(diagmod, url_prefix=f'{MODULO_REFERENCIALES}/diagnostico')
+app.register_blueprint(diagapi, url_prefix=API_V1)
+
+
+
+
+
+
+# En el archivo principal de la aplicación (app.py)
+
+# Registrar el Blueprint para Medicamento
+from app.rutas.referenciales.medicamento.medicamento_routes import medmod
+app.register_blueprint(medmod, url_prefix='/medicamento')
+
+# Registrar el Blueprint para la API de Medicamento
+from app.rutas.referenciales.medicamento.medicamento_api import medapi
+app.register_blueprint(medapi, url_prefix='/api/v1')
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Registrar el Blueprint para Signos
+from app.rutas.referenciales.signo.signo_routes import signomod
+app.register_blueprint(signomod, url_prefix='/signo')
+
+# Registrar el Blueprint para la API de Signos
+from app.rutas.referenciales.signo.signo_api import signoapi
+app.register_blueprint(signoapi, url_prefix='/api/v1')
+
+# Registrar el Blueprint para Síntomas
+from app.rutas.referenciales.sintoma.sintoma_routes import sintmod
+app.register_blueprint(sintmod, url_prefix='/sintoma')
+
+# Registrar el Blueprint para la API de Síntomas
+from app.rutas.referenciales.sintoma.sintoma_api import sintapi
+app.register_blueprint(sintapi, url_prefix='/api/v1')
+
+
+# Registrar el Blueprint para Tipos de Análisis
+from app.rutas.referenciales.tipo_analisis.analisis_routes import tipoanalisismod
+app.register_blueprint(tipoanalisismod, url_prefix='/tipo-analisis')
+
+# Registrar el Blueprint para la API de Tipos de Análisis
+from app.rutas.referenciales.tipo_analisis.analisis_api import tipo_analisis_api
+app.register_blueprint(tipo_analisis_api, url_prefix='/api/v1')
+
+
+
+# Registrar el Blueprint para Tipos de Estudios
+from app.rutas.referenciales.tipo_estudio.estudio_routes import tipo_estudio_mod
+app.register_blueprint(tipo_estudio_mod, url_prefix='/tipo-estudio')
+
+# Registrar el Blueprint para la API de Tipos de Estudios
+from app.rutas.referenciales.tipo_estudio.estudio_api import tipo_estudio_api
+app.register_blueprint(tipo_estudio_api, url_prefix='/api/v1')
+
+# Registrar el Blueprint para Tipos de Procedimientos
+from app.rutas.referenciales.tipo_procedimiento.procedimiento_routes import tipo_procedimiento_mod
+app.register_blueprint(tipo_procedimiento_mod, url_prefix='/tipo-procedimiento')
+
+# Registrar el Blueprint para la API de Tipos de Procedimientos
+from app.rutas.referenciales.tipo_procedimiento.procedimiento_api import tipo_procedimiento_api
+app.register_blueprint(tipo_procedimiento_api, url_prefix='/api/v1')

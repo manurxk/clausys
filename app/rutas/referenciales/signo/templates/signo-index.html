@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+    
+{% block titulo %}
+Signos
+{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h3>Listar Signos</h3>
+
+    <!-- tarjeta -->
+    <div class="card">
+      <div class="card-header">
+        <button type="button" class="btn btn-primary" id="btnAgregar">Agregar</button>
+      </div>
+      <div class="card-body">
+        <table class="table table-striped" id="tbl">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+      </table>
+      </div>
+    </div>
+    <!-- /tarjeta -->
+
+    <!-- Modal formulario -->
+    <div class="modal" id="modalFormulario">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title" id="modalTitle"></h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- Modal body -->
+          <div class="modal-body">
+            <input type="hidden" id="txtIdSigno">
+            <div class="form-group">
+              <label for="txtDescripcion">Descripción:</label>
+              <input type="text" class="form-control" placeholder="Ingrese una descripción del signo" id="txtDescripcion">
+              <small class="form-text text-muted">Solo letras, números, espacios y puntos</small>
+            </div>
+            <div class="form-group">
+              <label for="selectEstado">Estado:</label>
+              <select class="form-control" id="selectEstado">
+                <option value="A">Activo</option>
+                <option value="I">Inactivo</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cerrar</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-4 d-none" id="rowAlerta">
+        <div class="col col-md-12">
+            <div class="alert alert-success">
+                <strong>Registro Exitoso!</strong>
+                <div class="row" id="mostrarAlerta"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+  const CSRFToken = "{{ csrf_token() }}" || null;
+
+  const initDatatable = () => {
+    $('#tbl').DataTable({
+      language: {
+        url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+      },
+      ajax:'/api/v1/signos',
+      columns: [
+        { data: 'descripcion' },
+        { data: 'estado', render: function(val) {
+            return val === 'A' ? '<span class="badge badge-success">Activo</span>'
+                               : '<span class="badge badge-secondary">Inactivo</span>';
+          }
+        },
+        { data: function(row) {
+            return `<button type="button" name="btn_editar" class="btn btn-primary btn-sm" data-id="${row.id}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger btn-sm" data-id="${row.id}">Eliminar</button>`
+          }
+        }
+      ]
+    });
+  }
+
+  const agregar = () => {
+    $('#btnAgregar').on('click', function(){
+      $('#modalTitle').text("Agregar un Signo");
+      $('#txtIdSigno').val("");
+      $('#txtDescripcion').val("");
+      $('#selectEstado').val("A");
+      $('#modalFormulario').modal();
+    });
+  }
+
+  const guardar = () => {
+    $('#btnGuardar').on('click', function() {
+      const idSigno = $('#txtIdSigno').val();
+      const nuevaDescripcion = $('#txtDescripcion').val();
+      const estado = $('#selectEstado').val();
+      const tabla = $('#tbl').DataTable();
+
+      if(!nuevaDescripcion.trim()) {
+        Swal.fire("Error", "La descripción no puede estar vacía.", "error");
+        return;
+      }
+
+      const payload = { 
+        descripcion: nuevaDescripcion, 
+        estado: estado 
+      };
+
+      if(idSigno) {
+        // update
+        fetch(`/api/v1/signos/${idSigno}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Actualizado", "El signo ha sido actualizado correctamente.", "success");
+            $('#modalFormulario').modal("hide");
+          } else {
+            Swal.fire("Error", data.error || "No se pudo actualizar el signo.", "error");
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al actualizar el signo.", "error");
+        });
+      } else {
+        // insert
+        fetch(`/api/v1/signos`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRFToken
+          },
+          body: JSON.stringify(payload)
+        })
+        .then(resp => resp.json())
+        .then(data => {
+          if(data && !data.error && data.success) {
+            tabla.ajax.reload();
+            Swal.fire("Agregado", "El signo ha sido agregado correctamente.", "success");
+            $('#modalFormulario').modal("hide");
+          } else {
+            Swal.fire("Error", data.error || "No se pudo guardar el signo.", "error");
+          }
+        }).catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Ocurrió un error al guardar el signo.", "error");
+        });
+      }
+    });
+  }
+
+  const editar = () => {
+    $('#tbl').on('click', 'button[name="btn_editar"]',function(){
+      Swal.fire({
+        title: "¿Deseas editar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Si",
+        cancelButtonText: `No`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          $('#modalTitle').text("Editar un Signo");
+
+          const idSigno = $(this).data('id');
+          $('#txtIdSigno').val(idSigno);
+
+          fetch(`/api/v1/signos/${idSigno}`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            $('#txtDescripcion').val(data.data.descripcion);
+            $('#selectEstado').val(data.data.estado);
+            $('#modalFormulario').modal();
+          });
+        }
+      });
+    });
+  }
+
+  const eliminar = () => {
+    $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
+      const idSigno = $(this).data('id');
+      Swal.fire({
+        title: "¿Deseas eliminar este registro?",
+        showCancelButton: true,
+        confirmButtonText: "Si",
+        cancelButtonText: `No`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/api/v1/signos/${idSigno}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': CSRFToken
+            }
+          })
+          .then(resp => resp.json())
+          .then(data => {
+            if(data && !data.error && data.success) {
+              const fila = $(this).closest('tr');
+              const tabla = $('#tbl').DataTable();
+              tabla.row(fila).remove().draw();
+              Swal.fire("Eliminado", "El signo ha sido eliminado.", "success");
+            } else {
+              Swal.fire("Error", data.error || "No se pudo eliminar el signo.", "error");
+            }
+          }).catch(err => {
+            Swal.fire("Error", "Ocurrió un error al eliminar el signo.", "error");
+          });
+        }
+      });
+    });
+  }
+
+  const addEvents = () => {
+    agregar();
+    guardar();
+    editar();
+    eliminar();
+  }
+
+  $(function() {
+    initDatatable();
+    addEvents();
+  });
+</script>
+{% endblock %}

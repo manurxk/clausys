@@ -455,12 +455,21 @@ Gestión de Citas Médicas
                 </button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <button type="button" class="btn btn-success btn-block" id="btnNuevoPaciente">
+                <!-- Botón para registrar nuevo paciente -->
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="mb-0 text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Busque un paciente existente o registre uno nuevo
+                        </p>
+                    </div>
+                    <button type="button" class="btn btn-success" id="btnAbrirRegistroRapido">
                         <i class="fas fa-user-plus"></i> Registrar Nuevo Paciente
                     </button>
                 </div>
+                
                 <hr>
+                
                 <div class="table-responsive">
                     <table class="table table-striped table-hover table-bordered w-100" id="tblPacientes">
                         <thead class="thead-dark">
@@ -479,6 +488,129 @@ Gestión de Citas Médicas
         </div>
     </div>
 </div>
+
+
+
+
+<!-- ========================================== -->
+<!-- MODAL REGISTRO RÁPIDO DE PACIENTE -->
+<!-- ========================================== -->
+<div class="modal fade" id="modalRegistroRapido" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus"></i> Registro Rápido de Paciente
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formRegistroRapido">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Registro simplificado</strong> - Datos básicos para crear la cita
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nombre <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtNombreRapido" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Apellido <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtApellidoRapido" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cédula <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="txtCedulaRapido" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="txtTelefonoRapido" 
+                               placeholder="Ej: 0981123456" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Fecha de Nacimiento <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="txtFechaNacimientoRapido" required>
+                        <small class="form-text text-muted">
+                            Se detectará automáticamente si es menor de edad
+                        </small>
+                    </div>
+
+                    <!-- Alerta dinámica para menores -->
+                    <div id="alertMenorRapido" class="alert alert-warning" style="display:none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Paciente menor de edad detectado.</strong><br>
+                        Complete los datos de AL MENOS uno de los tutores (nombre Y apellido).
+                    </div>
+
+                    <!-- Campos adicionales para menores (ocultos por defecto) -->
+                    <div id="camposTutorRapido" style="display:none;">
+                        <hr>
+                        <h6 class="text-warning">
+                            <i class="fas fa-user-shield"></i> Datos del Tutor
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre de la Madre</label>
+                                    <input type="text" class="form-control" id="txtNombreMadreRapido">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Apellido de la Madre</label>
+                                    <input type="text" class="form-control" id="txtApellidoMadreRapido">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Nombre del Padre</label>
+                                    <input type="text" class="form-control" id="txtNombrePadreRapido">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Apellido del Padre</label>
+                                    <input type="text" class="form-control" id="txtApellidoPadreRapido">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info alert-sm">
+                            <small>
+                                <i class="fas fa-info-circle"></i>
+                                Debe completar <strong>nombre Y apellido</strong> de al menos uno de los tutores
+                            </small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardarRapido">
+                    <i class="fas fa-save"></i> Registrar y Continuar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 
 <!-- ========================================== -->
 <!-- MODAL BUSCAR ESPECIALIDAD -->
@@ -2160,12 +2292,6 @@ const bindModalEvents = () => {
     $('#tblEspecialistas').DataTable().ajax.reload();
   });
 
-  // Botón para registrar nuevo paciente
-  $('#btnNuevoPaciente').on('click', function() {
-    // Aquí podrías abrir un modal de registro de paciente
-    // O redirigir a la página de pacientes
-    Swal.fire('Info', 'Funcionalidad de registro de nuevo paciente', 'info');
-  });
 }
 
 // ==========================================
@@ -2242,6 +2368,217 @@ const cargarEstadosFiltro = () => {
   });
 }
 
+
+// ==========================================
+// REGISTRO RÁPIDO DE PACIENTE
+// ==========================================
+const abrirRegistroRapido = () => {
+  $('#btnAbrirRegistroRapido').on('click', function() {
+    $('#formRegistroRapido')[0].reset();
+    $('#alertMenorRapido').hide();
+    $('#camposTutorRapido').hide();
+    $('#modalRegistroRapido').modal('show');
+  });
+}
+
+const validarEdadRapido = () => {
+  $('#txtFechaNacimientoRapido').on('change', function() {
+    const fechaNac = new Date($(this).val());
+    const hoy = new Date();
+    const edad = Math.floor((hoy - fechaNac) / (365.25 * 24 * 60 * 60 * 1000));
+    
+    if (edad < 18) {
+      $('#alertMenorRapido').fadeIn();
+      $('#camposTutorRapido').slideDown();
+      
+      // Validación en tiempo real
+      $('#txtNombreMadreRapido, #txtApellidoMadreRapido, #txtNombrePadreRapido, #txtApellidoPadreRapido').on('input', function() {
+        validarTutores();
+      });
+    } else {
+      $('#alertMenorRapido').fadeOut();
+      $('#camposTutorRapido').slideUp();
+    }
+  });
+}
+
+// Nueva función: Validar que al menos un tutor esté completo
+const validarTutores = () => {
+  const nombreMadre = $('#txtNombreMadreRapido').val().trim();
+  const apellidoMadre = $('#txtApellidoMadreRapido').val().trim();
+  const nombrePadre = $('#txtNombrePadreRapido').val().trim();
+  const apellidoPadre = $('#txtApellidoPadreRapido').val().trim();
+  
+  const madreCompleta = nombreMadre && apellidoMadre;
+  const padreCompleto = nombrePadre && apellidoPadre;
+  
+  // Remover clases de error
+  $('#txtNombreMadreRapido, #txtApellidoMadreRapido, #txtNombrePadreRapido, #txtApellidoPadreRapido')
+    .removeClass('is-invalid is-valid');
+  
+  if (madreCompleta || padreCompleto) {
+    // Al menos uno está completo - marcar campos completos como válidos
+    if (madreCompleta) {
+      $('#txtNombreMadreRapido, #txtApellidoMadreRapido').addClass('is-valid');
+    }
+    if (padreCompleto) {
+      $('#txtNombrePadreRapido, #txtApellidoPadreRapido').addClass('is-valid');
+    }
+    return true;
+  } else {
+    // Ninguno está completo - marcar campos incompletos como inválidos
+    if (nombreMadre && !apellidoMadre) {
+      $('#txtApellidoMadreRapido').addClass('is-invalid');
+    } else if (!nombreMadre && apellidoMadre) {
+      $('#txtNombreMadreRapido').addClass('is-invalid');
+    }
+    
+    if (nombrePadre && !apellidoPadre) {
+      $('#txtApellidoPadreRapido').addClass('is-invalid');
+    } else if (!nombrePadre && apellidoPadre) {
+      $('#txtNombrePadreRapido').addClass('is-invalid');
+    }
+    
+    return false;
+  }
+}
+
+const guardarPacienteRapido = () => {
+  $('#btnGuardarRapido').on('click', function() {
+    const form = $('#formRegistroRapido')[0];
+    
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    // Validar datos de menor si aplica
+    const fechaNac = new Date($('#txtFechaNacimientoRapido').val());
+    const hoy = new Date();
+    const edad = Math.floor((hoy - fechaNac) / (365.25 * 24 * 60 * 60 * 1000));
+    const esMenor = edad < 18;
+
+    if (esMenor) {
+      const nombreMadre = $('#txtNombreMadreRapido').val().trim();
+      const apellidoMadre = $('#txtApellidoMadreRapido').val().trim();
+      const nombrePadre = $('#txtNombrePadreRapido').val().trim();
+      const apellidoPadre = $('#txtApellidoPadreRapido').val().trim();
+      
+      const madreCompleta = nombreMadre && apellidoMadre;
+      const padreCompleto = nombrePadre && apellidoPadre;
+      
+      if (!madreCompleta && !padreCompleto) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Datos incompletos',
+          html: 'Para menores de edad debe completar:<br>' +
+                '<strong>Nombre Y Apellido</strong> de al menos uno de los tutores<br><br>' +
+                '<small>Ejemplo:<br>' +
+                '✅ Nombre Madre: María - Apellido Madre: González<br>' +
+                '❌ Nombre Madre: María - Apellido Madre: (vacío)</small>'
+        });
+        validarTutores(); // Mostrar errores visuales
+        return;
+      }
+    }
+
+    const dataPaciente = {
+      nombre: $('#txtNombreRapido').val(),
+      apellido: $('#txtApellidoRapido').val(),
+      cedula: $('#txtCedulaRapido').val(),
+      telefono: $('#txtTelefonoRapido').val(),
+      fecha_nacimiento: $('#txtFechaNacimientoRapido').val(),
+      direccion: null,
+      email: null
+    };
+
+    // Agregar datos de tutor si es menor (nombre Y apellido completos)
+    if (esMenor) {
+      const nombreMadre = $('#txtNombreMadreRapido').val().trim();
+      const apellidoMadre = $('#txtApellidoMadreRapido').val().trim();
+      const nombrePadre = $('#txtNombrePadreRapido').val().trim();
+      const apellidoPadre = $('#txtApellidoPadreRapido').val().trim();
+      
+      // Solo enviar si está completo
+      if (nombreMadre && apellidoMadre) {
+        dataPaciente.nombre_madre = `${nombreMadre} ${apellidoMadre}`;
+      }
+      if (nombrePadre && apellidoPadre) {
+        dataPaciente.nombre_padre = `${nombrePadre} ${apellidoPadre}`;
+      }
+    }
+
+    console.log('📤 Guardando paciente rápido:', dataPaciente);
+
+    // Deshabilitar botón mientras se guarda
+    $('#btnGuardarRapido').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
+
+    fetch('/api/v1/pacientes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRFToken
+      },
+      body: JSON.stringify(dataPaciente)
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      $('#btnGuardarRapido').prop('disabled', false).html('<i class="fas fa-save"></i> Registrar y Continuar');
+      
+      if (data.success) {
+        Swal.fire('Éxito', 'Paciente registrado correctamente', 'success');
+        
+        // Seleccionar automáticamente el paciente recién creado
+        const paciente = data.data;
+        
+        pacienteSeleccionado = {
+          id: paciente.id_paciente,
+          nombre: `${dataPaciente.nombre} ${dataPaciente.apellido}`,
+          cedula: dataPaciente.cedula,
+          telefono: dataPaciente.telefono,
+          hc: paciente.historia_clinica || 'N/A',
+          fecha_nacimiento: dataPaciente.fecha_nacimiento
+        };
+
+        $('#id_paciente').val(paciente.id_paciente);
+        $('#txtPaciente').val(pacienteSeleccionado.nombre);
+        $('#infoPacNombre').text(pacienteSeleccionado.nombre);
+        $('#infoPacCedula').text(dataPaciente.cedula);
+        $('#infoPacHC').text(pacienteSeleccionado.hc);
+        $('#infoPacTelefono').text(dataPaciente.telefono);
+        $('#infoPacEdad').text(edad + ' años');
+        $('#infoPaciente').fadeIn();
+
+        // Cerrar ambos modales
+        $('#modalRegistroRapido').modal('hide');
+        $('#modalBuscarPaciente').modal('hide');
+
+        // Recargar tabla de pacientes
+        $('#tblPacientes').DataTable().ajax.reload();
+      } else {
+        Swal.fire('Error', data.error || 'No se pudo registrar el paciente', 'error');
+      }
+    })
+    .catch(err => {
+      $('#btnGuardarRapido').prop('disabled', false).html('<i class="fas fa-save"></i> Registrar y Continuar');
+      console.error('Error guardando paciente:', err);
+      Swal.fire('Error', 'Ocurrió un error al guardar: ' + err.message, 'error');
+    });
+  });
+}
+
+// Función auxiliar para calcular edad
+const calcularEdad = (fechaNac) => {
+  const nacimiento = new Date(fechaNac);
+  const hoy = new Date();
+  return Math.floor((hoy - nacimiento) / (365.25 * 24 * 60 * 60 * 1000));
+}
+
+
+
+
+
+
 // ==========================================
 // AGREGAR EVENTOS
 // ==========================================
@@ -2262,7 +2599,12 @@ const addEvents = () => {
   seleccionarEspecialista();
   seleccionarCupo();
   seleccionarTipoCita();
-}
+  
+  // Nuevos eventos para registro rápido
+  abrirRegistroRapido();
+  validarEdadRapido();
+  guardarPacienteRapido();
+} // ← SOLO UN CIERRE
 
 // ==========================================
 // INICIALIZACIÓN
@@ -2308,6 +2650,11 @@ $(document).ready(function() {
 
   console.log('✅ Sistema de citas médicas completamente inicializado');
 });
+
+
+
+
+
 
 </script>
 {% endblock %}

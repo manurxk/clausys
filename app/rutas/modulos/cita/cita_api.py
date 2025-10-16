@@ -55,6 +55,63 @@ def getCitaParaEditar(id_cita):
         return jsonify({'success': False, 'error': 'Ocurrió un error interno.'}), 500
 
 
+
+
+
+
+
+
+@citaapi.route('/pacientes/registro-rapido', methods=['POST'])
+def registroPacienteRapido():
+    """
+    Registro rápido de paciente desde módulo de citas
+    Body: { nombre, apellido, cedula, fecha_nacimiento }
+    """
+    data = request.get_json()
+    citadao = CitaDao()
+    
+    # Validar campos requeridos
+    campos_requeridos = ['nombre', 'apellido', 'cedula', 'fecha_nacimiento']
+    for campo in campos_requeridos:
+        if campo not in data or not data[campo]:
+            return jsonify({
+                'success': False,
+                'error': f'El campo {campo} es obligatorio'
+            }), 400
+    
+    try:
+        paciente = citadao.registrarPacienteRapido(
+            nombre=data['nombre'],
+            apellido=data['apellido'],
+            cedula=data['cedula'],
+            fecha_nacimiento=data['fecha_nacimiento']
+        )
+        
+        if paciente:
+            return jsonify({
+                'success': True,
+                'data': paciente,
+                'mensaje': 'Paciente registrado exitosamente'
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'No se pudo registrar el paciente. Verifique que la cédula no esté duplicada.'
+            }), 400
+    
+    except Exception as e:
+        app.logger.error(f"Error en registro rápido: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Error interno: {str(e)}'
+        }), 500
+
+
+
+
+
+
+
 @citaapi.route('/citas', methods=['POST'])
 def addCita():
     """Crea una nueva cita médica"""
