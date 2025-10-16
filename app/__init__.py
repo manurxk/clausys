@@ -115,25 +115,6 @@ app.register_blueprint(citaapi, url_prefix='/api/v1')
 
 
 
-# ✅ CORRECTO
-from app.rutas.modulos.consulta.consulta_routes import consultamod
-app.register_blueprint(consultamod, url_prefix='/consulta')
-
-# ✅ CORRECTO
-from app.rutas.modulos.consulta.consulta_api import consultaapi
-app.register_blueprint(consultaapi, url_prefix='/api/v1')
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -218,3 +199,54 @@ app.register_blueprint(tipo_procedimiento_mod, url_prefix='/tipo-procedimiento')
 # Registrar el Blueprint para la API de Tipos de Procedimientos
 from app.rutas.referenciales.tipo_procedimiento.procedimiento_api import tipo_procedimiento_api
 app.register_blueprint(tipo_procedimiento_api, url_prefix='/api/v1')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Registrar el Blueprint para Consultas
+from app.rutas.modulos.consulta.registrarconsulta.registrarconsulta_routes import consultamod
+app.register_blueprint(consultamod, url_prefix='/consulta')
+
+# Registrar el Blueprint para la API de Consultas
+from app.rutas.modulos.consulta.registrarconsulta.registrarconsulta_api import consultaapi
+app.register_blueprint(consultaapi, url_prefix='/api/v1')
+
+# Registrar el Blueprint para Diagnósticos
+from app.rutas.modulos.consulta.registrardiagnostico.registrardiagnostico_routes import diagnosticomod
+app.register_blueprint(diagnosticomod, url_prefix='/diagnostico')
+
+# Registrar el Blueprint para la API de Diagnósticos
+from app.rutas.modulos.consulta.registrardiagnostico.registrardiagnostico_api import registrodiagnosticoapi
+app.register_blueprint(registrodiagnosticoapi, url_prefix='/api/v1')
+
+# Registrar el Blueprint para Tratamientos
+from app.rutas.modulos.consulta.registrartratamiento.registrartratamiento_routes import tratamientomod
+app.register_blueprint(tratamientomod, url_prefix='/tratamiento')
+
+# Registrar el Blueprint para la API de Tratamientos
+from app.rutas.modulos.consulta.registrartratamiento.registrartratamiento_api import registrotratamientoapi
+app.register_blueprint(registrotratamientoapi, url_prefix='/api/v1')
+
+# Registrar el Blueprint para Procedimientos
+from app.rutas.modulos.consulta.registrarprocedimiento.registrarprocedimiento_routes import procedimientomod
+app.register_blueprint(procedimientomod, url_prefix='/procedimiento')
+
+# Registrar el Blueprint para la API de Procedimientos
+from app.rutas.modulos.consulta.registrarprocedimiento.registrarprocedimiento_api import registroprocedimientoapi
+app.register_blueprint(registroprocedimientoapi, url_prefix='/api/v1')

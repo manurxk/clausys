@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+
+{% block titulo %}
+Registrar Consulta Médica
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-4">
+    <h3><i class="fas fa-notes-medical"></i> Registrar Consulta Médica</h3>
+    
+    <!-- Tarjeta principal -->
+    <div class="card shadow">
+        <!-- Header -->
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar-check"></i> Citas Disponibles para Consulta
+            </h5>
+        </div>
+
+        <!-- Cuerpo con tabla -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered w-100" id="tblCitas">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Paciente</th>
+                            <th>HC</th>
+                            <th>Especialista</th>
+                            <th>Tipo Cita</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Registrar Consulta -->
+<div class="modal fade" id="modalRegistrarConsulta" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h4 class="modal-title">
+                    <i class="fas fa-file-medical"></i> Registrar Consulta Médica
+                </h4>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Información de la Cita (Pre-cargada) -->
+                <div class="card border-primary mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-info-circle"></i> Información de la Cita
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Paciente:</strong> <span id="infoPaciente"></span></p>
+                                <p class="mb-1"><strong>HC:</strong> <span id="infoHC"></span></p>
+                                <p class="mb-1"><strong>Fecha:</strong> <span id="infoFecha"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Especialista:</strong> <span id="infoEspecialista"></span></p>
+                                <p class="mb-1"><strong>Hora:</strong> <span id="infoHora"></span></p>
+                                <p class="mb-1"><strong>Tipo:</strong> <span id="infoTipo"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="formConsulta">
+                    <input type="hidden" id="id_cita">
+                    <input type="hidden" id="id_paciente">
+                    <input type="hidden" id="id_profesional">
+
+                    <!-- Fecha y Hora de la Consulta -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Fecha de Consulta: <span class="text-danger">*</span></label>
+                                <input type="datetime-local" class="form-control" id="consulta_fecha" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Estado de Consulta: <span class="text-danger">*</span></label>
+                                <select class="form-control" id="consulta_estado" required>
+                                    <option value="PENDIENTE">Pendiente</option>
+                                    <option value="EN_ATENCION" selected>En Atención</option>
+                                    <option value="FINALIZADA">Finalizada</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Motivo de Consulta -->
+                    <div class="form-group">
+                        <label>Motivo de Consulta: <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="consulta_motivo" rows="2" 
+                                  placeholder="Motivo por el cual el paciente acude a consulta..." 
+                                  required></textarea>
+                    </div>
+
+                    <!-- Descripción de la Consulta -->
+                    <div class="form-group">
+                        <label>Descripción de la Consulta:</label>
+                        <textarea class="form-control" id="des_consulta" rows="4" 
+                                  placeholder="Descripción detallada de la consulta (anamnesis, examen físico, etc.)..."></textarea>
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="form-group">
+                        <label>Observaciones:</label>
+                        <textarea class="form-control" id="consulta_observaciones" rows="2" 
+                                  placeholder="Observaciones adicionales..."></textarea>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnGuardarConsulta">
+                    <i class="fas fa-save"></i> Guardar Consulta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+#tblCitas tbody tr {
+    cursor: pointer;
+}
+
+#tblCitas tbody tr:hover {
+    background-color: #e7f3ff;
+}
+</style>
+
+{% endblock %}
+
+{% block js %}
+<script>
+const CSRFToken = "{{ csrf_token() }}" || null;
+
+// ==========================================
+// DATATABLE DE CITAS
+// ==========================================
+const initDatatable = () => {
+  $('#tblCitas').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: {
+      url: '/api/v1/citas',
+      dataSrc: function(json) {
+        if (json.success) {
+          return json.data;
+        } else {
+          Swal.fire('Error', json.error || 'Error al cargar citas', 'error');
+          return [];
+        }
+      },
+      error: function(xhr, error, thrown) {
+        console.error('Error en AJAX:', xhr.responseText);
+        Swal.fire('Error', 'No se pudieron cargar las citas', 'error');
+      }
+    },
+    columns: [
+      { data: 'cita_fecha', title: 'Fecha' },
+      { data: 'cita_hora_inicio', title: 'Hora' },
+      { data: 'paciente_nombre', title: 'Paciente' },
+      { data: 'historia_clinica', title: 'HC' },
+      { data: 'especialista_nombre', title: 'Especialista' },
+      { 
+        data: 'cita_tipo',
+        render: function(data, type, row) {
+          const badges = {
+            'PRIMERA_VEZ': '<span class="badge badge-primary">Primera Vez</span>',
+            'EVALUACION': '<span class="badge badge-info">Evaluación</span>',
+            'TRATAMIENTO': '<span class="badge badge-success">Tratamiento</span>',
+            'SEGUIMIENTO': '<span class="badge badge-warning">Seguimiento</span>'
+          };
+          return badges[data] || data;
+        },
+        title: 'Tipo',
+        className: 'text-center'
+      },
+      { 
+        data: 'estado_nombre',
+        render: function(data, type, row) {
+          return `<span class="badge" style="background-color: ${row.estado_color}">${data}</span>`;
+        },
+        title: 'Estado',
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          return `
+            <button type="button" class="btn btn-success btn-sm btn-iniciar-consulta" 
+                    data-id="${row.id_cita}" 
+                    data-paciente="${row.paciente_nombre}"
+                    data-hc="${row.historia_clinica}"
+                    data-especialista="${row.especialista_nombre}"
+                    data-fecha="${row.cita_fecha}"
+                    data-hora="${row.cita_hora_inicio}"
+                    data-tipo="${row.cita_tipo}"
+                    data-motivo="${row.cita_motivo || ''}"
+                    data-id-paciente="${row.id_paciente}"
+                    data-id-profesional="${row.id_profesional}"
+                    title="Iniciar Consulta">
+              <i class="fas fa-play-circle"></i> Iniciar Consulta
+            </button>
+          `;
+        },
+        title: 'Acciones',
+        className: 'text-center',
+        orderable: false
+      }
+    ],
+    order: [[0, 'desc'], [1, 'asc']],
+    responsive: true,
+    pageLength: 10
+  });
+}
+
+// ==========================================
+// ABRIR MODAL Y PRE-CARGAR DATOS
+// ==========================================
+const iniciarConsulta = () => {
+  $('#tblCitas').on('click', '.btn-iniciar-consulta', function() {
+    const data = $(this).data();
+    
+    // Llenar información de la cita
+    $('#infoPaciente').text(data.paciente);
+    $('#infoHC').text(data.hc);
+    $('#infoFecha').text(data.fecha);
+    $('#infoEspecialista').text(data.especialista);
+    $('#infoHora').text(data.hora);
+    $('#infoTipo').html($(this).closest('tr').find('td:eq(5)').html());
+    
+    // Llenar campos ocultos
+    $('#id_cita').val(data.id);
+    $('#id_paciente').val(data.idPaciente);
+    $('#id_profesional').val(data.idProfesional);
+    
+    // Pre-cargar fecha actual
+    const ahora = new Date();
+    const fechaHoraLocal = ahora.toISOString().slice(0, 16);
+    $('#consulta_fecha').val(fechaHoraLocal);
+    
+    // Pre-cargar motivo si existe
+    $('#consulta_motivo').val(data.motivo);
+    
+    // Limpiar otros campos
+    $('#des_consulta').val('');
+    $('#consulta_observaciones').val('');
+    $('#consulta_estado').val('EN_ATENCION');
+    
+    // Abrir modal
+    $('#modalRegistrarConsulta').modal('show');
+  });
+}
+
+// ==========================================
+// GUARDAR CONSULTA
+// ==========================================
+const guardarConsulta = () => {
+  $('#btnGuardarConsulta').on('click', function() {
+    // Validar campos obligatorios
+    if (!$('#consulta_fecha').val() || !$('#consulta_motivo').val()) {
+      Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
+      return;
+    }
+    
+    const dataConsulta = {
+      id_cita: parseInt($('#id_cita').val()),
+      id_paciente: parseInt($('#id_paciente').val()),
+      id_profesional: parseInt($('#id_profesional').val()),
+      consulta_fecha: $('#consulta_fecha').val(),
+      consulta_motivo: $('#consulta_motivo').val(),
+      consulta_estado: $('#consulta_estado').val(),
+      des_consulta: $('#des_consulta').val() || null,
+      consulta_observaciones: $('#consulta_observaciones').val() || null,
+      usuario_creacion: 'ADMIN' // Cambiar por usuario real
+    };
+    
+    console.log('📤 Enviando consulta:', dataConsulta);
+    
+    fetch('/api/v1/consultas', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRFToken
+      },
+      body: JSON.stringify(dataConsulta)
+    })
+    .then(resp => resp.json())
+    .then(data => {
+      if (data.success) {
+        $('#tblCitas').DataTable().ajax.reload();
+        $('#modalRegistrarConsulta').modal('hide');
+        
+        Swal.fire({
+          icon: 'success',
+          title: 'Consulta Registrada',
+          text: data.data.mensaje,
+          showCancelButton: true,
+          confirmButtonText: '<i class="fas fa-diagnoses"></i> Registrar Diagnóstico',
+          cancelButtonText: 'Cerrar',
+          confirmButtonColor: '#28a745'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Redirigir a registrar diagnóstico con la consulta pre-cargada
+            window.location.href = `/diagnostico/diagnostico-index?id_consulta=${data.data.id_consulta}`;
+          }
+        });
+      } else {
+        Swal.fire('Error', data.error || 'No se pudo guardar la consulta', 'error');
+      }
+    })
+    .catch(err => {
+      console.error('❌ Error:', err);
+      Swal.fire('Error', 'Ocurrió un error al guardar la consulta', 'error');
+    });
+  });
+}
+
+// ==========================================
+// INICIALIZACIÓN
+// ==========================================
+$(document).ready(function() {
+  initDatatable();
+  iniciarConsulta();
+  guardarConsulta();
+});
+</script>
+{% endblock %}
+
+
+
+
+
