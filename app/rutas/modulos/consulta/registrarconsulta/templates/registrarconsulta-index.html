@@ -150,6 +150,7 @@ Registrar Consulta Médica
 
 {% block js %}
 <script>
+
 const CSRFToken = "{{ csrf_token() }}" || null;
 
 // ==========================================
@@ -207,7 +208,7 @@ const initDatatable = () => {
         data: function(row) {
           return `
             <button type="button" class="btn btn-success btn-sm btn-iniciar-consulta" 
-                    data-id="${row.id_cita}" 
+                    data-id-cita="${row.id_cita}" 
                     data-paciente="${row.paciente_nombre}"
                     data-hc="${row.historia_clinica}"
                     data-especialista="${row.especialista_nombre}"
@@ -234,24 +235,122 @@ const initDatatable = () => {
 }
 
 // ==========================================
+// VALIDACIONES
+// ==========================================
+const validarDatos = (idCita, idPaciente, idProfesional) => {
+  if (!idCita || idCita <= 0) {
+    Swal.fire('Error', 'ID de cita no válido', 'error');
+    return false;
+  }
+  if (!idPaciente || idPaciente <= 0) {
+    Swal.fire('Error', 'ID de paciente no válido', 'error');
+    return false;
+  }
+  if (!idProfesional || idProfesional <= 0) {
+    Swal.fire('Error', 'ID de profesional no válido', 'error');
+    return false;
+  }
+  return true;
+}
+
+const validarCamposObligatorios = () => {
+  const fecha = $('#consulta_fecha').val();
+  const motivo = $('#consulta_motivo').val();
+  const estado = $('#consulta_estado').val();
+  
+  if (!fecha || fecha.trim() === '') {
+    Swal.fire('Validación', 'Debe ingresar la fecha de consulta', 'warning');
+    return false;
+  }
+  
+  if (!motivo || motivo.trim() === '') {
+    Swal.fire('Validación', 'Debe ingresar el motivo de consulta', 'warning');
+    return false;
+  }
+  
+  if (!estado || estado.trim() === '') {
+    Swal.fire('Validación', 'Debe seleccionar un estado', 'warning');
+    return false;
+  }
+  
+  // Validar que la fecha no sea anterior a hoy
+  const fechaConsulta = new Date(fecha);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  
+  if (fechaConsulta < hoy) {
+    Swal.fire('Validación', 'La fecha de consulta no puede ser anterior a hoy', 'warning');
+    return false;
+  }
+  
+  return true;
+}
+
+const validarLongitudTextos = () => {
+  const motivo = $('#consulta_motivo').val();
+  const descripcion = $('#des_consulta').val();
+  const observaciones = $('#consulta_observaciones').val();
+  
+  if (motivo.length > 500) {
+    Swal.fire('Validación', 'El motivo no puede exceder 500 caracteres', 'warning');
+    return false;
+  }
+  
+  if (descripcion.length > 2000) {
+    Swal.fire('Validación', 'La descripción no puede exceder 2000 caracteres', 'warning');
+    return false;
+  }
+  
+  if (observaciones.length > 1000) {
+    Swal.fire('Validación', 'Las observaciones no pueden exceder 1000 caracteres', 'warning');
+    return false;
+  }
+  
+  return true;
+}
+
+// ==========================================
 // ABRIR MODAL Y PRE-CARGAR DATOS
 // ==========================================
 const iniciarConsulta = () => {
   $('#tblCitas').on('click', '.btn-iniciar-consulta', function() {
-    const data = $(this).data();
+    const idCita = $(this).data('id-cita');
+    const idPaciente = $(this).data('id-paciente');
+    const idProfesional = $(this).data('id-profesional');
+    
+    // Validar que los IDs existan y sean válidos
+    if (!validarDatos(idCita, idPaciente, idProfesional)) {
+      return;
+    }
     
     // Llenar información de la cita
-    $('#infoPaciente').text(data.paciente);
-    $('#infoHC').text(data.hc);
-    $('#infoFecha').text(data.fecha);
-    $('#infoEspecialista').text(data.especialista);
-    $('#infoHora').text(data.hora);
-    $('#infoTipo').html($(this).closest('tr').find('td:eq(5)').html());
+    $('#infoPaciente').text($(this).data('paciente'));
+    $('#infoHC').text($(this).data('hc'));
+    $('#infoFecha').text($(this).data('fecha'));
+    $('#infoEspecialista').text($(this).data('especialista'));
+    $('#infoHora').text($(this).data('hora'));
     
-    // Llenar campos ocultos
-    $('#id_cita').val(data.id);
-    $('#id_paciente').val(data.idPaciente);
-    $('#id_profesional').val(data.idProfesional);
+    // Para el tipo de cita, obtener el badge HTML
+    const tipoCita = $(this).data('tipo');
+    const badges = {
+      'PRIMERA_VEZ': '<span class="badge badge-primary">Primera Vez</span>',
+      'EVALUACION': '<span class="badge badge-info">Evaluación</span>',
+      'TRATAMIENTO': '<span class="badge badge-success">Tratamiento</span>',
+      'SEGUIMIENTO': '<span class="badge badge-warning">Seguimiento</span>'
+    };
+    $('#infoTipo').html(badges[tipoCita] || tipoCita);
+    
+    // Llenar campos ocultos con valores numéricos
+    $('#id_cita').val(idCita);
+    $('#id_paciente').val(idPaciente);
+    $('#id_profesional').val(idProfesional);
+    
+    // Validar que los campos ocultos se hayan llenado correctamente
+    console.log('Valores guardados:', {
+      id_cita: $('#id_cita').val(),
+      id_paciente: $('#id_paciente').val(),
+      id_profesional: $('#id_profesional').val()
+    });
     
     // Pre-cargar fecha actual
     const ahora = new Date();
@@ -259,7 +358,12 @@ const iniciarConsulta = () => {
     $('#consulta_fecha').val(fechaHoraLocal);
     
     // Pre-cargar motivo si existe
-    $('#consulta_motivo').val(data.motivo);
+    const motivo = $(this).data('motivo');
+    if (motivo) {
+      $('#consulta_motivo').val(motivo);
+    } else {
+      $('#consulta_motivo').val('');
+    }
     
     // Limpiar otros campos
     $('#des_consulta').val('');
@@ -276,25 +380,41 @@ const iniciarConsulta = () => {
 // ==========================================
 const guardarConsulta = () => {
   $('#btnGuardarConsulta').on('click', function() {
-    // Validar campos obligatorios
-    if (!$('#consulta_fecha').val() || !$('#consulta_motivo').val()) {
-      Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
+    // Validaciones previas
+    if (!validarCamposObligatorios()) {
+      return;
+    }
+    
+    if (!validarLongitudTextos()) {
+      return;
+    }
+    
+    const idCita = parseInt($('#id_cita').val());
+    const idPaciente = parseInt($('#id_paciente').val());
+    const idProfesional = parseInt($('#id_profesional').val());
+    
+    // Validación final de IDs
+    if (!validarDatos(idCita, idPaciente, idProfesional)) {
       return;
     }
     
     const dataConsulta = {
-      id_cita: parseInt($('#id_cita').val()),
-      id_paciente: parseInt($('#id_paciente').val()),
-      id_profesional: parseInt($('#id_profesional').val()),
+      id_cita: idCita,
+      id_paciente: idPaciente,
+      id_profesional: idProfesional,
       consulta_fecha: $('#consulta_fecha').val(),
-      consulta_motivo: $('#consulta_motivo').val(),
+      consulta_motivo: $('#consulta_motivo').val().trim(),
       consulta_estado: $('#consulta_estado').val(),
-      des_consulta: $('#des_consulta').val() || null,
-      consulta_observaciones: $('#consulta_observaciones').val() || null,
-      usuario_creacion: 'ADMIN' // Cambiar por usuario real
+      des_consulta: $('#des_consulta').val().trim() || null,
+      consulta_observaciones: $('#consulta_observaciones').val().trim() || null,
+      usuario_creacion: 'ADMIN'
     };
     
-    console.log('📤 Enviando consulta:', dataConsulta);
+    console.log('Datos a enviar:', dataConsulta);
+    
+    // Deshabilitar botón mientras se envía
+    const btn = $(this);
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
     
     fetch('/api/v1/consultas', {
       method: 'POST',
@@ -304,8 +424,15 @@ const guardarConsulta = () => {
       },
       body: JSON.stringify(dataConsulta)
     })
-    .then(resp => resp.json())
+    .then(resp => {
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+      return resp.json();
+    })
     .then(data => {
+      btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Consulta');
+      
       if (data.success) {
         $('#tblCitas').DataTable().ajax.reload();
         $('#modalRegistrarConsulta').modal('hide');
@@ -320,7 +447,6 @@ const guardarConsulta = () => {
           confirmButtonColor: '#28a745'
         }).then((result) => {
           if (result.isConfirmed) {
-            // Redirigir a registrar diagnóstico con la consulta pre-cargada
             window.location.href = `/diagnostico/diagnostico-index?id_consulta=${data.data.id_consulta}`;
           }
         });
@@ -329,8 +455,9 @@ const guardarConsulta = () => {
       }
     })
     .catch(err => {
-      console.error('❌ Error:', err);
-      Swal.fire('Error', 'Ocurrió un error al guardar la consulta', 'error');
+      btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Consulta');
+      console.error('Error:', err);
+      Swal.fire('Error', 'Ocurrió un error al guardar la consulta: ' + err.message, 'error');
     });
   });
 }
@@ -343,6 +470,7 @@ $(document).ready(function() {
   iniciarConsulta();
   guardarConsulta();
 });
+
 </script>
 {% endblock %}
 

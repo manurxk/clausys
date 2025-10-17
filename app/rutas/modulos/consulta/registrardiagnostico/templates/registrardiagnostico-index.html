@@ -222,6 +222,9 @@ Registrar Diagnóstico
 
 {% block js %}
 <script>
+// ==========================================
+// CONFIGURACIÓN GLOBAL
+// ==========================================
 const CSRFToken = "{{ csrf_token() }}" || null;
 
 // ==========================================
@@ -318,19 +321,64 @@ const initDiagnosticosDatatable = () => {
     ajax: {
       url: '/api/v1/diagnosticos',
       dataSrc: function(json) {
-        return json.success ? json.data : [];
+        console.log('📋 Respuesta API diagnósticos:', json);
+        
+        if (!json.success || !json.data) {
+          console.error('❌ API no devolvió datos válidos');
+          Swal.fire('Error', 'No se pudieron cargar los diagnósticos', 'error');
+          return [];
+        }
+        
+        console.log(`✅ Total diagnósticos: ${json.data.length}`);
+        
+        if (json.data.length > 0) {
+          console.log('📄 Primer diagnóstico:', json.data[0]);
+          console.log('🔑 Claves disponibles:', Object.keys(json.data[0]));
+        }
+        
+        return json.data;
+      },
+      error: function(xhr, error, thrown) {
+        console.error('❌ Error cargando diagnósticos:', xhr.responseText);
+        Swal.fire('Error', 'No se pudieron cargar los diagnósticos CIE-10', 'error');
       }
     },
     columns: [
-      { data: 'codigo_cie10' },
-      { data: 'descripcion' },
+      { 
+        data: 'codigo_cie10',
+        render: function(data) {
+          return data || '<span class="text-muted">Sin código</span>';
+        }
+      },
+      { 
+        data: 'descripcion',
+        render: function(data) {
+          return data || '<span class="text-muted">Sin descripción</span>';
+        }
+      },
       { 
         data: function(row) {
+          const idDiag = row.id;
+          
+          if (!idDiag && idDiag !== 0) {
+            console.error('❌ Diagnóstico sin ID:', row);
+            return '<button class="btn btn-danger btn-sm" disabled><i class="fa fa-times"></i> Sin ID</button>';
+          }
+          
+          const descripcionEscapada = (row.descripcion || '')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+          
+          const codigoEscapado = (row.codigo_cie10 || '')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+          
           return `
-            <button type="button" class="btn btn-success btn-sm btn-select-diagnostico" 
-                    data-id="${row.id_diagnostico}" 
-                    data-codigo="${row.codigo_cie10}"
-                    data-descripcion="${row.descripcion}">
+            <button type="button" 
+                    class="btn btn-success btn-sm btn-select-diagnostico" 
+                    data-id="${idDiag}" 
+                    data-codigo="${codigoEscapado}"
+                    data-descripcion="${descripcionEscapada}">
               <i class="fa fa-check"></i> Seleccionar
             </button>
           `;
@@ -351,7 +399,6 @@ const registrarDiagnostico = () => {
   $('#tblConsultas').on('click', '.btn-registrar-diagnostico', function() {
     const data = $(this).data();
     
-    // Llenar información de la consulta
     $('#infoPaciente').text(data.paciente);
     $('#infoHC').text(data.hc);
     $('#infoFecha').text(data.fecha);
@@ -359,21 +406,17 @@ const registrarDiagnostico = () => {
     $('#infoMotivo').text(data.motivo);
     $('#infoEstado').html($(this).closest('tr').find('td:eq(6)').html());
     
-    // Llenar campo oculto
     $('#id_consulta').val(data.id);
     
-    // Limpiar formulario
     $('#id_diagnostico').val('');
-    $('#txtDiagnostico').val('');
+    $('#txtDiagnostico').val('').removeClass('is-invalid is-valid');
     $('#tipo_diagnostico').val('');
     $('#estado_diagnostico').val('CONFIRMADO');
     $('#descripcion_adicional').val('');
     $('#observaciones').val('');
     
-    // Cargar diagnósticos existentes
     cargarDiagnosticosExistentes(data.id);
     
-    // Abrir modal
     $('#modalRegistrarDiagnostico').modal('show');
   });
 }
@@ -389,22 +432,42 @@ const cargarDiagnosticosExistentes = (idConsulta) => {
       'X-CSRFToken': CSRFToken
     }
   })
-  .then(resp => resp.json())
+  .then(resp => {
+    if (!resp.ok) {
+      if (resp.status === 404) {
+        console.log('ℹ️ No hay diagnósticos previos para esta consulta');
+        $('#listaDiagnosticos').hide();
+        return null;
+      }
+      throw new Error(`HTTP ${resp.status}`);
+    }
+    return resp.json();
+  })
   .then(data => {
-    if (data.success && data.data.length > 0) {
+    if (!data) return;
+    
+    if (data.success && data.data && data.data.length > 0) {
+      console.log('📋 Diagnósticos existentes:', data.data.length);
+      
       let html = '';
-      data.data.forEach(diag => {
+      data.data.forEach((diag, index) => {
         html += `
-          <div class="diagnostico-item ${diag.tipo}">
-            <strong>${diag.codigo_cie10}</strong> - ${diag.descripcion}
-            <br>
-            <small>
-              <span class="badge badge-secondary">${diag.tipo}</span>
-              <span class="badge badge-info">${diag.estado}</span>
-            </small>
+          <div class="diagnostico-item ${diag.tipo}" style="animation: fadeIn 0.3s ease ${index * 0.1}s both;">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong class="text-primary">${diag.codigo_cie10}</strong> - ${diag.descripcion}
+                <br>
+                <small class="text-muted">
+                  <span class="badge badge-secondary">${diag.tipo}</span>
+                  <span class="badge badge-info">${diag.estado}</span>
+                  ${diag.descripcion_adicional ? `<span class="badge badge-light"><i class="fas fa-info-circle"></i> Con descripción adicional</span>` : ''}
+                </small>
+              </div>
+            </div>
           </div>
         `;
       });
+      
       $('#contenidoDiagnosticos').html(html);
       $('#listaDiagnosticos').show();
     } else {
@@ -412,7 +475,7 @@ const cargarDiagnosticosExistentes = (idConsulta) => {
     }
   })
   .catch(err => {
-    console.error('Error cargando diagnósticos:', err);
+    console.error('⚠️ Error cargando diagnósticos existentes:', err);
     $('#listaDiagnosticos').hide();
   });
 }
@@ -425,38 +488,148 @@ const buscarDiagnostico = () => {
     $('#modalBuscarDiagnostico').modal('show');
   });
   
-  $('#tblDiagnosticos').on('click', '.btn-select-diagnostico', function() {
-    const data = $(this).data();
+  $(document).on('click', '.btn-select-diagnostico', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
     
-    $('#id_diagnostico').val(data.id);
-    $('#txtDiagnostico').val(`${data.codigo} - ${data.descripcion}`);
+    console.log('🖱️ Click en seleccionar detectado');
+    
+    const idDiagnostico = $(this).attr('data-id');
+    const codigo = $(this).attr('data-codigo');
+    const descripcion = $(this).attr('data-descripcion');
+    
+    console.log('📋 Datos capturados:', {
+      id_raw: idDiagnostico,
+      id_parsed: parseInt(idDiagnostico),
+      codigo: codigo,
+      descripcion: descripcion
+    });
+    
+    if (!idDiagnostico || idDiagnostico === 'undefined') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'ID de diagnóstico no válido. Por favor, recargue la página.'
+      });
+      console.error('❌ ID diagnóstico inválido:', idDiagnostico);
+      return;
+    }
+    
+    const idParsed = parseInt(idDiagnostico);
+    if (isNaN(idParsed)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El ID del diagnóstico no es un número válido'
+      });
+      console.error('❌ ID no es número:', idDiagnostico);
+      return;
+    }
+    
+    console.log('✅ Diagnóstico seleccionado correctamente:', {
+      id: idParsed,
+      codigo: codigo,
+      descripcion: descripcion
+    });
+    
+    $('#id_diagnostico').val(idParsed);
+    $('#txtDiagnostico').val(`${codigo} - ${descripcion}`);
+    
+    console.log('✅ Valores asignados:', {
+      id_diagnostico_field: $('#id_diagnostico').val(),
+      txt_diagnostico_field: $('#txtDiagnostico').val()
+    });
     
     $('#modalBuscarDiagnostico').modal('hide');
+    
+    $('#txtDiagnostico').addClass('is-valid').removeClass('is-invalid');
+    setTimeout(() => {
+      $('#txtDiagnostico').removeClass('is-valid');
+    }, 2000);
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Diagnóstico Seleccionado',
+      text: `${codigo} - ${descripcion}`,
+      timer: 2000,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
   });
 }
 
 // ==========================================
-// GUARDAR DIAGNÓSTICO
+// GUARDAR DIAGNÓSTICO - ✅ CON REGISTRO_FECHA
 // ==========================================
 const guardarDiagnostico = () => {
   $('#btnGuardarDiagnostico').on('click', function() {
-    // Validar campos obligatorios
-    if (!$('#id_diagnostico').val() || !$('#tipo_diagnostico').val() || !$('#estado_diagnostico').val()) {
+    const idConsulta = parseInt($('#id_consulta').val());
+    const idDiagnostico = parseInt($('#id_diagnostico').val());
+    const tipoDiagnostico = $('#tipo_diagnostico').val();
+    const estadoDiagnostico = $('#estado_diagnostico').val();
+    
+    console.log('🔍 Validando datos:', {
+      idConsulta,
+      idDiagnostico,
+      tipoDiagnostico,
+      estadoDiagnostico
+    });
+    
+    // Validación 1: ID de consulta
+    if (!idConsulta || isNaN(idConsulta)) {
+      Swal.fire('Error', 'ID de consulta no válido', 'error');
+      return;
+    }
+    
+    // Validación 2: ID de diagnóstico
+    if (!idDiagnostico || isNaN(idDiagnostico)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Diagnóstico no seleccionado',
+        text: 'Debe buscar y seleccionar un diagnóstico CIE-10',
+        confirmButtonText: 'Entendido'
+      });
+      $('#txtDiagnostico').addClass('is-invalid');
+      return;
+    }
+    
+    // Validación 3: Campos requeridos
+    if (!tipoDiagnostico || !estadoDiagnostico) {
       Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
       return;
     }
     
+    // ✅ GENERAR FECHA ACTUAL
+    const now = new Date();
+    
+    // Formato SQL estándar: 'YYYY-MM-DD HH:MM:SS'
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const registroFecha = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    
+    console.log('📅 Fecha generada:', registroFecha);
+    
+    // ✅ CONSTRUIR OBJETO CON TODOS LOS CAMPOS
     const dataDiagnostico = {
-      id_consulta: parseInt($('#id_consulta').val()),
-      id_diagnostico: parseInt($('#id_diagnostico').val()),
-      tipo_diagnostico: $('#tipo_diagnostico').val(),
-      estado_diagnostico: $('#estado_diagnostico').val(),
-      descripcion_adicional: $('#descripcion_adicional').val() || null,
-      observaciones: $('#observaciones').val() || null,
-      usuario_creacion: 'ADMIN' // Cambiar por usuario real
+      id_consulta: idConsulta,
+      id_diagnostico: idDiagnostico,
+      tipo_diagnostico: tipoDiagnostico,
+      estado_diagnostico: estadoDiagnostico,
+      descripcion_adicional: $('#descripcion_adicional').val().trim() || null,
+      observaciones: $('#observaciones').val().trim() || null,
+      usuario_creacion: 'ADMIN',
+      registro_fecha: registroFecha  // ✅ CAMPO AGREGADO
     };
     
     console.log('📤 Enviando diagnóstico:', dataDiagnostico);
+    
+    const btn = $(this);
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
     
     fetch('/api/v1/registro-diagnosticos', {
       method: 'POST',
@@ -466,23 +639,43 @@ const guardarDiagnostico = () => {
       },
       body: JSON.stringify(dataDiagnostico)
     })
-    .then(resp => resp.json())
+    .then(resp => {
+      if (!resp.ok) {
+        return resp.json().then(err => {
+          throw new Error(err.error || `HTTP ${resp.status}`);
+        });
+      }
+      return resp.json();
+    })
     .then(data => {
+      btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Diagnóstico');
+      
       if (data.success) {
+        console.log('✅ Diagnóstico guardado:', data);
+        
         $('#tblConsultas').DataTable().ajax.reload();
-        $('#modalRegistrarDiagnostico').modal('hide');
+        cargarDiagnosticosExistentes(idConsulta);
+        
+        $('#id_diagnostico').val('');
+        $('#txtDiagnostico').val('').removeClass('is-invalid is-valid');
+        $('#tipo_diagnostico').val('');
+        $('#estado_diagnostico').val('CONFIRMADO');
+        $('#descripcion_adicional').val('');
+        $('#observaciones').val('');
         
         Swal.fire({
           icon: 'success',
-          title: 'Diagnóstico Registrado',
-          text: data.data.mensaje,
+          title: '¡Diagnóstico Registrado!',
+          text: data.data.mensaje || 'Diagnóstico guardado correctamente',
           showCancelButton: true,
           confirmButtonText: '<i class="fas fa-pills"></i> Registrar Tratamiento',
-          cancelButtonText: 'Cerrar',
-          confirmButtonColor: '#28a745'
+          cancelButtonText: '<i class="fas fa-plus"></i> Agregar Otro Diagnóstico',
+          confirmButtonColor: '#28a745',
+          cancelButtonColor: '#6c757d'
         }).then((result) => {
           if (result.isConfirmed) {
-            window.location.href = `/tratamiento/tratamiento-index?id_consulta=${$('#id_consulta').val()}`;
+            $('#modalRegistrarDiagnostico').modal('hide');
+            window.location.href = `/tratamiento/tratamiento-index?id_consulta=${idConsulta}`;
           }
         });
       } else {
@@ -490,8 +683,9 @@ const guardarDiagnostico = () => {
       }
     })
     .catch(err => {
-      console.error('❌ Error:', err);
-      Swal.fire('Error', 'Ocurrió un error al guardar el diagnóstico', 'error');
+      btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Diagnóstico');
+      console.error('❌ Error guardando diagnóstico:', err);
+      Swal.fire('Error', err.message || 'Ocurrió un error al guardar el diagnóstico', 'error');
     });
   });
 }
@@ -500,21 +694,47 @@ const guardarDiagnostico = () => {
 // INICIALIZACIÓN
 // ==========================================
 $(document).ready(function() {
+  console.log('🚀 Inicializando módulo de diagnósticos...');
+  
   initDatatable();
   initDiagnosticosDatatable();
   registrarDiagnostico();
   buscarDiagnostico();
   guardarDiagnostico();
   
-  // Si viene con id_consulta en URL, abrir directamente
   const urlParams = new URLSearchParams(window.location.search);
   const idConsulta = urlParams.get('id_consulta');
   if (idConsulta) {
-    // Buscar y hacer clic en el botón correspondiente
+    console.log('🔗 ID de consulta en URL:', idConsulta);
     setTimeout(() => {
-      $(`button[data-id="${idConsulta}"]`).click();
+      const btn = $(`.btn-registrar-diagnostico[data-id="${idConsulta}"]`);
+      if (btn.length) {
+        btn.click();
+      } else {
+        console.warn('⚠️ No se encontró el botón para la consulta:', idConsulta);
+      }
     }, 500);
   }
+  
+  console.log('✅ Módulo de diagnósticos inicializado');
 });
+
+// Agregar animación CSS
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+document.head.appendChild(style);;
+
+  
 </script>
 {% endblock %}

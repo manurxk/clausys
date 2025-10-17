@@ -249,7 +249,7 @@ class CitaDao:
     # =====================================================
     
     def getAllCitas(self):
-        """Obtiene todas las citas activas"""
+        """Obtiene todas las citas activas CON id_profesional para consultas"""
         citasSQL = """
             SELECT
                 c.id_cita,
@@ -300,7 +300,8 @@ class CitaDao:
                 'historia_clinica': c[2],
                 'paciente_nombre': c[3],
                 'paciente_telefono': c[4],
-                'id_especialista': c[5],
+                'id_profesional': c[5],  # ✅ IMPORTANTE: id_especialista mapeado como id_profesional
+                'id_especialista': c[5],  # Mantener ambos por compatibilidad
                 'especialista_nombre': c[6],
                 'especialista_color': c[7],
                 'id_especialidad': c[8],

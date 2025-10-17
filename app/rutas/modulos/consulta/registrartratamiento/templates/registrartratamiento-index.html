@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Registrar Tratamiento
+Registrar Tratamiento Psicológico
 {% endblock %}
 
 {% block contenido %}
 <div class="container-fluid mt-4">
-    <h3><i class="fas fa-pills"></i> Registrar Tratamiento Médico</h3>
+    <h3><i class="fas fa-brain"></i> Registrar Tratamiento Psicológico</h3>
     
     <!-- Tarjeta principal -->
     <div class="card shadow">
         <!-- Header -->
-        <div class="card-header bg-warning text-dark">
+        <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
             <h5 class="mb-0">
                 <i class="fas fa-clipboard-list"></i> Consultas con Diagnósticos
             </h5>
@@ -44,171 +44,285 @@ Registrar Tratamiento
 <div class="modal fade" id="modalRegistrarTratamiento" tabindex="-1" data-backdrop="static">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
+            <div class="modal-header text-white" style="background-color: #6f42c1;">
                 <h4 class="modal-title">
-                    <i class="fas fa-pills"></i> Registrar Tratamiento Médico
+                    <i class="fas fa-brain"></i> Registrar Tratamiento Psicológico
                 </h4>
-                <button type="button" class="close" data-dismiss="modal">
+                <button type="button" class="close text-white" data-dismiss="modal">
                     <span>&times;</span>
                 </button>
             </div>
             
             <div class="modal-body">
-                <div class="row">
-                    <!-- Columna izquierda: Información y Formulario -->
-                    <div class="col-md-8">
-                        <!-- Información de la Consulta -->
-                        <div class="card border-warning mb-3">
-                            <div class="card-header bg-warning text-dark">
-                                <i class="fas fa-info-circle"></i> Información de la Consulta
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Paciente:</strong> <span id="infoPaciente"></span></p>
-                                        <p class="mb-1"><strong>HC:</strong> <span id="infoHC"></span></p>
-                                        <p class="mb-1"><strong>Fecha Consulta:</strong> <span id="infoFecha"></span></p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p class="mb-1"><strong>Profesional:</strong> <span id="infoProfesional"></span></p>
-                                        <p class="mb-1"><strong>Estado:</strong> <span id="infoEstado"></span></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <form id="formTratamiento">
-                            <input type="hidden" id="id_consulta">
-                            <input type="hidden" id="id_paciente">
-
-                            <!-- Seleccionar Diagnóstico -->
-                            <div class="form-group">
-                                <label>Diagnóstico a Tratar: <span class="text-danger">*</span></label>
-                                <select class="form-control" id="id_diagnostico" required>
-                                    <option value="">Seleccione un diagnóstico...</option>
-                                </select>
-                                <small class="form-text text-muted">
-                                    Seleccione el diagnóstico para el cual se prescribe el tratamiento
-                                </small>
-                            </div>
-
-                            <!-- Tipo de Tratamiento -->
-                            <div class="form-group">
-                                <label>Tipo de Tratamiento: <span class="text-danger">*</span></label>
-                                <select class="form-control" id="tipo_tratamiento" required>
-                                    <option value="">Seleccione...</option>
-                                    <option value="FARMACOLOGICO">Farmacológico</option>
-                                    <option value="FISIOTERAPIA">Fisioterapia</option>
-                                    <option value="QUIRURGICO">Quirúrgico</option>
-                                    <option value="PSICOLOGICO">Psicológico</option>
-                                    <option value="OTRO">Otro</option>
-                                </select>
-                            </div>
-
-                            <!-- Nombre del Tratamiento -->
-                            <div class="form-group">
-                                <label>Nombre del Tratamiento: <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="nombre_tratamiento" 
-                                       placeholder="Ej: Amoxicilina 500mg, Sesiones de fisioterapia..." 
-                                       required>
-                            </div>
-
-                            <!-- Descripción/Indicaciones -->
-                            <div class="form-group">
-                                <label>Descripción e Indicaciones: <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="descripcion_tratamiento" rows="3" 
-                                          placeholder="Descripción detallada del tratamiento e indicaciones de uso..." 
-                                          required></textarea>
-                            </div>
-
-                            <!-- Dosis y Frecuencia -->
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Dosis:</label>
-                                        <input type="text" class="form-control" id="dosis" 
-                                               placeholder="Ej: 1 comprimido, 5ml, etc.">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Frecuencia:</label>
-                                        <input type="text" class="form-control" id="frecuencia" 
-                                               placeholder="Ej: Cada 8 horas, 3 veces al día">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fechas -->
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Fecha de Inicio: <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" id="fecha_inicio" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>Fecha de Fin (estimada):</label>
-                                        <input type="date" class="form-control" id="fecha_fin">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Duración estimada -->
-                            <div class="form-group">
-                                <label>Duración Estimada (días):</label>
-                                <input type="number" class="form-control" id="duracion_dias" 
-                                       placeholder="Ej: 7, 15, 30..." min="1">
-                                <small class="form-text text-muted">
-                                    Si completa este campo, la fecha de fin se calculará automáticamente
-                                </small>
-                            </div>
-
-                            <!-- Estado del Tratamiento -->
-                            <div class="form-group">
-                                <label>Estado del Tratamiento: <span class="text-danger">*</span></label>
-                                <select class="form-control" id="estado_tratamiento" required>
-                                    <option value="ACTIVO" selected>Activo</option>
-                                    <option value="SUSPENDIDO">Suspendido</option>
-                                    <option value="FINALIZADO">Finalizado</option>
-                                </select>
-                            </div>
-
-                            <!-- Observaciones -->
-                            <div class="form-group">
-                                <label>Observaciones:</label>
-                                <textarea class="form-control" id="observaciones" rows="2" 
-                                          placeholder="Observaciones adicionales, precauciones, contraindicaciones..."></textarea>
-                            </div>
-                        </form>
+                <!-- Información de la Consulta -->
+                <div class="card border-purple mb-3" style="border-color: #6f42c1 !important;">
+                    <div class="card-header text-white" style="background-color: #6f42c1;">
+                        <i class="fas fa-info-circle"></i> Información de la Consulta
                     </div>
-
-                    <!-- Columna derecha: Tratamientos Activos del Paciente -->
-                    <div class="col-md-4">
-                        <div class="card border-info">
-                            <div class="card-header bg-info text-white">
-                                <i class="fas fa-history"></i> Tratamientos del Paciente
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Paciente:</strong> <span id="infoPaciente"></span></p>
+                                <p class="mb-1"><strong>HC:</strong> <span id="infoHC"></span></p>
                             </div>
-                            <div class="card-body" style="max-height: 600px; overflow-y: auto;">
-                                <div id="listaTratamientos">
-                                    <p class="text-muted text-center">
-                                        <i class="fas fa-spinner fa-spin"></i> Cargando...
-                                    </p>
-                                </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Profesional:</strong> <span id="infoProfesional"></span></p>
+                                <p class="mb-1"><strong>Fecha Consulta:</strong> <span id="infoFecha"></span></p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Estado:</strong> <span id="infoEstado"></span></p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <form id="formTratamiento">
+                    <input type="hidden" id="id_consulta">
+                    <input type="hidden" id="id_paciente">
+
+                    <!-- SECCIÓN 1: INFORMACIÓN BÁSICA -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background-color: #f8f9fa; cursor: pointer;" data-toggle="collapse" data-target="#seccionBasica">
+                            <h5 class="mb-0">
+                                <i class="fas fa-file-medical text-primary"></i> 
+                                <strong>1. Información Básica del Tratamiento</strong>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </h5>
+                        </div>
+                        <div class="collapse show" id="seccionBasica">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-diagnoses"></i> Diagnóstico a Tratar: <span class="text-danger">*</span></label>
+                                            <select class="form-control" id="id_diagnostico" required>
+                                                <option value="">Seleccione un diagnóstico...</option>
+                                            </select>
+                                            <small class="form-text text-muted">
+                                                Seleccione el diagnóstico para el cual se prescribe el tratamiento
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-user-md"></i> Tipo de Tratamiento: <span class="text-danger">*</span></label>
+                                            <input type="hidden" id="id_tipo_tratamiento">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" 
+                                                       placeholder="Haga clic para buscar tipo de tratamiento" 
+                                                       id="txtTipoTratamiento" 
+                                                       readonly 
+                                                       required>
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-primary" type="button" id="btnBuscarTratamiento">
+                                                        <i class="fas fa-search"></i> Buscar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">
+                                                Busque y seleccione el tipo de tratamiento de la base de datos
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-tag"></i> Nombre/Título del Tratamiento: <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="nombre_tratamiento" 
+                                                   placeholder="Ej: Terapia Cognitiva para Ansiedad, Sesiones de Mindfulness..." 
+                                                   required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 2: OBJETIVOS Y DESCRIPCIÓN -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background-color: #f8f9fa; cursor: pointer;" data-toggle="collapse" data-target="#seccionObjetivos">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bullseye text-success"></i> 
+                                <strong>2. Objetivos y Metodología</strong>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </h5>
+                        </div>
+                        <div class="collapse show" id="seccionObjetivos">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label><i class="fas fa-crosshairs"></i> Objetivos Terapéuticos: <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="objetivos_terapeuticos" rows="3" 
+                                              placeholder="Objetivos específicos a alcanzar en el tratamiento..." 
+                                              required></textarea>
+                                    <small class="form-text text-muted">
+                                        Describa los objetivos concretos y medibles que se esperan lograr
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label><i class="fas fa-tools"></i> Descripción y Técnicas a Utilizar: <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="descripcion_tratamiento" rows="3" 
+                                              placeholder="Descripción detallada del tratamiento y técnicas psicológicas a aplicar..." 
+                                              required></textarea>
+                                    <small class="form-text text-muted">
+                                        Especifique las técnicas terapéuticas y metodología a emplear
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 3: PLANIFICACIÓN DE SESIONES -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background-color: #f8f9fa; cursor: pointer;" data-toggle="collapse" data-target="#seccionSesiones">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-check text-info"></i> 
+                                <strong>3. Planificación de Sesiones</strong>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </h5>
+                        </div>
+                        <div class="collapse show" id="seccionSesiones">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-hashtag"></i> Número de Sesiones Estimadas:</label>
+                                            <input type="number" class="form-control" id="numero_sesiones" 
+                                                   placeholder="Ej: 8, 12, 16..." min="1">
+                                            <small class="form-text text-muted">Cantidad total aproximada</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-redo"></i> Frecuencia de Sesiones:</label>
+                                            <select class="form-control" id="frecuencia_sesiones">
+                                                <option value="">Seleccione...</option>
+                                                <option value="SEMANAL">Semanal</option>
+                                                <option value="QUINCENAL">Quincenal</option>
+                                                <option value="BISEMANAL">2 veces por semana</option>
+                                                <option value="MENSUAL">Mensual</option>
+                                            </select>
+                                            <small class="form-text text-muted">Periodicidad de las sesiones</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-clock"></i> Duración por Sesión (min):</label>
+                                            <input type="number" class="form-control" id="duracion_sesion" 
+                                                   placeholder="Ej: 45, 60..." min="15" step="15" value="60">
+                                            <small class="form-text text-muted">Tiempo de cada sesión</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 4: FECHAS Y ESTADO -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background-color: #f8f9fa; cursor: pointer;" data-toggle="collapse" data-target="#seccionFechas">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-alt text-warning"></i> 
+                                <strong>4. Fechas y Estado del Tratamiento</strong>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </h5>
+                        </div>
+                        <div class="collapse show" id="seccionFechas">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-calendar-plus"></i> Fecha de Inicio: <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control" id="fecha_inicio" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-calendar-minus"></i> Fecha de Fin Estimada:</label>
+                                            <input type="date" class="form-control" id="fecha_fin">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label><i class="fas fa-info-circle"></i> Estado del Tratamiento: <span class="text-danger">*</span></label>
+                                            <select class="form-control" id="estado_tratamiento" required>
+                                                <option value="ACTIVO" selected>Activo</option>
+                                                <option value="EN_PAUSA">En Pausa</option>
+                                                <option value="SUSPENDIDO">Suspendido</option>
+                                                <option value="FINALIZADO">Finalizado</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 5: OBSERVACIONES -->
+                    <div class="card mb-3">
+                        <div class="card-header" style="background-color: #f8f9fa; cursor: pointer;" data-toggle="collapse" data-target="#seccionObservaciones">
+                            <h5 class="mb-0">
+                                <i class="fas fa-sticky-note text-secondary"></i> 
+                                <strong>5. Observaciones Adicionales</strong>
+                                <i class="fas fa-chevron-down float-right"></i>
+                            </h5>
+                        </div>
+                        <div class="collapse show" id="seccionObservaciones">
+                            <div class="card-body">
+                                <div class="form-group mb-0">
+                                    <label><i class="fas fa-comment-medical"></i> Observaciones Generales:</label>
+                                    <textarea class="form-control" id="observaciones" rows="3" 
+                                              placeholder="Observaciones adicionales, notas importantes, consideraciones especiales..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
             
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
-                <button type="button" class="btn btn-warning" id="btnGuardarTratamiento">
+                <button type="button" class="btn text-white" style="background-color: #6f42c1;" id="btnGuardarTratamiento">
                     <i class="fas fa-save"></i> Guardar Tratamiento
                 </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Buscar Tipo de Tratamiento -->
+<div class="modal fade" id="modalBuscarTratamiento" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color: #6f42c1;">
+                <h5 class="modal-title">
+                    <i class="fas fa-search"></i> Buscar Tipo de Tratamiento
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered w-100" id="tblTiposTratamiento">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>Descripción del Tratamiento</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -220,36 +334,32 @@ Registrar Tratamiento
 }
 
 #tblConsultas tbody tr:hover {
-    background-color: #fff3cd;
+    background-color: #f3e5f5;
 }
 
-.tratamiento-item {
-    padding: 10px;
-    border-left: 3px solid #ffc107;
-    margin-bottom: 10px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
+.card-header[data-toggle="collapse"] {
+    transition: background-color 0.3s;
 }
 
-.tratamiento-item.ACTIVO {
-    border-left-color: #28a745;
+.card-header[data-toggle="collapse"]:hover {
+    background-color: #e9ecef !important;
 }
 
-.tratamiento-item.SUSPENDIDO {
-    border-left-color: #dc3545;
+.card-header .fa-chevron-down {
+    transition: transform 0.3s;
 }
 
-.tratamiento-item.FINALIZADO {
-    border-left-color: #6c757d;
+.card-header[aria-expanded="false"] .fa-chevron-down {
+    transform: rotate(-90deg);
 }
 
-.tratamiento-item h6 {
-    margin-bottom: 5px;
-    font-size: 14px;
+.form-group label i {
+    margin-right: 5px;
+    opacity: 0.7;
 }
 
-.tratamiento-item small {
-    font-size: 11px;
+.border-purple {
+    border: 2px solid #6f42c1 !important;
 }
 </style>
 
@@ -301,8 +411,8 @@ const initDatatable = () => {
       { 
         data: 'id_consulta',
         render: function(data, type, row) {
-          return `<span class="badge badge-info cursor-pointer" onclick="verDiagnosticos(${data})">
-                    Ver Diagnósticos
+          return `<span class="badge badge-info cursor-pointer" onclick="verDiagnosticos(${data})" style="cursor: pointer;">
+                    <i class="fas fa-eye"></i> Ver
                   </span>`;
         },
         className: 'text-center'
@@ -322,7 +432,8 @@ const initDatatable = () => {
       { 
         data: function(row) {
           return `
-            <button type="button" class="btn btn-warning btn-sm btn-registrar-tratamiento" 
+            <button type="button" class="btn btn-sm text-white btn-registrar-tratamiento" 
+                    style="background-color: #6f42c1;"
                     data-id="${row.id_consulta}" 
                     data-id-paciente="${row.id_paciente}"
                     data-paciente="${row.paciente_nombre}"
@@ -346,22 +457,101 @@ const initDatatable = () => {
 }
 
 // ==========================================
-// VER DIAGNÓSTICOS (FUNCIÓN AUXILIAR)
+// DATATABLE DE TIPOS DE TRATAMIENTO
+// ==========================================
+// REEMPLAZA initTiposTratamientoDatatable con esto:
+const initTiposTratamientoDatatable = () => {
+  $('#tblTiposTratamiento').DataTable({
+    language: {
+      url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
+    },
+    ajax: {
+      url: '/api/v1/tipos-tratamientos',
+      dataSrc: function(json) {
+        console.log('📋 Respuesta API tipos tratamiento:', json);
+        
+        if (!json.success || !json.data) {
+          console.error('❌ API no devolvió datos válidos');
+          Swal.fire('Error', 'No se pudieron cargar los tipos de tratamiento', 'error');
+          return [];
+        }
+        
+        console.log(`✅ Total tipos tratamiento: ${json.data.length}`);
+        return json.data;
+      },
+      error: function(xhr, error, thrown) {
+        console.error('❌ Error cargando tipos tratamiento:', xhr.responseText);
+        Swal.fire('Error', 'No se pudieron cargar los tipos de tratamiento', 'error');
+      }
+    },
+    columns: [
+      { 
+        data: 'id',  // ✅ CAMBIO: Aquí era el problema - usaba 'id_tipo_tratamiento'
+        className: 'text-center'
+      },
+      { 
+        data: 'descripcion'  // ✅ CAMBIO: Era 'des_tipo_tratamiento', ahora es 'descripcion'
+      },
+      { 
+        data: 'estado',  // ✅ CAMBIO: Era 'est_tipo_tratamiento', ahora es 'estado'
+        render: function(data) {
+          return data === 'A' 
+            ? '<span class="badge badge-success">Activo</span>' 
+            : '<span class="badge badge-secondary">Inactivo</span>';
+        },
+        className: 'text-center'
+      },
+      { 
+        data: function(row) {
+          const idTipo = row.id;  // ✅ Usa 'id' en lugar de 'id_tipo_tratamiento'
+          
+          if (!idTipo && idTipo !== 0) {
+            console.error('❌ Tipo tratamiento sin ID:', row);
+            return '<button class="btn btn-danger btn-sm" disabled><i class="fa fa-times"></i> Sin ID</button>';
+          }
+          
+          const descripcionEscapada = (row.descripcion || '')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+          
+          return `
+            <button type="button" 
+                    class="btn btn-success btn-sm btn-select-tratamiento" 
+                    data-id="${idTipo}" 
+                    data-descripcion="${descripcionEscapada}">
+              <i class="fa fa-check"></i> Seleccionar
+            </button>
+          `;
+        },
+        orderable: false,
+        className: 'text-center'
+      }
+    ],
+    responsive: true,
+    pageLength: 8
+  });
+}
+
+// ==========================================
+// VER DIAGNÓSTICOS
 // ==========================================
 window.verDiagnosticos = (idConsulta) => {
-  fetch(`/api/v1/diagnosticos/consulta/${idConsulta}`)
-    .then(resp => resp.json())
+fetch(`/api/v1/registro-diagnosticos/consulta/${idConsulta}`)    .then(resp => resp.json())
     .then(data => {
       if (data.success && data.data.length > 0) {
-        let html = '<ul>';
+        let html = '<ul class="list-unstyled">';
         data.data.forEach(d => {
-          html += `<li><strong>${d.codigo_cie10}:</strong> ${d.descripcion}</li>`;
+          html += `<li class="mb-2">
+                    <strong>${d.codigo_cie10}:</strong> ${d.descripcion}
+                    <br><small class="text-muted">Tipo: ${d.tipo} | Estado: ${d.estado}</small>
+                  </li>`;
         });
         html += '</ul>';
         Swal.fire({
           title: 'Diagnósticos de la Consulta',
           html: html,
-          icon: 'info'
+          icon: 'info',
+          width: '600px'
         });
       } else {
         Swal.fire('Sin diagnósticos', 'Esta consulta no tiene diagnósticos registrados', 'info');
@@ -376,6 +566,8 @@ const registrarTratamiento = () => {
   $('#tblConsultas').on('click', '.btn-registrar-tratamiento', function() {
     const data = $(this).data();
     
+    console.log('📋 Datos de la consulta:', data);
+    
     // Llenar información de la consulta
     $('#infoPaciente').text(data.paciente);
     $('#infoHC').text(data.hc);
@@ -387,27 +579,29 @@ const registrarTratamiento = () => {
     $('#id_consulta').val(data.id);
     $('#id_paciente').val(data.idPaciente);
     
+    console.log('✅ IDs asignados:', {
+      id_consulta: $('#id_consulta').val(),
+      id_paciente: $('#id_paciente').val()
+    });
+    
     // Pre-cargar fecha de inicio (hoy)
     const hoy = new Date().toISOString().split('T')[0];
     $('#fecha_inicio').val(hoy);
     
     // Limpiar formulario
-    $('#id_diagnostico').html('<option value="">Seleccione un diagnóstico...</option>');
-    $('#tipo_tratamiento').val('');
-    $('#nombre_tratamiento').val('');
-    $('#descripcion_tratamiento').val('');
-    $('#dosis').val('');
-    $('#frecuencia').val('');
-    $('#fecha_fin').val('');
-    $('#duracion_dias').val('');
-    $('#observaciones').val('');
+    $('#formTratamiento')[0].reset();
+    $('#id_consulta').val(data.id);
+    $('#id_paciente').val(data.idPaciente);
+    $('#fecha_inicio').val(hoy);
     $('#estado_tratamiento').val('ACTIVO');
+    $('#duracion_sesion').val(60);
+    
+    // Limpiar campos de tipo tratamiento
+    $('#id_tipo_tratamiento').val('');
+    $('#txtTipoTratamiento').val('').removeClass('is-invalid is-valid');
     
     // Cargar diagnósticos de la consulta
     cargarDiagnosticosConsulta(data.id);
-    
-    // Cargar tratamientos del paciente
-    cargarTratamientosPaciente(data.idPaciente);
     
     // Abrir modal
     $('#modalRegistrarTratamiento').modal('show');
@@ -418,10 +612,22 @@ const registrarTratamiento = () => {
 // CARGAR DIAGNÓSTICOS DE LA CONSULTA
 // ==========================================
 const cargarDiagnosticosConsulta = (idConsulta) => {
-  fetch(`/api/v1/diagnosticos/consulta/${idConsulta}`)
-    .then(resp => resp.json())
+fetch(`/api/v1/registro-diagnosticos/consulta/${idConsulta}`)    .then(resp => {
+      if (!resp.ok) {
+        if (resp.status === 404) {
+          $('#id_diagnostico').html('<option value="">No hay diagnósticos registrados</option>');
+          Swal.fire('Sin diagnósticos', 'Esta consulta no tiene diagnósticos. Debe registrar un diagnóstico primero.', 'warning');
+          return null;
+        }
+        throw new Error(`HTTP ${resp.status}`);
+      }
+      return resp.json();
+    })
     .then(data => {
+      if (!data) return;
+      
       if (data.success && data.data.length > 0) {
+        console.log('✅ Diagnósticos cargados:', data.data.length);
         let html = '<option value="">Seleccione un diagnóstico...</option>';
         data.data.forEach(diag => {
           html += `<option value="${diag.id_registro_diagnostico}">
@@ -431,71 +637,87 @@ const cargarDiagnosticosConsulta = (idConsulta) => {
         $('#id_diagnostico').html(html);
       } else {
         $('#id_diagnostico').html('<option value="">No hay diagnósticos registrados</option>');
-        Swal.fire('Sin diagnósticos', 'Esta consulta no tiene diagnósticos. Debe registrar un diagnóstico primero.', 'warning');
       }
     })
     .catch(err => {
-      console.error('Error cargando diagnósticos:', err);
+      console.error('❌ Error cargando diagnósticos:', err);
+      $('#id_diagnostico').html('<option value="">Error al cargar</option>');
     });
 }
 
 // ==========================================
-// CARGAR TRATAMIENTOS DEL PACIENTE
+// BUSCAR Y SELECCIONAR TIPO DE TRATAMIENTO
 // ==========================================
-const cargarTratamientosPaciente = (idPaciente) => {
-  $('#listaTratamientos').html('<p class="text-muted text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>');
-  
-  fetch(`/api/v1/tratamientos/paciente/${idPaciente}`)
-    .then(resp => resp.json())
-    .then(data => {
-      if (data.success && data.data.length > 0) {
-        let html = '';
-        data.data.forEach(trat => {
-          html += `
-            <div class="tratamiento-item ${trat.estado}">
-              <h6>${trat.nombre}</h6>
-              <small>
-                <strong>Tipo:</strong> ${trat.tipo}<br>
-                <strong>Inicio:</strong> ${trat.fecha_inicio}<br>
-                ${trat.fecha_fin ? `<strong>Fin:</strong> ${trat.fecha_fin}<br>` : ''}
-                <span class="badge badge-sm badge-secondary">${trat.estado}</span>
-              </small>
-            </div>
-          `;
-        });
-        $('#listaTratamientos').html(html);
-      } else {
-        $('#listaTratamientos').html('<p class="text-muted text-center">Sin tratamientos previos</p>');
-      }
-    })
-    .catch(err => {
-      console.error('Error cargando tratamientos:', err);
-      $('#listaTratamientos').html('<p class="text-danger text-center">Error al cargar</p>');
-    });
-}
-
-// ==========================================
-// CALCULAR FECHA FIN AUTOMÁTICAMENTE
-// ==========================================
-const calcularFechaFin = () => {
-  $('#duracion_dias').on('input', function() {
-    const duracion = parseInt($(this).val());
-    const fechaInicio = $('#fecha_inicio').val();
-    
-    if (duracion > 0 && fechaInicio) {
-      const fecha = new Date(fechaInicio + 'T00:00:00');
-      fecha.setDate(fecha.getDate() + duracion);
-      
-      const fechaFin = fecha.toISOString().split('T')[0];
-      $('#fecha_fin').val(fechaFin);
-    }
+const buscarTipoTratamiento = () => {
+  $('#btnBuscarTratamiento').on('click', function() {
+    $('#modalBuscarTratamiento').modal('show');
   });
   
-  $('#fecha_inicio').on('change', function() {
-    const duracion = parseInt($('#duracion_dias').val());
-    if (duracion > 0) {
-      $('#duracion_dias').trigger('input');
+  $(document).on('click', '.btn-select-tratamiento', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('🖱️ Click en seleccionar tipo tratamiento detectado');
+    
+    const idTipo = $(this).attr('data-id');
+    const descripcion = $(this).attr('data-descripcion');
+    
+    console.log('📋 Datos capturados:', {
+      id_raw: idTipo,
+      id_parsed: parseInt(idTipo),
+      descripcion: descripcion
+    });
+    
+    if (!idTipo || idTipo === 'undefined') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'ID de tipo tratamiento no válido. Por favor, recargue la página.'
+      });
+      console.error('❌ ID tipo tratamiento inválido:', idTipo);
+      return;
     }
+    
+    const idParsed = parseInt(idTipo);
+    if (isNaN(idParsed)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El ID del tipo de tratamiento no es un número válido'
+      });
+      console.error('❌ ID no es número:', idTipo);
+      return;
+    }
+    
+    console.log('✅ Tipo de tratamiento seleccionado correctamente:', {
+      id: idParsed,
+      descripcion: descripcion
+    });
+    
+    $('#id_tipo_tratamiento').val(idParsed);
+    $('#txtTipoTratamiento').val(descripcion);
+    
+    console.log('✅ Valores asignados:', {
+      id_tipo_tratamiento_field: $('#id_tipo_tratamiento').val(),
+      txt_tipo_tratamiento_field: $('#txtTipoTratamiento').val()
+    });
+    
+    $('#modalBuscarTratamiento').modal('hide');
+    
+    $('#txtTipoTratamiento').addClass('is-valid').removeClass('is-invalid');
+    setTimeout(() => {
+      $('#txtTipoTratamiento').removeClass('is-valid');
+    }, 2000);
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Tipo de Tratamiento Seleccionado',
+      text: descripcion,
+      timer: 2000,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
   });
 }
 
@@ -505,31 +727,84 @@ const calcularFechaFin = () => {
 const guardarTratamiento = () => {
   $('#btnGuardarTratamiento').on('click', function() {
     // Validar campos obligatorios
-    if (!$('#id_diagnostico').val() || !$('#tipo_tratamiento').val() || 
-        !$('#nombre_tratamiento').val() || !$('#descripcion_tratamiento').val() || 
+    const idConsulta = parseInt($('#id_consulta').val());
+    const idPaciente = parseInt($('#id_paciente').val());
+    const idDiagnostico = parseInt($('#id_diagnostico').val());
+    const idTipoTratamiento = parseInt($('#id_tipo_tratamiento').val());
+    
+    console.log('🔍 Validando datos:', {
+      idConsulta,
+      idPaciente,
+      idDiagnostico,
+      idTipoTratamiento
+    });
+    
+    if (!idConsulta || isNaN(idConsulta)) {
+      Swal.fire('Error', 'ID de consulta no válido', 'error');
+      return;
+    }
+    
+    if (!idPaciente || isNaN(idPaciente)) {
+      Swal.fire('Error', 'ID de paciente no válido', 'error');
+      return;
+    }
+    
+    if (!idDiagnostico || isNaN(idDiagnostico)) {
+      Swal.fire('Atención', 'Debe seleccionar un diagnóstico', 'warning');
+      return;
+    }
+    
+    // ✅ VALIDAR TIPO DE TRATAMIENTO
+    if (!idTipoTratamiento || isNaN(idTipoTratamiento)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Tipo de Tratamiento no seleccionado',
+        text: 'Debe buscar y seleccionar un tipo de tratamiento',
+        confirmButtonText: 'Entendido'
+      });
+      $('#txtTipoTratamiento').addClass('is-invalid');
+      return;
+    }
+    
+    if (!$('#nombre_tratamiento').val() || 
+        !$('#objetivos_terapeuticos').val() || !$('#descripcion_tratamiento').val() || 
         !$('#fecha_inicio').val() || !$('#estado_tratamiento').val()) {
       Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
       return;
     }
     
+    // Preparar datos del tratamiento
     const dataTratamiento = {
-      id_consulta: parseInt($('#id_consulta').val()),
-      id_paciente: parseInt($('#id_paciente').val()),
-      id_diagnostico: parseInt($('#id_diagnostico').val()),
-      tipo_tratamiento: $('#tipo_tratamiento').val(),
-      nombre_tratamiento: $('#nombre_tratamiento').val(),
-      descripcion_tratamiento: $('#descripcion_tratamiento').val(),
-      dosis: $('#dosis').val() || null,
-      frecuencia: $('#frecuencia').val() || null,
-      fecha_inicio: $('#fecha_inicio').val(),
-      fecha_fin: $('#fecha_fin').val() || null,
-      duracion_dias: parseInt($('#duracion_dias').val()) || null,
-      estado_tratamiento: $('#estado_tratamiento').val(),
-      observaciones: $('#observaciones').val() || null,
-      usuario_creacion: 'ADMIN' // Cambiar por usuario real
+      id_consulta: idConsulta,
+      id_paciente: idPaciente,
+      id_registro_diagnostico: idDiagnostico,
+      id_tipo_tratamiento: idTipoTratamiento,  // ✅ NUEVO CAMPO
+      
+      // Datos del tratamiento psicológico
+      des_tratamiento: $('#nombre_tratamiento').val(),
+      tratamiento_objetivos: $('#objetivos_terapeuticos').val() + '\n\nTÉCNICAS:\n' + $('#descripcion_tratamiento').val(),
+      
+      // Sesiones
+      numero_sesiones: parseInt($('#numero_sesiones').val()) || null,
+      frecuencia_sesiones: $('#frecuencia_sesiones').val() || null,
+      duracion_sesion: parseInt($('#duracion_sesion').val()) || null,
+      
+      // Fechas
+      tratamiento_fecha_inicio: $('#fecha_inicio').val(),
+      tratamiento_fecha_fin: $('#fecha_fin').val() || null,
+      
+      // Estado
+      tratamiento_estado: $('#estado_tratamiento').val(),
+      tratamiento_observaciones: $('#observaciones').val() || null,
+      
+      usuario_creacion: 'ADMIN'
     };
     
     console.log('📤 Enviando tratamiento:', dataTratamiento);
+    
+    // Deshabilitar botón
+    const btn = $(this);
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
     
     fetch('/api/v1/tratamientos', {
       method: 'POST',
@@ -539,25 +814,38 @@ const guardarTratamiento = () => {
       },
       body: JSON.stringify(dataTratamiento)
     })
-    .then(resp => resp.json())
+    .then(resp => {
+      if (!resp.ok) {
+        return resp.json().then(err => {
+          throw new Error(err.error || `HTTP ${resp.status}`);
+        });
+      }
+      return resp.json();
+    })
     .then(data => {
+      btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Tratamiento');
+      
       if (data.success) {
+        console.log('✅ Tratamiento guardado:', data);
+        
         $('#tblConsultas').DataTable().ajax.reload();
         $('#modalRegistrarTratamiento').modal('hide');
         
         Swal.fire({
           icon: 'success',
-          title: 'Tratamiento Registrado',
-          text: data.data.mensaje,
-          confirmButtonText: 'Cerrar'
+          title: '¡Tratamiento Registrado!',
+          text: data.data.mensaje || 'El tratamiento ha sido registrado exitosamente',
+          confirmButtonText: 'Cerrar',
+          confirmButtonColor: '#6f42c1'
         });
       } else {
         Swal.fire('Error', data.error || 'No se pudo guardar el tratamiento', 'error');
       }
     })
     .catch(err => {
-      console.error('❌ Error:', err);
-      Swal.fire('Error', 'Ocurrió un error al guardar el tratamiento', 'error');
+      btn.prop('disabled', false).html('<i class="fas fa-save"></i> Guardar Tratamiento');
+      console.error('❌ Error guardando tratamiento:', err);
+      Swal.fire('Error', err.message || 'Ocurrió un error al guardar el tratamiento', 'error');
     });
   });
 }
@@ -566,19 +854,30 @@ const guardarTratamiento = () => {
 // INICIALIZACIÓN
 // ==========================================
 $(document).ready(function() {
+  console.log('🚀 Inicializando módulo de tratamientos psicológicos...');
+  
   initDatatable();
+  initTiposTratamientoDatatable();
   registrarTratamiento();
-  calcularFechaFin();
+  buscarTipoTratamiento();
   guardarTratamiento();
   
   // Si viene con id_consulta en URL, abrir directamente
   const urlParams = new URLSearchParams(window.location.search);
   const idConsulta = urlParams.get('id_consulta');
   if (idConsulta) {
+    console.log('🔗 ID de consulta en URL:', idConsulta);
     setTimeout(() => {
-      $(`button[data-id="${idConsulta}"]`).click();
+      const btn = $(`.btn-registrar-tratamiento[data-id="${idConsulta}"]`);
+      if (btn.length) {
+        btn.click();
+      } else {
+        console.warn('⚠️ No se encontró el botón para la consulta:', idConsulta);
+      }
     }, 500);
   }
+  
+  console.log('✅ Módulo de tratamientos inicializado');
 });
 </script>
 {% endblock %}

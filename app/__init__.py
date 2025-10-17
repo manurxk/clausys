@@ -201,6 +201,13 @@ from app.rutas.referenciales.tipo_procedimiento.procedimiento_api import tipo_pr
 app.register_blueprint(tipo_procedimiento_api, url_prefix='/api/v1')
 
 
+# Registrar el Blueprint para Tipos de Tratamientos
+from app.rutas.referenciales.tipo_tratamiento.tratamiento_routes import tipotratamientomod
+app.register_blueprint(tipotratamientomod, url_prefix='/tipo-tratamiento')
+
+# Registrar el Blueprint para la API de Tipos de Tratamientos
+from app.rutas.referenciales.tipo_tratamiento.tratamiento_api import tipo_tratamiento_api
+app.register_blueprint(tipo_tratamiento_api, url_prefix='/api/v1')
 
 
 

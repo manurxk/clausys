@@ -366,8 +366,9 @@ const initDatatable = () => {
   });
 }
 
+
 // ==========================================
-// DATATABLE DE TIPOS DE PROCEDIMIENTO
+// DATATABLE DE TIPOS DE PROCEDIMIENTO - CORREGIDO
 // ==========================================
 const initTiposProcedimientoDatatable = () => {
   $('#tblTiposProcedimiento').DataTable({
@@ -375,20 +376,41 @@ const initTiposProcedimientoDatatable = () => {
       url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
     },
     ajax: {
-      url: '/api/v1/tipos-procedimiento',
+      url: '/api/v1/tipos_procedimientos',  // ✅ RUTA CORRECTA (con guión bajo)
       dataSrc: function(json) {
-        return json.success ? json.data : [];
+        console.log('🔍 Respuesta tipos procedimiento:', json);
+        if (json.success) {
+          return json.data;
+        } else {
+          Swal.fire('Error', json.error || 'Error al cargar tipos', 'error');
+          return [];
+        }
+      },
+      error: function(xhr, error, thrown) {
+        console.error('❌ Error cargando tipos:', xhr.responseText);
+        Swal.fire('Error', 'No se pudieron cargar los tipos de procedimiento', 'error');
       }
     },
     columns: [
-      { data: 'nombre' },
-      { data: 'descripcion' },
+      { 
+        data: 'descripcion',
+        title: 'Tipo de Procedimiento'
+      },
+      { 
+        data: 'estado',
+        title: 'Estado',
+        render: function(data) {
+          return data === 'A' ? 
+            '<span class="badge badge-success">Activo</span>' : 
+            '<span class="badge badge-secondary">Inactivo</span>';
+        },
+        className: 'text-center'
+      },
       { 
         data: function(row) {
           return `
             <button type="button" class="btn btn-success btn-sm btn-select-tipo-procedimiento" 
-                    data-id="${row.id_tipo_procedimiento}" 
-                    data-nombre="${row.nombre}"
+                    data-id="${row.id}"  // ✅ TU DAO DEVUELVE 'id' NO 'id_tipo_procedimiento'
                     data-descripcion="${row.descripcion}">
               <i class="fa fa-check"></i> Seleccionar
             </button>
@@ -402,6 +424,8 @@ const initTiposProcedimientoDatatable = () => {
     pageLength: 8
   });
 }
+
+
 
 // ==========================================
 // DATATABLE DE PROFESIONALES
@@ -522,20 +546,32 @@ const cargarProcedimientosExistentes = (idConsulta) => {
 }
 
 // ==========================================
-// BUSCAR Y SELECCIONAR TIPO DE PROCEDIMIENTO
+// SELECCIÓN DE TIPO - CORREGIDO
 // ==========================================
 const buscarTipoProcedimiento = () => {
   $('#btnBuscarTipoProcedimiento').on('click', function() {
     $('#modalBuscarTipoProcedimiento').modal('show');
   });
   
+  // ✅ CORREGIDO - usar delegación de eventos
   $('#tblTiposProcedimiento').on('click', '.btn-select-tipo-procedimiento', function() {
-    const data = $(this).data();
+    const id = $(this).data('id');
+    const descripcion = $(this).data('descripcion');
     
-    $('#id_tipo_procedimiento').val(data.id);
-    $('#txtTipoProcedimiento').val(`${data.nombre} - ${data.descripcion}`);
+    console.log('✅ Tipo seleccionado:', { id, descripcion });
+    
+    $('#id_tipo_procedimiento').val(id);
+    $('#txtTipoProcedimiento').val(descripcion);
     
     $('#modalBuscarTipoProcedimiento').modal('hide');
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Tipo Seleccionado',
+      text: descripcion,
+      timer: 1500,
+      showConfirmButton: false
+    });
   });
 }
 
@@ -558,15 +594,13 @@ const buscarProfesional = () => {
 }
 
 // ==========================================
-// GUARDAR PROCEDIMIENTO
+// GUARDAR PROCEDIMIENTO - CORREGIDO
 // ==========================================
 const guardarProcedimiento = () => {
   $('#btnGuardarProcedimiento').on('click', function() {
     // Validar campos obligatorios
-    if (!$('#id_tipo_procedimiento').val() || !$('#fecha_procedimiento').val() || 
-        !$('#id_profesional_realizo').val() || !$('#descripcion_procedimiento').val() || 
-        !$('#estado_procedimiento').val()) {
-      Swal.fire('Atención', 'Complete los campos obligatorios', 'warning');
+    if (!$('#id_tipo_procedimiento').val()) {
+      Swal.fire('Atención', 'Seleccione un tipo de procedimiento', 'warning');
       return;
     }
     
@@ -574,18 +608,17 @@ const guardarProcedimiento = () => {
       id_consulta: parseInt($('#id_consulta').val()),
       id_paciente: parseInt($('#id_paciente').val()),
       id_tipo_procedimiento: parseInt($('#id_tipo_procedimiento').val()),
-      id_profesional: parseInt($('#id_profesional_realizo').val()),
-      fecha_procedimiento: $('#fecha_procedimiento').val(),
-      descripcion_procedimiento: $('#descripcion_procedimiento').val(),
-      resultado_procedimiento: $('#resultado_procedimiento').val() || null,
-      estado_procedimiento: $('#estado_procedimiento').val(),
-      observaciones: $('#observaciones').val() || null,
-      usuario_creacion: 'ADMIN' // Cambiar por usuario real
+      des_registro_procedimiento: $('#descripcion_procedimiento').val(),
+      registro_fecha: $('#fecha_procedimiento').val(),
+      registro_resultado: $('#resultado_procedimiento').val() || null,
+      registro_observaciones: $('#observaciones').val() || null,
+      usuario_creacion: 'ADMIN'
     };
     
     console.log('📤 Enviando procedimiento:', dataProcedimiento);
     
-    fetch('/api/v1/procedimientos', {
+    // ✅ ENDPOINT CORREGIDO
+    fetch('/api/v1/registro-procedimientos', {  // 👈 CAMBIAR AQUÍ
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -593,28 +626,28 @@ const guardarProcedimiento = () => {
       },
       body: JSON.stringify(dataProcedimiento)
     })
-    .then(resp => resp.json())
+    .then(resp => {
+      if (!resp.ok) {
+        throw new Error(`HTTP error! status: ${resp.status}`);
+      }
+      return resp.json();
+    })
     .then(data => {
       if (data.success) {
         $('#tblConsultas').DataTable().ajax.reload();
         $('#modalRegistrarProcedimiento').modal('hide');
-        
-        Swal.fire({
-          icon: 'success',
-          title: 'Procedimiento Registrado',
-          text: data.data.mensaje,
-          confirmButtonText: 'Cerrar'
-        });
+        Swal.fire('Éxito', 'Procedimiento registrado correctamente', 'success');
       } else {
-        Swal.fire('Error', data.error || 'No se pudo guardar el procedimiento', 'error');
+        Swal.fire('Error', data.error || 'No se pudo guardar', 'error');
       }
     })
     .catch(err => {
       console.error('❌ Error:', err);
-      Swal.fire('Error', 'Ocurrió un error al guardar el procedimiento', 'error');
+      Swal.fire('Error', 'Error al guardar procedimiento: ' + err.message, 'error');
     });
   });
 }
+
 
 // ==========================================
 // INICIALIZACIÓN
